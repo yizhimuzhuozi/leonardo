@@ -298,13 +298,7 @@ module.exports = reloadCSS;
         module.hot.dispose(reloadCSS);
         module.hot.accept(reloadCSS);
       
-},{"_css_loader":"../../../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"../../../node_modules/@spectrum-css/tabs/dist/vars.css":[function(require,module,exports) {
-
-        var reloadCSS = require('_css_loader');
-        module.hot.dispose(reloadCSS);
-        module.hot.accept(reloadCSS);
-      
-},{"_css_loader":"../../../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"../../../node_modules/@spectrum-css/tabs/dist/index.css":[function(require,module,exports) {
+},{"_css_loader":"../../../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"../../../node_modules/@spectrum-css/tabs/dist/index-vars.css":[function(require,module,exports) {
 
         var reloadCSS = require('_css_loader');
         module.hot.dispose(reloadCSS);
@@ -325,100 +319,7 @@ var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
-},{"_css_loader":"../../../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
-var define;
-/*
-Copyright 2018 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
-
-// UMD pattern via umdjs
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD
-    define([], factory);
-  }
-  else if (typeof module === 'object' && module.exports) {
-    // CommonJS-like
-    module.exports = factory();
-  }
-  else {
-    // Browser
-    root.loadIcons = factory();
-  }
-}(typeof self !== 'undefined' ? self : this, function() {
-  function handleError(string) {
-    string = 'loadIcons: '+string;
-    var error = new Error(string);
-
-    console.error(error.toString());
-
-    if (typeof callback === 'function') {
-      callback(error);
-    }
-  }
-
-  function injectSVG(svgURL, callback) {
-    var error;
-    // 200 for web servers, 0 for CEP panels
-    if (this.status !== 200 && this.status !== 0) {
-      handleError('Failed to fetch icons, server returned ' + this.status);
-      return;
-    }
-
-    // Parse the SVG
-    var parser = new DOMParser();
-    try {
-      var doc = parser.parseFromString(this.responseText, 'image/svg+xml');
-      var svg = doc.firstChild;
-    }
-    catch (err) {
-      handleError('Error parsing SVG: ' + err);
-      return;
-    }
-
-    // Make sure a real SVG was returned
-    if (svg && svg.tagName === 'svg') {
-      // Hide the element
-      svg.style.display = 'none';
-
-      svg.setAttribute('data-url', svgURL);
-
-      // Insert it into the head
-      document.head.insertBefore(svg, null);
-
-      // Pass the SVG to the callback
-      if (typeof callback === 'function') {
-        callback(null, svg);
-      }
-    }
-    else {
-      handleError('Parsed SVG document contained something other than an SVG');
-    }
-  }
-
-  function loadIcons(svgURL, callback) {
-    // Request the SVG sprite
-    var req = new XMLHttpRequest();
-    req.open('GET', svgURL, true);
-    req.addEventListener('load', injectSVG.bind(req, svgURL, callback));
-    req.addEventListener('error', function(event) {
-      handleError('Request failed');
-    });
-    req.send();
-  }
-
-  return loadIcons;
-}));
-
-},{}],"../../../node_modules/@adobe/focus-ring-polyfill/index.js":[function(require,module,exports) {
+},{"_css_loader":"../../../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"../../../node_modules/@adobe/focus-ring-polyfill/index.js":[function(require,module,exports) {
 /**
  *  Copyright 2018 Adobe. All rights reserved.
  *  This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -30627,7 +30528,100 @@ exports.luminance = luminance;
 exports.contrast = contrast;
 exports.binarySearch = binarySearch;
 exports.generateContrastColors = generateContrastColors;
-},{"d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/clipboard/dist/clipboard.js":[function(require,module,exports) {
+},{"d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
+var define;
+/*
+Copyright 2018 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+
+// UMD pattern via umdjs
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD
+    define([], factory);
+  }
+  else if (typeof module === 'object' && module.exports) {
+    // CommonJS-like
+    module.exports = factory();
+  }
+  else {
+    // Browser
+    root.loadIcons = factory();
+  }
+}(typeof self !== 'undefined' ? self : this, function() {
+  function handleError(string) {
+    string = 'loadIcons: '+string;
+    var error = new Error(string);
+
+    console.error(error.toString());
+
+    if (typeof callback === 'function') {
+      callback(error);
+    }
+  }
+
+  function injectSVG(svgURL, callback) {
+    var error;
+    // 200 for web servers, 0 for CEP panels
+    if (this.status !== 200 && this.status !== 0) {
+      handleError('Failed to fetch icons, server returned ' + this.status);
+      return;
+    }
+
+    // Parse the SVG
+    var parser = new DOMParser();
+    try {
+      var doc = parser.parseFromString(this.responseText, 'image/svg+xml');
+      var svg = doc.firstChild;
+    }
+    catch (err) {
+      handleError('Error parsing SVG: ' + err);
+      return;
+    }
+
+    // Make sure a real SVG was returned
+    if (svg && svg.tagName === 'svg') {
+      // Hide the element
+      svg.style.display = 'none';
+
+      svg.setAttribute('data-url', svgURL);
+
+      // Insert it into the head
+      document.head.insertBefore(svg, null);
+
+      // Pass the SVG to the callback
+      if (typeof callback === 'function') {
+        callback(null, svg);
+      }
+    }
+    else {
+      handleError('Parsed SVG document contained something other than an SVG');
+    }
+  }
+
+  function loadIcons(svgURL, callback) {
+    // Request the SVG sprite
+    var req = new XMLHttpRequest();
+    req.open('GET', svgURL, true);
+    req.addEventListener('load', injectSVG.bind(req, svgURL, callback));
+    req.addEventListener('error', function(event) {
+      handleError('Request failed');
+    });
+    req.send();
+  }
+
+  return loadIcons;
+}));
+
+},{}],"../../../node_modules/clipboard/dist/clipboard.js":[function(require,module,exports) {
 var define;
 /*!
  * clipboard.js v2.0.4
@@ -33232,9 +33226,7 @@ require("@spectrum-css/tooltip/dist/index-vars.css");
 
 require("@spectrum-css/slider/dist/index-vars.css");
 
-require("@spectrum-css/tabs/dist/vars.css");
-
-require("@spectrum-css/tabs/dist/index.css");
+require("@spectrum-css/tabs/dist/index-vars.css");
 
 require("./scss/colorinputs.scss");
 
@@ -33242,11 +33234,11 @@ require("./scss/charts.scss");
 
 require("./scss/style.scss");
 
-var _loadicons = _interopRequireDefault(require("loadicons"));
-
 require("@adobe/focus-ring-polyfill");
 
 var _leonardoContrastColors = _interopRequireDefault(require("@adobe/leonardo-contrast-colors"));
+
+var _loadicons = _interopRequireDefault(require("loadicons"));
 
 var _clipboard = _interopRequireDefault(require("clipboard"));
 
@@ -33278,7 +33270,6 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-// import loadIcons from 'loadicons';
 (0, _loadicons.default)('./spectrum-css-icons.svg');
 (0, _loadicons.default)('./spectrum-icons.svg');
 new _clipboard.default('.copyButton');
@@ -34000,7 +33991,7 @@ function updateCharts(selectObject) {
 }
 
 window.updateCharts = updateCharts;
-},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/typography/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/vars.css":"../../../node_modules/@spectrum-css/tabs/dist/vars.css","@spectrum-css/tabs/dist/index.css":"../../../node_modules/@spectrum-css/tabs/dist/index.css","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/charts.scss":"scss/charts.scss","./scss/style.scss":"scss/style.scss","loadicons":"../../../node_modules/loadicons/index.js","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","./charts.js":"charts.js","./data.js":"data.js"}],"../../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/typography/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/tabs/dist/index-vars.css","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/charts.scss":"scss/charts.scss","./scss/style.scss":"scss/style.scss","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","./charts.js":"charts.js","./data.js":"data.js"}],"../../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -34028,7 +34019,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57979" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53931" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
