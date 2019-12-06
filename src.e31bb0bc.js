@@ -32221,7 +32221,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 Object.assign(d3, d33d);
 var chart3dColorspace = document.getElementById('chart3dColorspace');
-var dest = document.querySelector('.chart3D');
+var dest = document.getElementById('3dchart');
 /*
 Create 2d and 3d chart heights and widths based on known
 paddings and panel dimensions, based on viewport height/width.
@@ -33821,8 +33821,13 @@ function updateParams(c, b, r, m) {
   params.set('ratios', r);
   params.set('mode', m);
   var cStrings = c.toString().replace(/[#\/]/g, '"#').replace(/[,\/]/g, '",');
-  cStrings = cStrings + '"';
-  window.history.replaceState({}, '', '?' + params); // update the page's URL.
+  cStrings = cStrings + '"'; // retain pathname if present
+
+  if (pathName == '/') {
+    window.history.replaceState({}, '', '/?' + params); // update the page's URL.
+  } else {
+    window.history.replaceState({}, '', pathName + '/?' + params); // update the page's URL.
+  }
 
   var p = document.getElementById('params');
   p.innerHTML = " ";
@@ -34014,7 +34019,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58765" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55441" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
