@@ -30283,9 +30283,9 @@ governing permissions and limitations under the License.
 Object.assign(d3, d3hsluv, d3hsv, d3cam02);
 
 function cArray(c) {
-  let L = d3.hsluv(c).l;
-  let U = d3.hsluv(c).u;
-  let V = d3.hsluv(c).v;
+  var L = d3.hsluv(c).l;
+  var U = d3.hsluv(c).u;
+  var V = d3.hsluv(c).v;
   return new Array(L, U, V);
 }
 
@@ -30296,10 +30296,10 @@ function createScale({
   shift = 1,
   fullScale = true
 } = {}) {
-  let domains = colorKeys.map(key => swatches - swatches * (d3.hsluv(key).v / 100)).sort((a, b) => a - b).concat(swatches);
+  var domains = colorKeys.map(key => swatches - swatches * (d3.hsluv(key).v / 100)).sort((a, b) => a - b).concat(swatches);
   domains.unshift(0); // Test logarithmic domain (for non-contrast-based scales)
 
-  let sqrtDomains = d3.scalePow().exponent(shift).domain([1, swatches]).range([1, swatches]);
+  var sqrtDomains = d3.scalePow().exponent(shift).domain([1, swatches]).range([1, swatches]);
   sqrtDomains = domains.map(d => {
     if (sqrtDomains(d) < 0) {
       return 0;
@@ -30309,7 +30309,7 @@ function createScale({
   }); // Transform square root in order to smooth gradient
 
   domains = sqrtDomains;
-  let sortedColor = colorKeys // Convert to HSLuv and keep track of original indices
+  var sortedColor = colorKeys // Convert to HSLuv and keep track of original indices
   .map((c, i) => {
     return {
       colorKeys: cArray(c),
@@ -30318,7 +30318,7 @@ function createScale({
   }) // Sort by lightness
   .sort((c1, c2) => c2.colorKeys[2] - c1.colorKeys[2]) // Retrieve original RGB color
   .map(data => colorKeys[data.index]);
-  let inverseSortedColor = colorKeys // Convert to HSLuv and keep track of original indices
+  var inverseSortedColor = colorKeys // Convert to HSLuv and keep track of original indices
   .map((c, i) => {
     return {
       colorKeys: cArray(c),
@@ -30399,7 +30399,7 @@ function createScale({
     throw new Error(`Colorspace ${colorspace} not supported`);
   }
 
-  let Colors = d3.range(swatches).map(d => scale(d));
+  var Colors = d3.range(swatches).map(d => scale(d));
   let colors = Colors.filter(el => el != null); // Return colors as hex values for interpolators.
 
   let colorsHex = [];
@@ -30424,18 +30424,6 @@ function generateContrastColors({
   ratios,
   colorspace = 'LAB'
 } = {}) {
-  if (!base) {
-    throw new Error(`Base is undefined`);
-  }
-
-  if (!colorKeys) {
-    throw new Error(`Color Keys are undefined`);
-  }
-
-  if (!ratios) {
-    throw new Error(`Ratios are undefined`);
-  }
-
   let swatches = 3000;
   let scaleData = createScale({
     swatches: swatches,
@@ -30443,19 +30431,19 @@ function generateContrastColors({
     colorspace: colorspace,
     shift: 1
   });
-  let Contrasts = d3.range(swatches).map(d => {
-    let rgbArray = [d3.rgb(scaleData.scale(d)).r, d3.rgb(scaleData.scale(d)).g, d3.rgb(scaleData.scale(d)).b];
-    let baseRgbArray = [d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b];
-    let ca = contrast(rgbArray, baseRgbArray).toFixed(2);
+  var Contrasts = d3.range(swatches).map(d => {
+    var rgbArray = [d3.rgb(scaleData.scale(d)).r, d3.rgb(scaleData.scale(d)).g, d3.rgb(scaleData.scale(d)).b];
+    var baseRgbArray = [d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b];
+    var ca = contrast(rgbArray, baseRgbArray).toFixed(2);
     return Number(ca);
   });
   let contrasts = Contrasts.filter(el => el != null);
-  let baseLum = luminance(d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b);
+  var baseLum = luminance(d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b);
   let newColors = [];
   ratios = ratios.map(Number); // Return color matching target ratio, or closest number
 
   for (let i = 0; i < ratios.length; i++) {
-    let r = binarySearch(contrasts, ratios[i], baseLum);
+    var r = binarySearch(contrasts, ratios[i], baseLum);
     newColors.push(d3.rgb(scaleData.colors[r]).hex());
   }
 
@@ -30463,7 +30451,7 @@ function generateContrastColors({
 }
 
 function luminance(r, g, b) {
-  let a = [r, g, b].map(v => {
+  var a = [r, g, b].map(v => {
     v /= 255;
     return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
   });
@@ -30475,10 +30463,10 @@ function luminance(r, g, b) {
 
 
 function contrast(color, base) {
-  let colorLum = luminance(color[0], color[1], color[2]);
-  let baseLum = luminance(base[0], base[1], base[2]);
-  let cr1 = (colorLum + 0.05) / (baseLum + 0.05);
-  let cr2 = (baseLum + 0.05) / (colorLum + 0.05);
+  var colorLum = luminance(color[0], color[1], color[2]);
+  var baseLum = luminance(base[0], base[1], base[2]);
+  var cr1 = (colorLum + 0.05) / (baseLum + 0.05);
+  var cr2 = (baseLum + 0.05) / (colorLum + 0.05);
 
   if (baseLum < 0.5) {
     if (cr1 >= 1) {
@@ -30504,8 +30492,8 @@ function binarySearch(list, value, baseLum) {
   let start = 0;
   let stop = list.length - 1;
   let middle = Math.floor((start + stop) / 2);
-  let minContrast = Math.min(...list);
-  let maxContrast = Math.max(...list); // While the middle is not what we're looking for and the list does not have a single item
+  var minContrast = Math.min(...list);
+  var maxContrast = Math.max(...list); // While the middle is not what we're looking for and the list does not have a single item
 
   while (list[middle] !== value && start < stop) {
     // Value greater than since array is ordered descending
@@ -32231,20 +32219,9 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
 Object.assign(d3, d33d);
 var chart3dColorspace = document.getElementById('chart3dColorspace');
-var dest = document.querySelector('.chart3D');
+var dest = document.getElementById('3dchart');
 /*
 Create 2d and 3d chart heights and widths based on known
 paddings and panel dimensions, based on viewport height/width.
@@ -32272,8 +32249,8 @@ function createChartHeight() {
   var viewportHeight = window.innerHeight;
   var height = (viewportHeight - offset) / 3;
 
-  if (height < 160) {
-    return 160;
+  if (height < 180) {
+    return 180;
   } else {
     return height;
   }
@@ -32292,7 +32269,7 @@ function create3dChartHeight() {
   var headerHeight = 58;
   var tabHeight = 48;
   var paddings = 164 / 2;
-  var feedbackText = 100;
+  var feedbackText = 54;
   var offset = headerHeight + tabHeight + paddings + feedbackText;
   var viewportHeight = window.innerHeight;
   return viewportHeight - offset;
@@ -32300,25 +32277,9 @@ function create3dChartHeight() {
 
 var chartWidth = create3dChartWidth();
 var chartHeight = create3dChartHeight();
-var modelScale;
-var yOrigin;
-var viewportHeight = window.innerHeight;
+var modelScale = 30;
 
-if (viewportHeight < 640) {
-  modelScale = 20;
-  yOrigin = chartHeight;
-} else if (viewportHeight >= 640 && viewportHeight < 800) {
-  modelScale = 30;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 800 && viewportHeight < 900) {
-  modelScale = 40;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 900) {
-  modelScale = 50;
-  yOrigin = chartHeight / 1.25;
-}
-
-var origin = [chartWidth / 1.85, chartHeight / 1.25],
+var origin = [chartWidth / 1.85, chartHeight / 1.5],
     j = 10,
     scale = modelScale,
     scatter = [],
@@ -32785,17 +32746,6 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
 // Create data based on colorspace
 function createData(colors) {
   var CAM_J = [];
@@ -33320,12 +33270,6 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-// expose functions so they can be ran in the console
-window.createScale = _leonardoContrastColors.default.createScale;
-window.luminance = _leonardoContrastColors.default.luminance;
-window.contrast = _leonardoContrastColors.default.contrast;
-window.generateContrastColors = _leonardoContrastColors.default.generateContrastColors;
-window.contrastColors = _leonardoContrastColors.default;
 (0, _loadicons.default)('./spectrum-css-icons.svg');
 (0, _loadicons.default)('./spectrum-icons.svg');
 new _clipboard.default('.copyButton');
@@ -33358,7 +33302,7 @@ function paramSetup() {
 
     if (crs[0] == 0) {
       crs = ['#707070'];
-    }
+    } else {}
 
     for (var i = 0; i < crs.length; i++) {
       addColor(crs[i]);
@@ -33388,7 +33332,6 @@ function paramSetup() {
   if (params.has('mode')) {
     document.querySelector('select[name="mode"]').value = params.get('mode');
   } else {
-    addColor('#6fa7ff');
     addRatio(3);
     addRatio(4.5);
   }
@@ -33878,8 +33821,13 @@ function updateParams(c, b, r, m) {
   params.set('ratios', r);
   params.set('mode', m);
   var cStrings = c.toString().replace(/[#\/]/g, '"#').replace(/[,\/]/g, '",');
-  cStrings = cStrings + '"';
-  window.history.replaceState({}, '', '?' + params); // update the page's URL.
+  cStrings = cStrings + '"'; // retain pathname if present
+
+  if (pathName == '/') {
+    window.history.replaceState({}, '', '/?' + params); // update the page's URL.
+  } else {
+    window.history.replaceState({}, '', pathName + '/?' + params); // update the page's URL.
+  }
 
   var p = document.getElementById('params');
   p.innerHTML = " ";
@@ -34071,7 +34019,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49464" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55441" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
