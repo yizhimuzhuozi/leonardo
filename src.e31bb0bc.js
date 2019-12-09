@@ -33713,6 +33713,27 @@ function colorspaceOptions() {
 
   chart3dColorspace.value = 'CAM02';
   chart2dColorspace.value = 'CAM02';
+} // Ramp function to create HTML canvas color scale
+
+
+function ramp(color, n) {
+  n = window.innerHeight - 284;
+  var container = d3.select('#colorScale');
+  var canvas = container.append("canvas").attr("height", n).attr("width", 1);
+  var context = canvas.node().getContext("2d");
+  canvas.style.width = "40px";
+  canvas.style.imageRendering = "pixelated";
+
+  for (var i = 0; i < n; ++i) {
+    // only do this for actual colors
+    if (color[i] !== undefined) {
+      context.fillStyle = color[i]; // color[i / (n - 1)]
+
+      context.fillRect(0, i, 1, 1);
+    }
+  }
+
+  return canvas;
 } // Calculate Color and generate Scales
 
 
@@ -33766,6 +33787,17 @@ function colorInput() {
     shift: shift
   });
 
+  var n = window.innerHeight - 282; // let n = window.innerHeight - 84;
+
+  console.log(n);
+
+  var rampData = _leonardoContrastColors.default.createScale({
+    swatches: n,
+    colorKeys: colorArgs,
+    colorspace: mode,
+    shift: shift
+  });
+
   newColors = _leonardoContrastColors.default.generateContrastColors({
     colorKeys: colorArgs,
     base: background,
@@ -33810,17 +33842,11 @@ function colorInput() {
 
     var swatch = document.getElementById(rfIds[_i9] + '-sw');
     swatch.style.backgroundColor = newColors[_i9];
-  } // Generate Gradient
+  } // Generate Gradient as HTML Canvas element
 
 
-  for (var _i10 = 0; _i10 < scaleData.colors.length; _i10++) {
-    var container = document.getElementById('colorScale');
-    var div = document.createElement('div');
-    div.className = 'colorScale-Item';
-    div.style.backgroundColor = scaleData.colors[_i10];
-    container.appendChild(div);
-  }
-
+  var filteredColors = rampData.colors;
+  ramp(filteredColors, n);
   var backgroundR = d3.rgb(background).r;
   var backgroundG = d3.rgb(background).g;
   var backgroundB = d3.rgb(background).b;
@@ -33829,13 +33855,13 @@ function colorInput() {
   var wrap = document.getElementById('demoWrapper');
   wrap.innerHTML = '';
 
-  for (var _i11 = 0; _i11 < newColors.length; _i11++) {
+  for (var _i10 = 0; _i10 < newColors.length; _i10++) {
     var colorOutput = document.createElement('div');
-    var colorOutputVal = newColors[_i11];
+    var colorOutputVal = newColors[_i10];
     var colorOutputText = document.createTextNode(d3.rgb(colorOutputVal).hex());
     var bg = d3.color(background).rgb();
 
-    var outputRatio = _leonardoContrastColors.default.contrast([d3.rgb(newColors[_i11]).r, d3.rgb(newColors[_i11]).g, d3.rgb(newColors[_i11]).b], [bg.r, bg.g, bg.b]);
+    var outputRatio = _leonardoContrastColors.default.contrast([d3.rgb(newColors[_i10]).r, d3.rgb(newColors[_i10]).g, d3.rgb(newColors[_i10]).b], [bg.r, bg.g, bg.b]);
 
     var ratioText = document.createTextNode(outputRatio.toFixed(2));
     var s1 = document.createElement('span');
@@ -33850,13 +33876,13 @@ function colorInput() {
     colorOutput.appendChild(s1);
     colorOutput.appendChild(s2);
 
-    if (_leonardoContrastColors.default.luminance(d3.rgb(newColors[_i11]).r, d3.rgb(newColors[_i11]).g, d3.rgb(newColors[_i11]).b) < 0.275) {
+    if (_leonardoContrastColors.default.luminance(d3.rgb(newColors[_i10]).r, d3.rgb(newColors[_i10]).g, d3.rgb(newColors[_i10]).b) < 0.275) {
       colorOutput.style.color = "#ffffff";
     } else {
       colorOutput.style.color = '#000000';
     }
 
-    createDemo(newColors[_i11], background);
+    createDemo(newColors[_i10], background);
   }
 
   var copyColors = document.getElementById('copyAllColors');
@@ -33945,8 +33971,8 @@ function interpolateLumArray() {
   var endLum = Math.max.apply(Math, lums);
   var interpolator = d3.interpolateNumber(startLum, endLum);
 
-  for (var _i12 = 1; _i12 < lums.length - 1; _i12++) {
-    lums[_i12] = interpolator(_i12 / lums.length);
+  for (var _i11 = 1; _i11 < lums.length - 1; _i11++) {
+    lums[_i11] = interpolator(_i11 / lums.length);
   }
 
   lums.sort(function (a, b) {
@@ -34000,8 +34026,8 @@ window.distributeLum = function distributeLum() {
   var sliders = document.getElementById('colorSlider-wrapper');
   sliders.innerHTML = ' '; // Add all new
 
-  for (var _i13 = 0; _i13 < newRatios.length; _i13++) {
-    addRatio(newRatios[_i13]);
+  for (var _i12 = 0; _i12 < newRatios.length; _i12++) {
+    addRatio(newRatios[_i12]);
   }
 
   colorInput();
@@ -34071,7 +34097,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57939" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49436" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
