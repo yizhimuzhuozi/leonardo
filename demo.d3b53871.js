@@ -30330,44 +30330,155 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
+function setup() {
+  var br = document.getElementById('sliderBrightness');
+  br.min = "-15";
+  br.max = "0";
+  br.defaultValue = '-3';
+  var calendar = document.getElementById('calendar');
+  calendar.innerHTML = ' ';
+  var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var d = new Date();
+  var month = monthNames[d.getMonth()];
+  var colNum = 5;
+
+  for (var i = 0; i < colNum; i++) {
+    var col = document.createElement('div');
+    col.className = 'calendarColumn';
+    col.id = 'calendarColumn' + i;
+    var head = document.createElement('div');
+    head.className = 'calendarColumnHeader';
+    var today = new Date();
+    var date = month + ' ' + (today.getDate() + i);
+    head.innerHTML = date;
+    col.appendChild(head);
+    var hours = 18;
+
+    for (var _i = 0; _i < hours; _i++) {
+      var half = document.createElement('div');
+      var full = document.createElement('div');
+      half.className = 'calendar30';
+      full.className = 'calendar60';
+      col.appendChild(half);
+      col.appendChild(full);
+    }
+
+    calendar.appendChild(col);
+  }
+}
+
+setup();
+
+function createEvent(col, dur, title, meta, cat, pos, width, customClass) {
+  if (!width) {
+    width = 'eventSingle';
+  } // pos is position related to half-hour increments. Ie, how many rows down.
+
+
+  var en = document.createElement('div');
+  var head = document.createElement('span');
+  var t = document.createTextNode(title);
+  head.className = 'eventTitle';
+  head.appendChild(t);
+  var detail = document.createElement('span');
+  var d = document.createTextNode(meta);
+  detail.className = 'eventMeta';
+  detail.appendChild(d);
+  en.classList.add('event', dur, cat, width, customClass);
+  en.appendChild(head);
+  en.appendChild(detail);
+  en.style.top = 56 + pos * 33;
+  col.appendChild(en);
+}
+
+var col0 = document.getElementById('calendarColumn0');
+var col1 = document.getElementById('calendarColumn1');
+var col2 = document.getElementById('calendarColumn2');
+var col3 = document.getElementById('calendarColumn3');
+var col4 = document.getElementById('calendarColumn4'); // Populate calendar with events
+// Col 0
+
+createEvent(col0, 'event30', 'Gym', '-', 'catPersonal', 1, 'eventDouble');
+createEvent(col0, 'event90', 'Office Hour', 'UT-331', 'catPrimary', 1, 'eventDouble');
+createEvent(col0, 'event60', 'Research Planning', 'UT-105', 'catDefault', 6);
+createEvent(col0, 'event90', 'Office Hour', 'UT-201', 'catPrimary', 10);
+createEvent(col0, 'event60', 'Project Sync', 'UT-220', 'catBlue', 16); // Col 1
+
+createEvent(col1, 'event30', 'Gym', '-', 'catPersonal', 1);
+createEvent(col1, 'event120', 'Employee Meeting', 'UT-203', 'catImportant', 4);
+createEvent(col1, 'event90', 'Leonardo integration', 'https://leonardocolor.io', 'catBlue', 12, 'eventSingle', 'is-selected'); // Col 2
+
+createEvent(col2, 'event30', 'Gym', '-', 'catPersonal', 1);
+createEvent(col2, 'event60', 'Workshop', 'UT-440', 'catBlue', 4);
+createEvent(col2, 'event90', 'Office Hour', 'UT-201', 'catPrimary', 10, 'eventDouble');
+createEvent(col2, 'event30', 'Color sync', 'UT-220', 'catDefault', 10, 'eventDouble');
+createEvent(col2, 'event30', 'Submission Deadline', '-', 'catUrgent', 18); // Col 3
+
+createEvent(col3, 'event30', 'Gym', '-', 'catPersonal', 1);
+createEvent(col3, 'event60', 'User Interview', 'UT-203', 'catDefault', 4);
+createEvent(col3, 'event60', 'User Interview', 'UT-203', 'catDefault', 7);
+createEvent(col3, 'event60', 'User Interview', 'UT-203', 'catDefault', 12);
+createEvent(col3, 'event120', 'Sprint Demo', 'UT-440', 'catImportant', 16, 'eventDouble');
+createEvent(col3, 'event60', 'Color palette review', 'UT-330', 'catBlue', 19, 'eventDouble'); // Col 4
+
+createEvent(col4, 'event30', 'Gym', '-', 'catPersonal', 1);
+createEvent(col4, 'event60', 'Workshop', 'UT-440', 'catBlue', 4);
+createEvent(col4, 'event120', 'Backlog grooming', 'UT-112', 'catPrimary', 8);
+
 function createColors() {
   var br = document.getElementById('sliderBrightness');
   var con = document.getElementById('sliderContrast');
   var mode = document.getElementById('darkMode');
-  br.min = "-15";
-  br.max = "0";
   var brVal = br.value * -1; // convert br.value to positive number to use as index
 
   var conVal = con.value; // TEST -> Define colors as configs and scales.
+  // generateContrastColors({base: "#f4f5f8"});
 
-  var baseRatios = [-1.1, 1, 1.25, 1.94, 3, 3.99, 5.22, 6.96, 9.30, 12.45, 15];
-  var uiRatios = [1.3, 3.5, 5];
+  var baseRatios = [-1.1, 1, 1.12, 1.25, 1.45, 1.75, 2.25, 3.01, 4.52, 7, 11, 16];
+  var uiRatios = [1, 1.12, 1.3, 2, 3.01, 4.52, 7, 11, 16];
 
   var grayScale = _leonardoContrastColors.default.createScale({
     swatches: 100,
-    colorKeys: ['#000036', '#f9ffff'],
-    colorspace: 'LAB'
+    colorKeys: ["#4a5b7b", "#72829c", "#a6b2c6"],
+    colorspace: 'HSL'
   });
 
-  var blueScale = _leonardoContrastColors.default.createScale({
+  var base = grayScale.colors[5]; // console.log(grayScale.colors);
+
+  var baseScale = {
+    colorKeys: grayScale.colorKeys,
+    colorspace: grayScale.colorspace
+  };
+  var purpleScale = {
+    colorKeys: ["#7a4beb", "#ac80f4", "#2f0071"],
+    colorspace: "LAB"
+  };
+  var blueScale = {
     colorKeys: ['#0272d4', '#b2f0ff', '#55cfff', '#0037d7'],
     colorspace: "CAM02"
-  });
-
-  var redScale = _leonardoContrastColors.default.createScale({
+  };
+  var greenScale = {
+    colorKeys: ["#4eb076", "#2a5a45", "#a7e3b4"],
+    colorspace: "HSL"
+  };
+  var redScale = {
     colorKeys: ["#ea2825", "#ffc1ad", "#fd937e"],
     colorspace: "LAB"
-  });
-
-  var base = grayScale.colors[4];
+  };
+  var goldScale = {
+    colorKeys: ["#e8b221", "#a06a00", "#ffdd7c"],
+    colorspace: "HSL"
+  };
   br.min = "-15";
   br.max = "0";
 
   if (mode.checked == true) {
-    brVal = 84 + brVal;
+    brVal = 80 + brVal;
     var base = grayScale.colors[brVal];
+    document.documentElement.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.5)');
   } else {
     var base = grayScale.colors[brVal];
+    document.documentElement.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.1)');
   }
 
   baseRatios = baseRatios.map(function (d) {
@@ -30380,8 +30491,8 @@ function createColors() {
   }); // adaptColor();
 
   var grayArray = _leonardoContrastColors.default.generateContrastColors({
-    colorKeys: grayScale.colorKeys,
-    colorspace: grayScale.colorspace,
+    colorKeys: baseScale.colorKeys,
+    colorspace: baseScale.colorspace,
     base: base,
     ratios: baseRatios
   });
@@ -30400,22 +30511,71 @@ function createColors() {
     ratios: uiRatios
   });
 
-  document.documentElement.style.setProperty('--gray50', grayArray[0]);
-  document.documentElement.style.setProperty('--gray100', grayArray[1]);
-  document.documentElement.style.setProperty('--gray200', grayArray[2]);
-  document.documentElement.style.setProperty('--gray300', grayArray[3]);
-  document.documentElement.style.setProperty('--gray400', grayArray[4]);
-  document.documentElement.style.setProperty('--gray500', grayArray[5]);
-  document.documentElement.style.setProperty('--gray600', grayArray[6]);
-  document.documentElement.style.setProperty('--gray700', grayArray[7]);
-  document.documentElement.style.setProperty('--gray800', grayArray[8]);
-  document.documentElement.style.setProperty('--gray900', grayArray[9]);
-  document.documentElement.style.setProperty('--gray1000', grayArray[10]);
-  document.documentElement.style.setProperty('--gray1100', grayArray[11]); // Blues
+  var purpleArray = _leonardoContrastColors.default.generateContrastColors({
+    colorKeys: purpleScale.colorKeys,
+    colorspace: purpleScale.colorspace,
+    base: base,
+    ratios: uiRatios
+  });
 
-  document.documentElement.style.setProperty('--blue100', blueArray[0]);
-  document.documentElement.style.setProperty('--blue200', blueArray[1]);
-  document.documentElement.style.setProperty('--blue300', blueArray[2]);
+  var greenArray = _leonardoContrastColors.default.generateContrastColors({
+    colorKeys: greenScale.colorKeys,
+    colorspace: greenScale.colorspace,
+    base: base,
+    ratios: uiRatios
+  });
+
+  var goldArray = _leonardoContrastColors.default.generateContrastColors({
+    colorKeys: goldScale.colorKeys,
+    colorspace: goldScale.colorspace,
+    base: base,
+    ratios: uiRatios
+  }); // Grays
+
+
+  document.documentElement.style.setProperty('--gray50', grayArray[0]);
+
+  for (var i = 1; i < grayArray.length; i++) {
+    // start after first value
+    var prop = '--gray' + (i * 100).toString();
+    document.documentElement.style.setProperty(prop, grayArray[i]);
+    console.log(prop);
+  } // Blues
+
+
+  for (var _i2 = 0; _i2 < blueArray.length; _i2++) {
+    var _prop = '--blue' + ((_i2 + 1) * 100).toString();
+
+    document.documentElement.style.setProperty(_prop, blueArray[_i2]);
+  } // Purples
+
+
+  for (var _i3 = 0; _i3 < purpleArray.length; _i3++) {
+    var _prop2 = '--purple' + ((_i3 + 1) * 100).toString();
+
+    document.documentElement.style.setProperty(_prop2, purpleArray[_i3]);
+  } // Greens
+
+
+  for (var _i4 = 0; _i4 < greenArray.length; _i4++) {
+    var _prop3 = '--green' + ((_i4 + 1) * 100).toString();
+
+    document.documentElement.style.setProperty(_prop3, greenArray[_i4]);
+  } // Gold
+
+
+  for (var _i5 = 0; _i5 < goldArray.length; _i5++) {
+    var _prop4 = '--gold' + ((_i5 + 1) * 100).toString();
+
+    document.documentElement.style.setProperty(_prop4, goldArray[_i5]);
+  } // Red
+
+
+  for (var _i6 = 0; _i6 < redArray.length; _i6++) {
+    var _prop5 = '--red' + ((_i6 + 1) * 100).toString();
+
+    document.documentElement.style.setProperty(_prop5, redArray[_i6]);
+  }
 }
 
 createColors();
@@ -30448,7 +30608,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52311" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57939" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
