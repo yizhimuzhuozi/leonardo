@@ -30257,6 +30257,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 },{"./src/hsv":"../../../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../../../node_modules/d3-hsv/src/interpolateHsv.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/index.js":[function(require,module,exports) {
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createScale = createScale;
+exports.luminance = luminance;
+exports.contrast = contrast;
+exports.binarySearch = binarySearch;
+exports.generateContrastColors = generateContrastColors;
+
 var d3 = _interopRequireWildcard(require("d3"));
 
 var d3cam02 = _interopRequireWildcard(require("d3-cam02"));
@@ -30280,7 +30289,18 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-Object.assign(d3, d3hsluv, d3hsv, d3cam02);
+// Work around node and babel's difference of opinion on the read-onlyness of default
+function assign(dest, ...src) {
+  for (let obj of src) {
+    for (let prop in obj) {
+      if (prop !== 'default') {
+        dest[prop] = obj[prop];
+      }
+    }
+  }
+}
+
+assign(d3, d3hsluv, d3hsv, d3cam02);
 
 function cArray(c) {
   let L = d3.hsluv(c).l;
@@ -30534,12 +30554,6 @@ function binarySearch(list, value, baseLum) {
 
   return list[middle] == !value ? closest : middle; // how it was originally expressed
 }
-
-exports.createScale = createScale;
-exports.luminance = luminance;
-exports.contrast = contrast;
-exports.binarySearch = binarySearch;
-exports.generateContrastColors = generateContrastColors;
 },{"d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
 var define;
 /*
@@ -32223,9 +32237,7 @@ var d3 = _interopRequireWildcard(require("d3"));
 
 var d33d = _interopRequireWildcard(require("d3-3d"));
 
-var _leonardoContrastColors = _interopRequireDefault(require("@adobe/leonardo-contrast-colors"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -32747,7 +32759,7 @@ function getChartColors(mode) {
   var shift = document.getElementById('shiftInput').value;
   var chartColors = []; // GENERATE PROPER SCALE OF COLORS FOR 3d CHART:
 
-  var chartRGB = _leonardoContrastColors.default.createScale({
+  var chartRGB = contrastColors.createScale({
     swatches: 340,
     colorKeys: colorArgs,
     colorspace: mode,
@@ -33286,7 +33298,7 @@ require("./scss/style.scss");
 
 require("@adobe/focus-ring-polyfill");
 
-var _leonardoContrastColors = _interopRequireDefault(require("@adobe/leonardo-contrast-colors"));
+var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
 
 var _loadicons = _interopRequireDefault(require("loadicons"));
 
@@ -33306,11 +33318,11 @@ var charts = _interopRequireWildcard(require("./charts.js"));
 
 var chartData = _interopRequireWildcard(require("./data.js"));
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -33321,11 +33333,11 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 // expose functions so they can be ran in the console
-window.createScale = _leonardoContrastColors.default.createScale;
-window.luminance = _leonardoContrastColors.default.luminance;
-window.contrast = _leonardoContrastColors.default.contrast;
-window.generateContrastColors = _leonardoContrastColors.default.generateContrastColors;
-window.contrastColors = _leonardoContrastColors.default;
+window.createScale = contrastColors.createScale;
+window.luminance = contrastColors.luminance;
+window.contrast = contrastColors.contrast;
+window.generateContrastColors = contrastColors.generateContrastColors;
+window.contrastColors = contrastColors;
 (0, _loadicons.default)('./spectrum-css-icons.svg');
 (0, _loadicons.default)('./spectrum-icons.svg');
 new _clipboard.default('.copyButton');
@@ -33538,8 +33550,7 @@ window.bulkColorInput = function bulkColorInput() {
   if (isSwatch) {
     // create ratio inputs for each contrast
     for (var _i2 = 0; _i2 < bulkValues.length; _i2++) {
-      var cr = _leonardoContrastColors.default.contrast([d3.rgb(bulkValues[_i2]).r, d3.rgb(bulkValues[_i2]).g, d3.rgb(bulkValues[_i2]).b], [d3.rgb(bgInput).r, d3.rgb(bgInput).g, d3.rgb(bgInput).b]);
-
+      var cr = contrastColors.contrast([d3.rgb(bulkValues[_i2]).r, d3.rgb(bulkValues[_i2]).g, d3.rgb(bulkValues[_i2]).b], [d3.rgb(bgInput).r, d3.rgb(bgInput).g, d3.rgb(bgInput).b]);
       addRatio(cr.toFixed(2));
     }
 
@@ -33780,25 +33791,20 @@ function colorInput() {
   var shift = 1;
   var clamping = document.getElementById('sequentialClamp').checked; // Generate scale data so we have access to all 3000 swatches to draw the gradient on the left
 
-  var scaleData = _leonardoContrastColors.default.createScale({
+  var scaleData = contrastColors.createScale({
     swatches: 3000,
     colorKeys: colorArgs,
     colorspace: mode,
     shift: shift
   });
-
-  var n = window.innerHeight - 282; // let n = window.innerHeight - 84;
-
-  console.log(n);
-
-  var rampData = _leonardoContrastColors.default.createScale({
+  var n = window.innerHeight - 282;
+  var rampData = contrastColors.createScale({
     swatches: n,
     colorKeys: colorArgs,
     colorspace: mode,
     shift: shift
   });
-
-  newColors = _leonardoContrastColors.default.generateContrastColors({
+  newColors = contrastColors.generateContrastColors({
     colorKeys: colorArgs,
     base: background,
     ratios: ratioInputs,
@@ -33860,9 +33866,7 @@ function colorInput() {
     var colorOutputVal = newColors[_i10];
     var colorOutputText = document.createTextNode(d3.rgb(colorOutputVal).hex());
     var bg = d3.color(background).rgb();
-
-    var outputRatio = _leonardoContrastColors.default.contrast([d3.rgb(newColors[_i10]).r, d3.rgb(newColors[_i10]).g, d3.rgb(newColors[_i10]).b], [bg.r, bg.g, bg.b]);
-
+    var outputRatio = contrastColors.contrast([d3.rgb(newColors[_i10]).r, d3.rgb(newColors[_i10]).g, d3.rgb(newColors[_i10]).b], [bg.r, bg.g, bg.b]);
     var ratioText = document.createTextNode(outputRatio.toFixed(2));
     var s1 = document.createElement('span');
     var s2 = document.createElement('span');
@@ -33876,7 +33880,7 @@ function colorInput() {
     colorOutput.appendChild(s1);
     colorOutput.appendChild(s2);
 
-    if (_leonardoContrastColors.default.luminance(d3.rgb(newColors[_i10]).r, d3.rgb(newColors[_i10]).g, d3.rgb(newColors[_i10]).b) < 0.275) {
+    if (contrastColors.luminance(d3.rgb(newColors[_i10]).r, d3.rgb(newColors[_i10]).g, d3.rgb(newColors[_i10]).b) < 0.275) {
       colorOutput.style.color = "#ffffff";
     } else {
       colorOutput.style.color = '#000000';
@@ -34010,7 +34014,7 @@ window.distributeLum = function distributeLum() {
     var NewRGB = d3.hsluv(L, U, V);
     var rgbArray = [d3.rgb(NewRGB).r, d3.rgb(NewRGB).g, d3.rgb(NewRGB).b];
     var baseRgbArray = [d3.rgb(background).r, d3.rgb(background).g, d3.rgb(background).b];
-    NewContrast.push(_leonardoContrastColors.default.contrast(rgbArray, baseRgbArray).toFixed(2));
+    NewContrast.push(contrastColors.contrast(rgbArray, baseRgbArray).toFixed(2));
   } // Concatenate first and last contrast array with new contrast array (middle)
 
 
@@ -34097,7 +34101,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49436" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64931" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

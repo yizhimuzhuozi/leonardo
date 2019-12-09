@@ -6355,7 +6355,7 @@ a.spectrum-ActionButton {
 .spectrum-Textfield[disabled]::placeholder {
       color: var(--spectrum-textfield-placeholder-text-color-disabled, var(--spectrum-alias-text-color-disabled));
     }
-/*
+
 .spectrum-Textfield.is-invalid,
   .spectrum-Textfield:invalid {
     border-color: var(--spectrum-textfield-border-color-error, var(--spectrum-global-color-red-500));
@@ -6370,7 +6370,7 @@ a.spectrum-ActionButton {
 .spectrum-Textfield.is-valid {
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' height='12' viewBox='0 0 12 12' width='12'%3E%3Cpath style='fill:var%28--spectrum-alert-success-icon-color%2C var%28--spectrum-semantic-positive-color-icon%29%29' d='M4.5 10a1.023 1.023 0 0 1-.8-.384l-2.488-3a1 1 0 0 1 1.577-1.233L4.5 7.376l4.712-5.991a1 1 0 1 1 1.576 1.23l-5.511 7A.977.977 0 0 1 4.5 10z'/%3E%3C/svg%3E");
   }
-*/
+
 .spectrum-Textfield--quiet {
   background-color: var(--spectrum-textfield-quiet-background-color, var(--spectrum-alias-background-color-transparent));
   border-color: var(--spectrum-textfield-quiet-border-color, var(--spectrum-global-color-gray-300));

@@ -29955,6 +29955,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 },{"./src/hsv":"../../../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../../../node_modules/d3-hsv/src/interpolateHsv.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/index.js":[function(require,module,exports) {
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createScale = createScale;
+exports.luminance = luminance;
+exports.contrast = contrast;
+exports.binarySearch = binarySearch;
+exports.generateContrastColors = generateContrastColors;
+
 var d3 = _interopRequireWildcard(require("d3"));
 
 var d3cam02 = _interopRequireWildcard(require("d3-cam02"));
@@ -29978,7 +29987,18 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-Object.assign(d3, d3hsluv, d3hsv, d3cam02);
+// Work around node and babel's difference of opinion on the read-onlyness of default
+function assign(dest, ...src) {
+  for (let obj of src) {
+    for (let prop in obj) {
+      if (prop !== 'default') {
+        dest[prop] = obj[prop];
+      }
+    }
+  }
+}
+
+assign(d3, d3hsluv, d3hsv, d3cam02);
 
 function cArray(c) {
   let L = d3.hsluv(c).l;
@@ -30232,12 +30252,6 @@ function binarySearch(list, value, baseLum) {
 
   return list[middle] == !value ? closest : middle; // how it was originally expressed
 }
-
-exports.createScale = createScale;
-exports.luminance = luminance;
-exports.contrast = contrast;
-exports.binarySearch = binarySearch;
-exports.generateContrastColors = generateContrastColors;
 },{"d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
 var bundleURL = null;
 
@@ -30313,11 +30327,13 @@ module.hot.accept(reloadCSS);
 },{"_css_loader":"../../../node_modules/parcel-bundler/src/builtins/css-loader.js"}],"demo.js":[function(require,module,exports) {
 "use strict";
 
-var _leonardoContrastColors = _interopRequireDefault(require("@adobe/leonardo-contrast-colors"));
+var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
 
 require("./demo.css");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 /*
 Copyright 2019 Adobe. All rights reserved.
@@ -30436,13 +30452,11 @@ function createColors() {
 
   var baseRatios = [-1.1, 1, 1.12, 1.25, 1.45, 1.75, 2.25, 3.01, 4.52, 7, 11, 16];
   var uiRatios = [1, 1.12, 1.3, 2, 3.01, 4.52, 7, 11, 16];
-
-  var grayScale = _leonardoContrastColors.default.createScale({
+  var grayScale = contrastColors.createScale({
     swatches: 100,
     colorKeys: ["#4a5b7b", "#72829c", "#a6b2c6"],
     colorspace: 'HSL'
   });
-
   var base = grayScale.colors[5]; // console.log(grayScale.colors);
 
   var baseScale = {
@@ -30490,48 +30504,42 @@ function createColors() {
     return newVal;
   }); // adaptColor();
 
-  var grayArray = _leonardoContrastColors.default.generateContrastColors({
+  var grayArray = contrastColors.generateContrastColors({
     colorKeys: baseScale.colorKeys,
     colorspace: baseScale.colorspace,
     base: base,
     ratios: baseRatios
   });
-
-  var redArray = _leonardoContrastColors.default.generateContrastColors({
+  var redArray = contrastColors.generateContrastColors({
     colorKeys: redScale.colorKeys,
     colorspace: redScale.colorspace,
     base: base,
     ratios: uiRatios
   });
-
-  var blueArray = _leonardoContrastColors.default.generateContrastColors({
+  var blueArray = contrastColors.generateContrastColors({
     colorKeys: blueScale.colorKeys,
     colorspace: blueScale.colorspace,
     base: base,
     ratios: uiRatios
   });
-
-  var purpleArray = _leonardoContrastColors.default.generateContrastColors({
+  var purpleArray = contrastColors.generateContrastColors({
     colorKeys: purpleScale.colorKeys,
     colorspace: purpleScale.colorspace,
     base: base,
     ratios: uiRatios
   });
-
-  var greenArray = _leonardoContrastColors.default.generateContrastColors({
+  var greenArray = contrastColors.generateContrastColors({
     colorKeys: greenScale.colorKeys,
     colorspace: greenScale.colorspace,
     base: base,
     ratios: uiRatios
   });
-
-  var goldArray = _leonardoContrastColors.default.generateContrastColors({
+  var goldArray = contrastColors.generateContrastColors({
     colorKeys: goldScale.colorKeys,
     colorspace: goldScale.colorspace,
     base: base,
     ratios: uiRatios
   }); // Grays
-
 
   document.documentElement.style.setProperty('--gray50', grayArray[0]);
 
@@ -30608,7 +30616,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49436" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64931" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
