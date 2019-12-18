@@ -419,7 +419,7 @@ module.hot.accept(reloadCSS);
   doc.addEventListener('blur', onBlurHandler, true);
 })(typeof window === "undefined" ? undefined : document);
 
-},{}],"../../../node_modules/d3/dist/package.js":[function(require,module,exports) {
+},{}],"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/dist/package.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -428,7 +428,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.dependencies = exports.devDependencies = exports.scripts = exports.files = exports.repository = exports.module = exports.jsdelivr = exports.unpkg = exports.main = exports.author = exports.license = exports.homepage = exports.keywords = exports.description = exports.version = exports.name = void 0;
 var name = "d3";
 exports.name = name;
-var version = "5.14.1";
+var version = "5.14.2";
 exports.version = version;
 var description = "Data-Driven Documents";
 exports.description = description;
@@ -28716,7 +28716,7 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./zoom.js":"../../../node_modules/d3-zoom/src/zoom.js","./transform.js":"../../../node_modules/d3-zoom/src/transform.js"}],"../../../node_modules/d3/index.js":[function(require,module,exports) {
+},{"./zoom.js":"../../../node_modules/d3-zoom/src/zoom.js","./transform.js":"../../../node_modules/d3-zoom/src/transform.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29136,7 +29136,7 @@ Object.keys(_d3Zoom).forEach(function (key) {
     }
   });
 });
-},{"./dist/package.js":"../../../node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-cam02/src/math.js":[function(require,module,exports) {
+},{"./dist/package.js":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-cam02/src/math.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -30554,7 +30554,7 @@ function binarySearch(list, value, baseLum) {
 
   return list[middle] == !value ? closest : middle; // how it was originally expressed
 }
-},{"d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
+},{"d3":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
 var define;
 /*
 Copyright 2018 Adobe. All rights reserved.
@@ -31814,7 +31814,517 @@ var define;
     ])
   );
 });
-},{}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
+},{}],"../../../node_modules/d3/dist/package.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.dependencies = exports.devDependencies = exports.scripts = exports.files = exports.repository = exports.module = exports.jsdelivr = exports.unpkg = exports.main = exports.author = exports.license = exports.homepage = exports.keywords = exports.description = exports.version = exports.name = void 0;
+var name = "d3";
+exports.name = name;
+var version = "5.14.1";
+exports.version = version;
+var description = "Data-Driven Documents";
+exports.description = description;
+var keywords = ["dom", "visualization", "svg", "animation", "canvas"];
+exports.keywords = keywords;
+var homepage = "https://d3js.org";
+exports.homepage = homepage;
+var license = "BSD-3-Clause";
+exports.license = license;
+var author = {
+  "name": "Mike Bostock",
+  "url": "https://bost.ocks.org/mike"
+};
+exports.author = author;
+var main = "dist/d3.node.js";
+exports.main = main;
+var unpkg = "dist/d3.min.js";
+exports.unpkg = unpkg;
+var jsdelivr = "dist/d3.min.js";
+exports.jsdelivr = jsdelivr;
+var _module = "index.js";
+exports.module = _module;
+var repository = {
+  "type": "git",
+  "url": "https://github.com/d3/d3.git"
+};
+exports.repository = repository;
+var files = ["dist/**/*.js", "index.js"];
+exports.files = files;
+var scripts = {
+  "pretest": "rimraf dist && mkdir dist && json2module package.json > dist/package.js && rollup -c",
+  "test": "tape 'test/**/*-test.js'",
+  "prepublishOnly": "yarn test",
+  "postpublish": "git push && git push --tags && cd ../d3.github.com && git pull && cp ../d3/dist/d3.js d3.v5.js && cp ../d3/dist/d3.min.js d3.v5.min.js && git add d3.v5.js d3.v5.min.js && git commit -m \"d3 ${npm_package_version}\" && git push && cd - && cd ../d3-bower && git pull && cp ../d3/LICENSE ../d3/README.md ../d3/dist/d3.js ../d3/dist/d3.min.js . && git add -- LICENSE README.md d3.js d3.min.js && git commit -m \"${npm_package_version}\" && git tag -am \"${npm_package_version}\" v${npm_package_version} && git push && git push --tags && cd - && zip -j dist/d3.zip -- LICENSE README.md API.md CHANGES.md dist/d3.js dist/d3.min.js"
+};
+exports.scripts = scripts;
+var devDependencies = {
+  "json2module": "0.0",
+  "rimraf": "2",
+  "rollup": "1",
+  "rollup-plugin-ascii": "0.0",
+  "rollup-plugin-node-resolve": "3",
+  "rollup-plugin-terser": "5",
+  "tape": "4"
+};
+exports.devDependencies = devDependencies;
+var dependencies = {
+  "d3-array": "1",
+  "d3-axis": "1",
+  "d3-brush": "1",
+  "d3-chord": "1",
+  "d3-collection": "1",
+  "d3-color": "1",
+  "d3-contour": "1",
+  "d3-dispatch": "1",
+  "d3-drag": "1",
+  "d3-dsv": "1",
+  "d3-ease": "1",
+  "d3-fetch": "1",
+  "d3-force": "1",
+  "d3-format": "1",
+  "d3-geo": "1",
+  "d3-hierarchy": "1",
+  "d3-interpolate": "1",
+  "d3-path": "1",
+  "d3-polygon": "1",
+  "d3-quadtree": "1",
+  "d3-random": "1",
+  "d3-scale": "2",
+  "d3-scale-chromatic": "1",
+  "d3-selection": "1",
+  "d3-shape": "1",
+  "d3-time": "1",
+  "d3-time-format": "2",
+  "d3-timer": "1",
+  "d3-transition": "1",
+  "d3-voronoi": "1",
+  "d3-zoom": "1"
+};
+exports.dependencies = dependencies;
+},{}],"../../../node_modules/d3/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _exportNames = {
+  version: true
+};
+Object.defineProperty(exports, "version", {
+  enumerable: true,
+  get: function () {
+    return _package.version;
+  }
+});
+
+var _package = require("./dist/package.js");
+
+var _d3Array = require("d3-array");
+
+Object.keys(_d3Array).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Array[key];
+    }
+  });
+});
+
+var _d3Axis = require("d3-axis");
+
+Object.keys(_d3Axis).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Axis[key];
+    }
+  });
+});
+
+var _d3Brush = require("d3-brush");
+
+Object.keys(_d3Brush).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Brush[key];
+    }
+  });
+});
+
+var _d3Chord = require("d3-chord");
+
+Object.keys(_d3Chord).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Chord[key];
+    }
+  });
+});
+
+var _d3Collection = require("d3-collection");
+
+Object.keys(_d3Collection).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Collection[key];
+    }
+  });
+});
+
+var _d3Color = require("d3-color");
+
+Object.keys(_d3Color).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Color[key];
+    }
+  });
+});
+
+var _d3Contour = require("d3-contour");
+
+Object.keys(_d3Contour).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Contour[key];
+    }
+  });
+});
+
+var _d3Dispatch = require("d3-dispatch");
+
+Object.keys(_d3Dispatch).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Dispatch[key];
+    }
+  });
+});
+
+var _d3Drag = require("d3-drag");
+
+Object.keys(_d3Drag).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Drag[key];
+    }
+  });
+});
+
+var _d3Dsv = require("d3-dsv");
+
+Object.keys(_d3Dsv).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Dsv[key];
+    }
+  });
+});
+
+var _d3Ease = require("d3-ease");
+
+Object.keys(_d3Ease).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Ease[key];
+    }
+  });
+});
+
+var _d3Fetch = require("d3-fetch");
+
+Object.keys(_d3Fetch).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Fetch[key];
+    }
+  });
+});
+
+var _d3Force = require("d3-force");
+
+Object.keys(_d3Force).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Force[key];
+    }
+  });
+});
+
+var _d3Format = require("d3-format");
+
+Object.keys(_d3Format).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Format[key];
+    }
+  });
+});
+
+var _d3Geo = require("d3-geo");
+
+Object.keys(_d3Geo).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Geo[key];
+    }
+  });
+});
+
+var _d3Hierarchy = require("d3-hierarchy");
+
+Object.keys(_d3Hierarchy).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Hierarchy[key];
+    }
+  });
+});
+
+var _d3Interpolate = require("d3-interpolate");
+
+Object.keys(_d3Interpolate).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Interpolate[key];
+    }
+  });
+});
+
+var _d3Path = require("d3-path");
+
+Object.keys(_d3Path).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Path[key];
+    }
+  });
+});
+
+var _d3Polygon = require("d3-polygon");
+
+Object.keys(_d3Polygon).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Polygon[key];
+    }
+  });
+});
+
+var _d3Quadtree = require("d3-quadtree");
+
+Object.keys(_d3Quadtree).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Quadtree[key];
+    }
+  });
+});
+
+var _d3Random = require("d3-random");
+
+Object.keys(_d3Random).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Random[key];
+    }
+  });
+});
+
+var _d3Scale = require("d3-scale");
+
+Object.keys(_d3Scale).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Scale[key];
+    }
+  });
+});
+
+var _d3ScaleChromatic = require("d3-scale-chromatic");
+
+Object.keys(_d3ScaleChromatic).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3ScaleChromatic[key];
+    }
+  });
+});
+
+var _d3Selection = require("d3-selection");
+
+Object.keys(_d3Selection).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Selection[key];
+    }
+  });
+});
+
+var _d3Shape = require("d3-shape");
+
+Object.keys(_d3Shape).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Shape[key];
+    }
+  });
+});
+
+var _d3Time = require("d3-time");
+
+Object.keys(_d3Time).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Time[key];
+    }
+  });
+});
+
+var _d3TimeFormat = require("d3-time-format");
+
+Object.keys(_d3TimeFormat).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3TimeFormat[key];
+    }
+  });
+});
+
+var _d3Timer = require("d3-timer");
+
+Object.keys(_d3Timer).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Timer[key];
+    }
+  });
+});
+
+var _d3Transition = require("d3-transition");
+
+Object.keys(_d3Transition).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Transition[key];
+    }
+  });
+});
+
+var _d3Voronoi = require("d3-voronoi");
+
+Object.keys(_d3Voronoi).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Voronoi[key];
+    }
+  });
+});
+
+var _d3Zoom = require("d3-zoom");
+
+Object.keys(_d3Zoom).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Zoom[key];
+    }
+  });
+});
+},{"./dist/package.js":"../../../node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function (global, factory) {
@@ -33343,7 +33853,8 @@ window.contrastColors = contrastColors;
 new _clipboard.default('.copyButton');
 new _clipboard.default('.colorOutputBlock');
 Object.assign(d3, d3cam02, d3hsluv, d3hsv, d33d);
-var background = document.getElementById('bgField').value; // var colorBlock = document.getElementById('color');
+var bgFieldInput = document.getElementById('bgField');
+var background = bgFieldInput.value; // var colorBlock = document.getElementById('color');
 
 var demoHeading = document.getElementById('demoHeading');
 var demoWrapper = document.getElementById('demoWrapper');
@@ -33357,6 +33868,46 @@ window.ratioInputs = [];
 var newColors;
 var pathName;
 window.colorArgs = null;
+bgFieldInput.onchange = throttle(colorInput, 50);
+
+function debounce(func, wait, immediate) {
+  var timerId = null;
+  return function debounced() {
+    var context = this;
+    var args = arguments;
+    clearTimeout(timerId);
+
+    if (immediate && !timerId) {
+      func.apply(context, args);
+    }
+
+    timerId = setTimeout(function () {
+      timerId = null;
+      if (!immediate) func.apply(context, args);
+    }, wait);
+  };
+}
+
+function throttle(func, wait) {
+  var timerId, lastRan;
+  return function throttled() {
+    var context = this;
+    var args = arguments;
+
+    if (!lastRan) {
+      func.apply(context, args);
+      lastRan = Date.now();
+    } else {
+      clearTimeout(timerId);
+      timerId = setTimeout(function () {
+        if (Date.now() - lastRan >= wait) {
+          func.apply(context, args);
+          lastRan = Date.now();
+        }
+      }, wait - (Date.now() - lastRan) || 0);
+    }
+  };
+}
 
 function paramSetup() {
   colorspaceOptions();
@@ -33448,7 +33999,8 @@ function addRatio(v) {
   input.placeholder = 4.5;
   input.id = randId;
   input.value = v;
-  input.oninput = colorInput;
+  input.onkeydown = checkRatioStepModifiers;
+  input.oninput = debounce(colorInput, 100);
   var button = document.createElement('button');
   button.className = 'spectrum-ActionButton spectrum-ActionButton--quiet';
   button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
@@ -33496,7 +34048,7 @@ function addColor(s) {
   var sw = document.createElement('input');
   sw.type = "color";
   sw.value = s;
-  sw.oninput = colorInput;
+  sw.oninput = throttle(colorInput, 50);
   sw.className = 'keyColor-Item';
   sw.id = randId + '-sw';
   sw.style.backgroundColor = s;
@@ -33745,6 +34297,30 @@ function ramp(color, n) {
   }
 
   return canvas;
+}
+
+function checkRatioStepModifiers(e) {
+  if (!e.shiftKey) return;
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  var value = Number(e.target.value);
+  var newValue;
+
+  switch (e.key) {
+    case 'ArrowDown':
+      newValue = value - 1;
+      e.target.value = newValue.toFixed(2);
+      e.target.oninput();
+      break;
+
+    case 'ArrowUp':
+      newValue = value + 1;
+      e.target.value = newValue.toFixed(2);
+      e.target.oninput();
+      break;
+
+    default:
+  }
 } // Calculate Color and generate Scales
 
 
@@ -34101,7 +34677,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64931" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52531" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
