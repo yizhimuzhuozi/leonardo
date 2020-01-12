@@ -30861,49 +30861,53 @@ function convert(c) {
   var typeId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : type.value;
   var A, B, C;
 
-  if (typeId == 'HSLuv') {
-    A = d3.hsluv(c).l;
-    B = d3.hsluv(c).u;
-    C = d3.hsluv(c).v;
-  }
+  if (typeId == 'Hex') {
+    return d3.rgb(c).formatHex();
+  } else {
+    if (typeId == 'HSLuv') {
+      A = d3.hsluv(c).l;
+      B = d3.hsluv(c).u;
+      C = d3.hsluv(c).v;
+    }
 
-  if (typeId == 'HSL') {
-    A = d3.hsl(c).h;
-    B = d3.hsl(c).s * 100;
-    C = d3.hsl(c).l * 100;
-  }
+    if (typeId == 'HSL') {
+      A = d3.hsl(c).h;
+      B = d3.hsl(c).s * 100;
+      C = d3.hsl(c).l * 100;
+    }
 
-  if (typeId == 'HSV') {
-    A = d3.hsv(c).h;
-    B = d3.hsv(c).s * 100;
-    C = d3.hsv(c).v * 100;
-  }
+    if (typeId == 'HSV') {
+      A = d3.hsv(c).h;
+      B = d3.hsv(c).s * 100;
+      C = d3.hsv(c).v * 100;
+    }
 
-  if (typeId == 'CAM02') {
-    A = d3.jab(c).J;
-    B = d3.jab(c).a;
-    C = d3.jab(c).b;
-  }
+    if (typeId == 'CAM02') {
+      A = d3.jab(c).J;
+      B = d3.jab(c).a;
+      C = d3.jab(c).b;
+    }
 
-  if (typeId == 'Lab') {
-    A = d3.lab(c).l;
-    B = d3.lab(c).a;
-    C = d3.lab(c).b;
-  }
+    if (typeId == 'Lab') {
+      A = d3.lab(c).l;
+      B = d3.lab(c).a;
+      C = d3.lab(c).b;
+    }
 
-  if (typeId == 'Lch') {
-    A = d3.hcl(c).l;
-    B = d3.hcl(c).c;
-    C = d3.hcl(c).h;
-  }
+    if (typeId == 'Lch') {
+      A = d3.hcl(c).l;
+      B = d3.hcl(c).c;
+      C = d3.hcl(c).h;
+    }
 
-  if (typeId == 'RGB') {
-    A = d3.rgb(c).r;
-    B = d3.rgb(c).g;
-    C = d3.rgb(c).b;
-  }
+    if (typeId == 'RGB') {
+      A = d3.rgb(c).r;
+      B = d3.rgb(c).g;
+      C = d3.rgb(c).b;
+    }
 
-  return new Array(A.toFixed(), B.toFixed(), C.toFixed());
+    return new Array(A.toFixed(), B.toFixed(), C.toFixed());
+  }
 }
 
 function returnColor() {
@@ -30995,25 +30999,38 @@ function returnColor() {
     typeArr = ['R', 'G', 'B'];
   }
 
-  if (val.length > 6 && val.charAt(0) == '#' || val.length >= 10 && val.charAt(0) != '#') {
+  if (val.length >= 10 && val.charAt(0) !== '#' || val.length > 6 && val.charAt(0) == '#') {
     var newVal = convert(val);
     output.innerHTML = ' ';
-    var d = document.createElement('div');
-    var a = document.createElement('div');
-    var b = document.createElement('div');
-    var c = document.createElement('div');
-    var str = document.createTextNode(typeId.toLowerCase() + '(' + newVal + ')');
-    var arr1 = document.createTextNode(typeArr[0] + ': ' + newVal[0]);
-    var arr2 = document.createTextNode(typeArr[1] + ': ' + newVal[1]);
-    var arr3 = document.createTextNode(typeArr[2] + ': ' + newVal[2]);
-    a.appendChild(arr1);
-    b.appendChild(arr2);
-    c.appendChild(arr3);
-    d.appendChild(str);
-    output.appendChild(d);
-    output.appendChild(a);
-    output.appendChild(b);
-    output.appendChild(c);
+
+    if (typeId == 'Hex') {
+      var d = document.createElement('div');
+      var str = document.createTextNode(newVal);
+      d.appendChild(str);
+      output.appendChild(d);
+    } else {
+      var _d = document.createElement('div');
+
+      var a = document.createElement('div');
+      var b = document.createElement('div');
+      var c = document.createElement('div');
+
+      var _str = document.createTextNode(typeId.toLowerCase() + '(' + newVal + ')');
+
+      var arr1 = document.createTextNode(typeArr[0] + ': ' + newVal[0]);
+      var arr2 = document.createTextNode(typeArr[1] + ': ' + newVal[1]);
+      var arr3 = document.createTextNode(typeArr[2] + ': ' + newVal[2]);
+      a.appendChild(arr1);
+      b.appendChild(arr2);
+      c.appendChild(arr3);
+
+      _d.appendChild(_str);
+
+      output.appendChild(_d);
+      output.appendChild(a);
+      output.appendChild(b);
+      output.appendChild(c);
+    }
   }
 }
 
@@ -31051,7 +31068,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56777" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58399" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
