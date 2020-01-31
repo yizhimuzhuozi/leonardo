@@ -419,7 +419,7 @@ module.hot.accept(reloadCSS);
   doc.addEventListener('blur', onBlurHandler, true);
 })(typeof window === "undefined" ? undefined : document);
 
-},{}],"../../../node_modules/d3/dist/package.js":[function(require,module,exports) {
+},{}],"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/dist/package.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28716,7 +28716,7 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./zoom.js":"../../../node_modules/d3-zoom/src/zoom.js","./transform.js":"../../../node_modules/d3-zoom/src/transform.js"}],"../../../node_modules/d3/index.js":[function(require,module,exports) {
+},{"./zoom.js":"../../../node_modules/d3-zoom/src/zoom.js","./transform.js":"../../../node_modules/d3-zoom/src/transform.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29136,7 +29136,7 @@ Object.keys(_d3Zoom).forEach(function (key) {
     }
   });
 });
-},{"./dist/package.js":"../../../node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-cam02/src/math.js":[function(require,module,exports) {
+},{"./dist/package.js":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-cam02/src/math.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -30463,19 +30463,19 @@ function generateContrastColors({
     colorspace: colorspace,
     shift: 1
   });
+  let baseV = d3.hsluv(base).v / 100;
   let Contrasts = d3.range(swatches).map(d => {
     let rgbArray = [d3.rgb(scaleData.scale(d)).r, d3.rgb(scaleData.scale(d)).g, d3.rgb(scaleData.scale(d)).b];
     let baseRgbArray = [d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b];
-    let ca = contrast(rgbArray, baseRgbArray).toFixed(2);
+    let ca = contrast(rgbArray, baseRgbArray, baseV).toFixed(2);
     return Number(ca);
   });
   let contrasts = Contrasts.filter(el => el != null);
-  let baseLum = luminance(d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b);
   let newColors = [];
   ratios = ratios.map(Number); // Return color matching target ratio, or closest number
 
   for (let i = 0; i < ratios.length; i++) {
-    let r = binarySearch(contrasts, ratios[i], baseLum);
+    let r = binarySearch(contrasts, ratios[i], baseV);
     newColors.push(d3.rgb(scaleData.colors[r]).hex());
   }
 
@@ -30491,16 +30491,15 @@ function luminance(r, g, b) {
 } // function percievedLum(r, g, b) {
 //   return (0.299*r + 0.587*g + 0.114*b);
 // }
-// Separate files in a lib folder as well.
 
 
-function contrast(color, base) {
+function contrast(color, base, baseV) {
   let colorLum = luminance(color[0], color[1], color[2]);
   let baseLum = luminance(base[0], base[1], base[2]);
   let cr1 = (colorLum + 0.05) / (baseLum + 0.05);
   let cr2 = (baseLum + 0.05) / (colorLum + 0.05);
 
-  if (baseLum < 0.5) {
+  if (baseV < 0.5) {
     if (cr1 >= 1) {
       return cr1;
     } else {
@@ -30554,7 +30553,7 @@ function binarySearch(list, value, baseLum) {
 
   return list[middle] == !value ? closest : middle; // how it was originally expressed
 }
-},{"d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
+},{"d3":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
 var define;
 /*
 Copyright 2018 Adobe. All rights reserved.
@@ -31814,7 +31813,7 @@ var define;
     ])
   );
 });
-},{}],"../node_modules/d3/dist/package.js":[function(require,module,exports) {
+},{}],"../../../node_modules/d3/dist/package.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31904,7 +31903,7 @@ var dependencies = {
   "d3-zoom": "1"
 };
 exports.dependencies = dependencies;
-},{}],"../node_modules/d3/index.js":[function(require,module,exports) {
+},{}],"../../../node_modules/d3/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32324,7 +32323,7 @@ Object.keys(_d3Zoom).forEach(function (key) {
     }
   });
 });
-},{"./dist/package.js":"../node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
+},{"./dist/package.js":"../../../node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function (global, factory) {
@@ -32872,6 +32871,8 @@ var point3d = d3._3d().x(function (d) {
 var yScale3d = d3._3d().shape('LINE_STRIP').origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
 
 function processData(data, tt) {
+  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
+  var chartColors = getChartColors(colorInterpSpace);
   var color = d3.scaleOrdinal(chartColors);
   /* ----------- GRID ----------- */
 
@@ -33193,6 +33194,7 @@ function toggleGraphs() {
 }
 
 function createAllCharts(mode) {
+  mode = document.getElementById('chart2dColorspace').value;
   var chart3 = document.getElementById('chart3Wrapper');
 
   if (mode == "LCH") {
@@ -33283,12 +33285,12 @@ function getChartColors(mode) {
   return chartColors;
 }
 
-function showCharts(mode) {
+function showCharts(mode, interpolation) {
   document.getElementById('chart1').innerHTML = ' ';
   document.getElementById('chart2').innerHTML = ' ';
   document.getElementById('chart3').innerHTML = ' ';
   document.getElementById('contrastChart').innerHTML = ' ';
-  chartColors = getChartColors(mode);
+  chartColors = getChartColors(interpolation);
   createAllCharts(mode);
 }
 
@@ -33298,7 +33300,7 @@ exports.init3dChart = init3dChart; // exports.update3dChart = update3dChart;
 
 exports.showCharts = showCharts; // window.update3dChart = update3dChart;
 // window.updateCharts = updateCharts;
-},{"d3":"../node_modules/d3/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js"}],"data.js":[function(require,module,exports) {
+},{"d3":"../../../node_modules/d3/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js"}],"data.js":[function(require,module,exports) {
 "use strict";
 
 var d3 = _interopRequireWildcard(require("d3"));
@@ -33757,7 +33759,7 @@ function createData(colors) {
 }
 
 exports.createData = createData;
-},{"d3":"../node_modules/d3/index.js"}],"index.js":[function(require,module,exports) {
+},{"d3":"../../../node_modules/d3/index.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 require("@spectrum-css/vars/dist/spectrum-global.css");
@@ -34469,8 +34471,8 @@ function colorInput() {
   copyColors.setAttribute('data-clipboard-text', newColors); // update URL parameters
 
   updateParams(inputColors, background.substr(1), ratioInputs, mode);
-  chartData.createData(scaleData.colors);
-  charts.showCharts('CAM02');
+  var data = chartData.createData(scaleData.colors);
+  charts.showCharts('CAM02', data);
   colorSpaceFeedback('CAM02'); // manually enter default of CAM02
 }
 
@@ -34643,13 +34645,14 @@ window.colorSpaceFeedback = colorSpaceFeedback;
 
 function updateCharts(selectObject) {
   var spaceOpt = selectObject.value;
+  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
   charts.init3dChart();
-  charts.showCharts(spaceOpt);
+  charts.showCharts(spaceOpt, colorInterpSpace);
   colorSpaceFeedback(spaceOpt);
 }
 
 window.updateCharts = updateCharts;
-},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/typography/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/tabs/dist/index-vars.css","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/charts.scss":"scss/charts.scss","./scss/style.scss":"scss/style.scss","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js","d3":"../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","./charts.js":"charts.js","./data.js":"data.js"}],"../../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/typography/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/tabs/dist/index-vars.css","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/charts.scss":"scss/charts.scss","./scss/style.scss":"scss/style.scss","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","./charts.js":"charts.js","./data.js":"data.js"}],"../../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -34677,7 +34680,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64452" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63900" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

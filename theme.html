@@ -1,0 +1,121 @@
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-156021617-1"></script>
+  <script>window.dataLayer = window.dataLayer || [];
+
+function gtag() {
+  dataLayer.push(arguments);
+}
+
+gtag('js', new Date());
+gtag('config', 'UA-156021617-1');</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Leonardo</title>
+  <meta property="og:title" content="Leonardo">
+  <meta name="description" content="Generate colors based on a desired contrast ratio.">
+  <meta property="og:description" content="Generate colors based on a desired contrast ratio.">
+  <meta property="og:image" content="">
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="repository-open-graph-leonardo">
+
+  <meta property="og:site_name" content="Leonardo">
+  <meta name="twitter:image:alt" content="Web interface for generating colors based on contrast ratio.">
+
+  <meta name="twitter:site" content="@Leonardo_Color">
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.4cdc4880.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.df129eab.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.467f1d8b.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.4bc48148.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.e3ea4192.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.a7bdcc8e.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.590927b0.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.da40a8c2.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.7b0657c6.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.ed196cac.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.bd6b9d71.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.5c1e6cfe.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.a0a61c08.png">
+  <link rel="manifest" href="/favicons/manifest.js">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.794a78a9.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro&display=swap">
+
+</head>
+<body class="spectrum spectrum spectrum--light spectrum--medium appFrame--right">
+<header class="spectrum-AppHeader">
+  <a href="/" id="logoTitle">
+    <img src="/Leonardo_Logo_sm.32a0c71b.svg" alt="Leonardo logo" id="headerLogo">
+    <h1 class="spectrum-Heading5 spectrum-AppHeader-Title">Leonardo</h1>
+  </a>
+  <div class="spectrum-AppHeader--right">
+    <a href="https://medium.com/@NateBaldwin/leonardo-an-open-source-contrast-based-color-generator-92d61b6521d2" class="spectrum-ActionButton spectrum-ActionButton--quiet">About</a>
+    <a href="https://www.github.com/adobe/leonardo#leonardo" class="spectrum-ActionButton spectrum-ActionButton--quiet">Docs</a>
+    <a href="/demo.html" class="spectrum-ActionButton spectrum-ActionButton--quiet">Demo</a>
+    <a href="/converter.html" class="spectrum-ActionButton spectrum-ActionButton--quiet">Converter</a>
+    <a href="https://www.github.com/adobe/leonardo" id="octo-link"> <img id="octocat" src="/GitHub-Mark-120px-plus.86842841.png" alt="Github octocat"> </a>
+  </div>
+</header>
+
+<main>
+
+
+</main>
+
+<div class="spectrum-Panel spectrum-Panel--small spectrum-Panel--right">
+    <div class="spectrum-Panel-Item">
+      <div class="spectrum-Panel-Title">
+        <h3 class="spectrum-Heading6">Generated Colors</h3>
+        <button id="copyAllColors" class="spectrum-ActionButton copyButton">
+          <span class="spectrum-ActionButton-label">Copy</span>
+        </button>
+      </div>
+      <div id="colorOutputs">
+      </div>
+    </div>
+    <div class="spectrum-Panel-Item">
+      <div class="spectrum-Panel-Title">
+        <h3 class="spectrum-Heading6">Function Parameters</h3>
+        <button id="copyParams" data-clipboard-target="#params" class="spectrum-ActionButton copyButton">
+          <span class="spectrum-ActionButton-label">Copy</span>
+        </button>
+      </div>
+      <div id="functionParams">
+        <span id="params" class="spectrum-Code5"></span>
+      </div>
+    </div>
+  </div>
+
+<div id="dialogOverlay" style="display: none;"></div>
+
+<div class="spectrum-Dialog spectrum-Dialog--small" id="addBulkColorDialog">
+  <div class="spectrum-Dialog-header">
+    <h2 class="spectrum-Dialog-title">Import color from Leonardo URL</h2>
+  </div>
+  <div class="spectrum-Dialog-content">
+    <span class="spectrum-Typography">
+      <p class="spectrum-Body4">Paste the URL from a color configuration you've created in Leonardo to add the color and its configurations to your theme.</p>
+    </span>
+    <form class="spectrum-Form spectrum-Form--labelsAbove">
+      <div class="spectrum-Form-item">
+        <label for="colorURL" class="spectrum-Form-itemLabel">URL:</label>
+        <input type="text" id="colorURL" class="spectrum-Textfield spectrum-Textfield">
+      </div>
+    </form>
+  </div>
+  <div class="spectrum-Dialog-footer">
+    <button class="spectrum-Button spectrum-Button--secondary" onclick="cancelBulk()">Cancel</button>
+    <button class="spectrum-Button spectrum-Button--cta" onclick="bulkColorInput()">Add</button>
+  </div>
+</div>
+
+<script src="/src.e31bb0bc.js"></script>
+
+</body>
+</html>
