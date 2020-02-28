@@ -157,6 +157,8 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
 },{}],"../../../node_modules/@spectrum-css/tabs/dist/index-vars.css":[function(require,module,exports) {
 
+},{}],"../../../node_modules/@spectrum-css/toast/dist/index-vars.css":[function(require,module,exports) {
+
 },{}],"../../../node_modules/@spectrum-css/illustratedmessage/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"scss/colorinputs.scss":[function(require,module,exports) {
@@ -30331,7 +30333,1918 @@ function binarySearch(list, value, baseLum) {
 
   return list[middle] == !value ? closest : middle; // how it was originally expressed
 }
-},{"d3":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
+},{"d3":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/onecolor/one-color-all-debug.js":[function(require,module,exports) {
+var define;
+/*jshint evil:true, onevar:false*/
+
+/*global define*/
+var installedColorSpaces = [],
+    namedColors = {},
+    undef = function (obj) {
+  return typeof obj === 'undefined';
+},
+    channelRegExp = /\s*(\.\d+|\d+(?:\.\d+)?)(%)?\s*/,
+    percentageChannelRegExp = /\s*(\.\d+|100|\d?\d(?:\.\d+)?)%\s*/,
+    alphaChannelRegExp = /\s*(\.\d+|\d+(?:\.\d+)?)\s*/,
+    cssColorRegExp = new RegExp("^(rgb|hsl|hsv)a?" + "\\(" + channelRegExp.source + "," + channelRegExp.source + "," + channelRegExp.source + "(?:," + alphaChannelRegExp.source + ")?" + "\\)$", "i");
+
+function ONECOLOR(obj) {
+  if (Object.prototype.toString.apply(obj) === '[object Array]') {
+    if (typeof obj[0] === 'string' && typeof ONECOLOR[obj[0]] === 'function') {
+      // Assumed array from .toJSON()
+      return new ONECOLOR[obj[0]](obj.slice(1, obj.length));
+    } else if (obj.length === 4) {
+      // Assumed 4 element int RGB array from canvas with all channels [0;255]
+      return new ONECOLOR.RGB(obj[0] / 255, obj[1] / 255, obj[2] / 255, obj[3] / 255);
+    }
+  } else if (typeof obj === 'string') {
+    var lowerCased = obj.toLowerCase();
+
+    if (namedColors[lowerCased]) {
+      obj = '#' + namedColors[lowerCased];
+    }
+
+    if (lowerCased === 'transparent') {
+      obj = 'rgba(0,0,0,0)';
+    } // Test for CSS rgb(....) string
+
+
+    var matchCssSyntax = obj.match(cssColorRegExp);
+
+    if (matchCssSyntax) {
+      var colorSpaceName = matchCssSyntax[1].toUpperCase(),
+          alpha = undef(matchCssSyntax[8]) ? matchCssSyntax[8] : parseFloat(matchCssSyntax[8]),
+          hasHue = colorSpaceName[0] === 'H',
+          firstChannelDivisor = matchCssSyntax[3] ? 100 : hasHue ? 360 : 255,
+          secondChannelDivisor = matchCssSyntax[5] || hasHue ? 100 : 255,
+          thirdChannelDivisor = matchCssSyntax[7] || hasHue ? 100 : 255;
+
+      if (undef(ONECOLOR[colorSpaceName])) {
+        throw new Error("one.color." + colorSpaceName + " is not installed.");
+      }
+
+      return new ONECOLOR[colorSpaceName](parseFloat(matchCssSyntax[2]) / firstChannelDivisor, parseFloat(matchCssSyntax[4]) / secondChannelDivisor, parseFloat(matchCssSyntax[6]) / thirdChannelDivisor, alpha);
+    } // Assume hex syntax
+
+
+    if (obj.length < 6) {
+      // Allow CSS shorthand
+      obj = obj.replace(/^#?([0-9a-f])([0-9a-f])([0-9a-f])$/i, '$1$1$2$2$3$3');
+    } // Split obj into red, green, and blue components
+
+
+    var hexMatch = obj.match(/^#?([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])([0-9a-f][0-9a-f])$/i);
+
+    if (hexMatch) {
+      return new ONECOLOR.RGB(parseInt(hexMatch[1], 16) / 255, parseInt(hexMatch[2], 16) / 255, parseInt(hexMatch[3], 16) / 255);
+    } // No match so far. Lets try the less likely ones
+
+
+    if (ONECOLOR.CMYK) {
+      var cmykMatch = obj.match(new RegExp("^cmyk" + "\\(" + percentageChannelRegExp.source + "," + percentageChannelRegExp.source + "," + percentageChannelRegExp.source + "," + percentageChannelRegExp.source + "\\)$", "i"));
+
+      if (cmykMatch) {
+        return new ONECOLOR.CMYK(parseFloat(cmykMatch[1]) / 100, parseFloat(cmykMatch[2]) / 100, parseFloat(cmykMatch[3]) / 100, parseFloat(cmykMatch[4]) / 100);
+      }
+    }
+  } else if (typeof obj === 'object' && obj.isColor) {
+    return obj;
+  }
+
+  return false;
+}
+
+function installColorSpace(colorSpaceName, propertyNames, config) {
+  ONECOLOR[colorSpaceName] = new Function(propertyNames.join(","), // Allow passing an array to the constructor:
+  "if (Object.prototype.toString.apply(" + propertyNames[0] + ") === '[object Array]') {" + propertyNames.map(function (propertyName, i) {
+    return propertyName + "=" + propertyNames[0] + "[" + i + "];";
+  }).reverse().join("") + "}" + "if (" + propertyNames.filter(function (propertyName) {
+    return propertyName !== 'alpha';
+  }).map(function (propertyName) {
+    return "isNaN(" + propertyName + ")";
+  }).join("||") + "){" + "throw new Error(\"[" + colorSpaceName + "]: Invalid color: (\"+" + propertyNames.join("+\",\"+") + "+\")\");}" + propertyNames.map(function (propertyName) {
+    if (propertyName === 'hue') {
+      return "this._hue=hue<0?hue-Math.floor(hue):hue%1"; // Wrap
+    } else if (propertyName === 'alpha') {
+      return "this._alpha=(isNaN(alpha)||alpha>1)?1:(alpha<0?0:alpha);";
+    } else {
+      return "this._" + propertyName + "=" + propertyName + "<0?0:(" + propertyName + ">1?1:" + propertyName + ")";
+    }
+  }).join(";") + ";");
+  ONECOLOR[colorSpaceName].propertyNames = propertyNames;
+  var prototype = ONECOLOR[colorSpaceName].prototype;
+  ['valueOf', 'hex', 'hexa', 'css', 'cssa'].forEach(function (methodName) {
+    prototype[methodName] = prototype[methodName] || (colorSpaceName === 'RGB' ? prototype.hex : new Function("return this.rgb()." + methodName + "();"));
+  });
+  prototype.isColor = true;
+
+  prototype.equals = function (otherColor, epsilon) {
+    if (undef(epsilon)) {
+      epsilon = 1e-10;
+    }
+
+    otherColor = otherColor[colorSpaceName.toLowerCase()]();
+
+    for (var i = 0; i < propertyNames.length; i = i + 1) {
+      if (Math.abs(this['_' + propertyNames[i]] - otherColor['_' + propertyNames[i]]) > epsilon) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  prototype.toJSON = new Function("return ['" + colorSpaceName + "', " + propertyNames.map(function (propertyName) {
+    return "this._" + propertyName;
+  }, this).join(", ") + "];");
+
+  for (var propertyName in config) {
+    if (config.hasOwnProperty(propertyName)) {
+      var matchFromColorSpace = propertyName.match(/^from(.*)$/);
+
+      if (matchFromColorSpace) {
+        ONECOLOR[matchFromColorSpace[1].toUpperCase()].prototype[colorSpaceName.toLowerCase()] = config[propertyName];
+      } else {
+        prototype[propertyName] = config[propertyName];
+      }
+    }
+  } // It is pretty easy to implement the conversion to the same color space:
+
+
+  prototype[colorSpaceName.toLowerCase()] = function () {
+    return this;
+  };
+
+  prototype.toString = new Function("return \"[one.color." + colorSpaceName + ":\"+" + propertyNames.map(function (propertyName, i) {
+    return "\" " + propertyNames[i] + "=\"+this._" + propertyName;
+  }).join("+") + "+\"]\";"); // Generate getters and setters
+
+  propertyNames.forEach(function (propertyName, i) {
+    prototype[propertyName] = prototype[propertyName === 'black' ? 'k' : propertyName[0]] = new Function("value", "isDelta", // Simple getter mode: color.red()
+    "if (typeof value === 'undefined') {" + "return this._" + propertyName + ";" + "}" + // Adjuster: color.red(+.2, true)
+    "if (isDelta) {" + "return new this.constructor(" + propertyNames.map(function (otherPropertyName, i) {
+      return "this._" + otherPropertyName + (propertyName === otherPropertyName ? "+value" : "");
+    }).join(", ") + ");" + "}" + // Setter: color.red(.2);
+    "return new this.constructor(" + propertyNames.map(function (otherPropertyName, i) {
+      return propertyName === otherPropertyName ? "value" : "this._" + otherPropertyName;
+    }).join(", ") + ");");
+  });
+
+  function installForeignMethods(targetColorSpaceName, sourceColorSpaceName) {
+    var obj = {};
+    obj[sourceColorSpaceName.toLowerCase()] = new Function("return this.rgb()." + sourceColorSpaceName.toLowerCase() + "();"); // Fallback
+
+    ONECOLOR[sourceColorSpaceName].propertyNames.forEach(function (propertyName, i) {
+      obj[propertyName] = obj[propertyName === 'black' ? 'k' : propertyName[0]] = new Function("value", "isDelta", "return this." + sourceColorSpaceName.toLowerCase() + "()." + propertyName + "(value, isDelta);");
+    });
+
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop) && ONECOLOR[targetColorSpaceName].prototype[prop] === undefined) {
+        ONECOLOR[targetColorSpaceName].prototype[prop] = obj[prop];
+      }
+    }
+  }
+
+  installedColorSpaces.forEach(function (otherColorSpaceName) {
+    installForeignMethods(colorSpaceName, otherColorSpaceName);
+    installForeignMethods(otherColorSpaceName, colorSpaceName);
+  });
+  installedColorSpaces.push(colorSpaceName);
+}
+
+ONECOLOR.installMethod = function (name, fn) {
+  installedColorSpaces.forEach(function (colorSpace) {
+    ONECOLOR[colorSpace].prototype[name] = fn;
+  });
+};
+
+installColorSpace('RGB', ['red', 'green', 'blue', 'alpha'], {
+  hex: function () {
+    var hexString = (Math.round(255 * this._red) * 0x10000 + Math.round(255 * this._green) * 0x100 + Math.round(255 * this._blue)).toString(16);
+    return '#' + '00000'.substr(0, 6 - hexString.length) + hexString;
+  },
+  hexa: function () {
+    var alphaString = Math.round(this._alpha * 255).toString(16);
+    return '#' + '00'.substr(0, 2 - alphaString.length) + alphaString + this.hex().substr(1, 6);
+  },
+  css: function () {
+    return "rgb(" + Math.round(255 * this._red) + "," + Math.round(255 * this._green) + "," + Math.round(255 * this._blue) + ")";
+  },
+  cssa: function () {
+    return "rgba(" + Math.round(255 * this._red) + "," + Math.round(255 * this._green) + "," + Math.round(255 * this._blue) + "," + this._alpha + ")";
+  }
+});
+
+if (typeof define === 'function' && !undef(define.amd)) {
+  define(function () {
+    return ONECOLOR;
+  });
+} else if (typeof exports === 'object') {
+  // Node module export
+  module.exports = ONECOLOR;
+} else {
+  one = window.one || {};
+  one.color = ONECOLOR;
+}
+
+if (typeof jQuery !== 'undefined' && undef(jQuery.color)) {
+  jQuery.color = ONECOLOR;
+}
+/*global namedColors*/
+
+
+namedColors = {
+  aliceblue: 'f0f8ff',
+  antiquewhite: 'faebd7',
+  aqua: '0ff',
+  aquamarine: '7fffd4',
+  azure: 'f0ffff',
+  beige: 'f5f5dc',
+  bisque: 'ffe4c4',
+  black: '000',
+  blanchedalmond: 'ffebcd',
+  blue: '00f',
+  blueviolet: '8a2be2',
+  brown: 'a52a2a',
+  burlywood: 'deb887',
+  cadetblue: '5f9ea0',
+  chartreuse: '7fff00',
+  chocolate: 'd2691e',
+  coral: 'ff7f50',
+  cornflowerblue: '6495ed',
+  cornsilk: 'fff8dc',
+  crimson: 'dc143c',
+  cyan: '0ff',
+  darkblue: '00008b',
+  darkcyan: '008b8b',
+  darkgoldenrod: 'b8860b',
+  darkgray: 'a9a9a9',
+  darkgrey: 'a9a9a9',
+  darkgreen: '006400',
+  darkkhaki: 'bdb76b',
+  darkmagenta: '8b008b',
+  darkolivegreen: '556b2f',
+  darkorange: 'ff8c00',
+  darkorchid: '9932cc',
+  darkred: '8b0000',
+  darksalmon: 'e9967a',
+  darkseagreen: '8fbc8f',
+  darkslateblue: '483d8b',
+  darkslategray: '2f4f4f',
+  darkslategrey: '2f4f4f',
+  darkturquoise: '00ced1',
+  darkviolet: '9400d3',
+  deeppink: 'ff1493',
+  deepskyblue: '00bfff',
+  dimgray: '696969',
+  dimgrey: '696969',
+  dodgerblue: '1e90ff',
+  firebrick: 'b22222',
+  floralwhite: 'fffaf0',
+  forestgreen: '228b22',
+  fuchsia: 'f0f',
+  gainsboro: 'dcdcdc',
+  ghostwhite: 'f8f8ff',
+  gold: 'ffd700',
+  goldenrod: 'daa520',
+  gray: '808080',
+  grey: '808080',
+  green: '008000',
+  greenyellow: 'adff2f',
+  honeydew: 'f0fff0',
+  hotpink: 'ff69b4',
+  indianred: 'cd5c5c',
+  indigo: '4b0082',
+  ivory: 'fffff0',
+  khaki: 'f0e68c',
+  lavender: 'e6e6fa',
+  lavenderblush: 'fff0f5',
+  lawngreen: '7cfc00',
+  lemonchiffon: 'fffacd',
+  lightblue: 'add8e6',
+  lightcoral: 'f08080',
+  lightcyan: 'e0ffff',
+  lightgoldenrodyellow: 'fafad2',
+  lightgray: 'd3d3d3',
+  lightgrey: 'd3d3d3',
+  lightgreen: '90ee90',
+  lightpink: 'ffb6c1',
+  lightsalmon: 'ffa07a',
+  lightseagreen: '20b2aa',
+  lightskyblue: '87cefa',
+  lightslategray: '789',
+  lightslategrey: '789',
+  lightsteelblue: 'b0c4de',
+  lightyellow: 'ffffe0',
+  lime: '0f0',
+  limegreen: '32cd32',
+  linen: 'faf0e6',
+  magenta: 'f0f',
+  maroon: '800000',
+  mediumaquamarine: '66cdaa',
+  mediumblue: '0000cd',
+  mediumorchid: 'ba55d3',
+  mediumpurple: '9370d8',
+  mediumseagreen: '3cb371',
+  mediumslateblue: '7b68ee',
+  mediumspringgreen: '00fa9a',
+  mediumturquoise: '48d1cc',
+  mediumvioletred: 'c71585',
+  midnightblue: '191970',
+  mintcream: 'f5fffa',
+  mistyrose: 'ffe4e1',
+  moccasin: 'ffe4b5',
+  navajowhite: 'ffdead',
+  navy: '000080',
+  oldlace: 'fdf5e6',
+  olive: '808000',
+  olivedrab: '6b8e23',
+  orange: 'ffa500',
+  orangered: 'ff4500',
+  orchid: 'da70d6',
+  palegoldenrod: 'eee8aa',
+  palegreen: '98fb98',
+  paleturquoise: 'afeeee',
+  palevioletred: 'd87093',
+  papayawhip: 'ffefd5',
+  peachpuff: 'ffdab9',
+  peru: 'cd853f',
+  pink: 'ffc0cb',
+  plum: 'dda0dd',
+  powderblue: 'b0e0e6',
+  purple: '800080',
+  rebeccapurple: '639',
+  red: 'f00',
+  rosybrown: 'bc8f8f',
+  royalblue: '4169e1',
+  saddlebrown: '8b4513',
+  salmon: 'fa8072',
+  sandybrown: 'f4a460',
+  seagreen: '2e8b57',
+  seashell: 'fff5ee',
+  sienna: 'a0522d',
+  silver: 'c0c0c0',
+  skyblue: '87ceeb',
+  slateblue: '6a5acd',
+  slategray: '708090',
+  slategrey: '708090',
+  snow: 'fffafa',
+  springgreen: '00ff7f',
+  steelblue: '4682b4',
+  tan: 'd2b48c',
+  teal: '008080',
+  thistle: 'd8bfd8',
+  tomato: 'ff6347',
+  turquoise: '40e0d0',
+  violet: 'ee82ee',
+  wheat: 'f5deb3',
+  white: 'fff',
+  whitesmoke: 'f5f5f5',
+  yellow: 'ff0',
+  yellowgreen: '9acd32'
+};
+/*global INCLUDE, installColorSpace, ONECOLOR*/
+
+installColorSpace('XYZ', ['x', 'y', 'z', 'alpha'], {
+  fromRgb: function () {
+    // http://www.easyrgb.com/index.php?X=MATH&H=02#text2
+    var convert = function (channel) {
+      return channel > 0.04045 ? Math.pow((channel + 0.055) / 1.055, 2.4) : channel / 12.92;
+    },
+        r = convert(this._red),
+        g = convert(this._green),
+        b = convert(this._blue); // Reference white point sRGB D65:
+    // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+
+
+    return new ONECOLOR.XYZ(r * 0.4124564 + g * 0.3575761 + b * 0.1804375, r * 0.2126729 + g * 0.7151522 + b * 0.0721750, r * 0.0193339 + g * 0.1191920 + b * 0.9503041, this._alpha);
+  },
+  rgb: function () {
+    // http://www.easyrgb.com/index.php?X=MATH&H=01#text1
+    var x = this._x,
+        y = this._y,
+        z = this._z,
+        convert = function (channel) {
+      return channel > 0.0031308 ? 1.055 * Math.pow(channel, 1 / 2.4) - 0.055 : 12.92 * channel;
+    }; // Reference white point sRGB D65:
+    // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+
+
+    return new ONECOLOR.RGB(convert(x * 3.2404542 + y * -1.5371385 + z * -0.4985314), convert(x * -0.9692660 + y * 1.8760108 + z * 0.0415560), convert(x * 0.0556434 + y * -0.2040259 + z * 1.0572252), this._alpha);
+  },
+  lab: function () {
+    // http://www.easyrgb.com/index.php?X=MATH&H=07#text7
+    var convert = function (channel) {
+      return channel > 0.008856 ? Math.pow(channel, 1 / 3) : 7.787037 * channel + 4 / 29;
+    },
+        x = convert(this._x / 95.047),
+        y = convert(this._y / 100.000),
+        z = convert(this._z / 108.883);
+
+    return new ONECOLOR.LAB(116 * y - 16, 500 * (x - y), 200 * (y - z), this._alpha);
+  }
+});
+/*global INCLUDE, installColorSpace, ONECOLOR*/
+
+installColorSpace('LAB', ['l', 'a', 'b', 'alpha'], {
+  fromRgb: function () {
+    return this.xyz().lab();
+  },
+  rgb: function () {
+    return this.xyz().rgb();
+  },
+  xyz: function () {
+    // http://www.easyrgb.com/index.php?X=MATH&H=08#text8
+    var convert = function (channel) {
+      var pow = Math.pow(channel, 3);
+      return pow > 0.008856 ? pow : (channel - 16 / 116) / 7.87;
+    },
+        y = (this._l + 16) / 116,
+        x = this._a / 500 + y,
+        z = y - this._b / 200;
+
+    return new ONECOLOR.XYZ(convert(x) * 95.047, convert(y) * 100.000, convert(z) * 108.883, this._alpha);
+  }
+});
+/*global one*/
+
+installColorSpace('HSV', ['hue', 'saturation', 'value', 'alpha'], {
+  rgb: function () {
+    var hue = this._hue,
+        saturation = this._saturation,
+        value = this._value,
+        i = Math.min(5, Math.floor(hue * 6)),
+        f = hue * 6 - i,
+        p = value * (1 - saturation),
+        q = value * (1 - f * saturation),
+        t = value * (1 - (1 - f) * saturation),
+        red,
+        green,
+        blue;
+
+    switch (i) {
+      case 0:
+        red = value;
+        green = t;
+        blue = p;
+        break;
+
+      case 1:
+        red = q;
+        green = value;
+        blue = p;
+        break;
+
+      case 2:
+        red = p;
+        green = value;
+        blue = t;
+        break;
+
+      case 3:
+        red = p;
+        green = q;
+        blue = value;
+        break;
+
+      case 4:
+        red = t;
+        green = p;
+        blue = value;
+        break;
+
+      case 5:
+        red = value;
+        green = p;
+        blue = q;
+        break;
+    }
+
+    return new ONECOLOR.RGB(red, green, blue, this._alpha);
+  },
+  hsl: function () {
+    var l = (2 - this._saturation) * this._value,
+        sv = this._saturation * this._value,
+        svDivisor = l <= 1 ? l : 2 - l,
+        saturation; // Avoid division by zero when lightness approaches zero:
+
+    if (svDivisor < 1e-9) {
+      saturation = 0;
+    } else {
+      saturation = sv / svDivisor;
+    }
+
+    return new ONECOLOR.HSL(this._hue, saturation, l / 2, this._alpha);
+  },
+  fromRgb: function () {
+    // Becomes one.color.RGB.prototype.hsv
+    var red = this._red,
+        green = this._green,
+        blue = this._blue,
+        max = Math.max(red, green, blue),
+        min = Math.min(red, green, blue),
+        delta = max - min,
+        hue,
+        saturation = max === 0 ? 0 : delta / max,
+        value = max;
+
+    if (delta === 0) {
+      hue = 0;
+    } else {
+      switch (max) {
+        case red:
+          hue = (green - blue) / delta / 6 + (green < blue ? 1 : 0);
+          break;
+
+        case green:
+          hue = (blue - red) / delta / 6 + 1 / 3;
+          break;
+
+        case blue:
+          hue = (red - green) / delta / 6 + 2 / 3;
+          break;
+      }
+    }
+
+    return new ONECOLOR.HSV(hue, saturation, value, this._alpha);
+  }
+});
+/*global one*/
+
+installColorSpace('HSL', ['hue', 'saturation', 'lightness', 'alpha'], {
+  hsv: function () {
+    // Algorithm adapted from http://wiki.secondlife.com/wiki/Color_conversion_scripts
+    var l = this._lightness * 2,
+        s = this._saturation * (l <= 1 ? l : 2 - l),
+        saturation; // Avoid division by zero when l + s is very small (approaching black):
+
+    if (l + s < 1e-9) {
+      saturation = 0;
+    } else {
+      saturation = 2 * s / (l + s);
+    }
+
+    return new ONECOLOR.HSV(this._hue, saturation, (l + s) / 2, this._alpha);
+  },
+  rgb: function () {
+    return this.hsv().rgb();
+  },
+  fromRgb: function () {
+    // Becomes one.color.RGB.prototype.hsv
+    return this.hsv().hsl();
+  }
+});
+/*global one*/
+
+installColorSpace('CMYK', ['cyan', 'magenta', 'yellow', 'black', 'alpha'], {
+  rgb: function () {
+    return new ONECOLOR.RGB(1 - this._cyan * (1 - this._black) - this._black, 1 - this._magenta * (1 - this._black) - this._black, 1 - this._yellow * (1 - this._black) - this._black, this._alpha);
+  },
+  fromRgb: function () {
+    // Becomes one.color.RGB.prototype.cmyk
+    // Adapted from http://www.javascripter.net/faq/rgb2cmyk.htm
+    var red = this._red,
+        green = this._green,
+        blue = this._blue,
+        cyan = 1 - red,
+        magenta = 1 - green,
+        yellow = 1 - blue,
+        black = 1;
+
+    if (red || green || blue) {
+      black = Math.min(cyan, Math.min(magenta, yellow));
+      cyan = (cyan - black) / (1 - black);
+      magenta = (magenta - black) / (1 - black);
+      yellow = (yellow - black) / (1 - black);
+    } else {
+      black = 1;
+    }
+
+    return new ONECOLOR.CMYK(cyan, magenta, yellow, black, this._alpha);
+  }
+});
+ONECOLOR.installMethod('clearer', function (amount) {
+  return this.alpha(isNaN(amount) ? -0.1 : -amount, true);
+});
+ONECOLOR.installMethod('darken', function (amount) {
+  return this.lightness(isNaN(amount) ? -0.1 : -amount, true);
+});
+ONECOLOR.installMethod('desaturate', function (amount) {
+  return this.saturation(isNaN(amount) ? -0.1 : -amount, true);
+});
+
+function gs() {
+  var rgb = this.rgb(),
+      val = rgb._red * 0.3 + rgb._green * 0.59 + rgb._blue * 0.11;
+  return new ONECOLOR.RGB(val, val, val, this._alpha);
+}
+
+;
+ONECOLOR.installMethod('greyscale', gs);
+ONECOLOR.installMethod('grayscale', gs);
+ONECOLOR.installMethod('lighten', function (amount) {
+  return this.lightness(isNaN(amount) ? 0.1 : amount, true);
+});
+ONECOLOR.installMethod('mix', function (otherColor, weight) {
+  otherColor = ONECOLOR(otherColor).rgb();
+  weight = 1 - (isNaN(weight) ? 0.5 : weight);
+  var w = weight * 2 - 1,
+      a = this._alpha - otherColor._alpha,
+      weight1 = ((w * a === -1 ? w : (w + a) / (1 + w * a)) + 1) / 2,
+      weight2 = 1 - weight1,
+      rgb = this.rgb();
+  return new ONECOLOR.RGB(rgb._red * weight1 + otherColor._red * weight2, rgb._green * weight1 + otherColor._green * weight2, rgb._blue * weight1 + otherColor._blue * weight2, rgb._alpha * weight + otherColor._alpha * (1 - weight));
+});
+ONECOLOR.installMethod('negate', function () {
+  var rgb = this.rgb();
+  return new ONECOLOR.RGB(1 - rgb._red, 1 - rgb._green, 1 - rgb._blue, this._alpha);
+});
+ONECOLOR.installMethod('opaquer', function (amount) {
+  return this.alpha(isNaN(amount) ? 0.1 : amount, true);
+});
+ONECOLOR.installMethod('rotate', function (degrees) {
+  return this.hue((degrees || 0) / 360, true);
+});
+ONECOLOR.installMethod('saturate', function (amount) {
+  return this.saturation(isNaN(amount) ? 0.1 : amount, true);
+}); // Adapted from http://gimp.sourcearchive.com/documentation/2.6.6-1ubuntu1/color-to-alpha_8c-source.html
+
+/*
+    toAlpha returns a color where the values of the argument have been converted to alpha
+*/
+
+ONECOLOR.installMethod('toAlpha', function (color) {
+  var me = this.rgb(),
+      other = ONECOLOR(color).rgb(),
+      epsilon = 1e-10,
+      a = new ONECOLOR.RGB(0, 0, 0, me._alpha),
+      channels = ['_red', '_green', '_blue'];
+  channels.forEach(function (channel) {
+    if (me[channel] < epsilon) {
+      a[channel] = me[channel];
+    } else if (me[channel] > other[channel]) {
+      a[channel] = (me[channel] - other[channel]) / (1 - other[channel]);
+    } else if (me[channel] > other[channel]) {
+      a[channel] = (other[channel] - me[channel]) / other[channel];
+    } else {
+      a[channel] = 0;
+    }
+  });
+
+  if (a._red > a._green) {
+    if (a._red > a._blue) {
+      me._alpha = a._red;
+    } else {
+      me._alpha = a._blue;
+    }
+  } else if (a._green > a._blue) {
+    me._alpha = a._green;
+  } else {
+    me._alpha = a._blue;
+  }
+
+  if (me._alpha < epsilon) {
+    return me;
+  }
+
+  channels.forEach(function (channel) {
+    me[channel] = (me[channel] - other[channel]) / me._alpha + other[channel];
+  });
+  me._alpha *= a._alpha;
+  return me;
+});
+/*global one*/
+// This file is purely for the build system
+// Order is important to prevent channel name clashes. Lab <-> hsL
+// Convenience functions
+},{}],"../../../node_modules/color-blind/lib/blind.js":[function(require,module,exports) {
+/*
+ * color-blind
+ * https://github.com/skratchdot/color-blind
+ *
+ * This source was copied from http://mudcu.be/sphere/js/Color.Blind.js
+ * 
+ * It contains modifications for use in node.js.
+ * 
+ * The original copyright is included below.
+ *
+ * Copyright (c) 2014 skratchdot
+ * Licensed under the MIT license.
+ */
+
+/*
+
+    The Color Blindness Simulation function is
+    copyright (c) 2000-2001 by Matthew Wickline and the
+    Human-Computer Interaction Resource Network ( http://hcirn.com/ ).
+    
+    It is used with the permission of Matthew Wickline and HCIRN,
+    and is freely available for non-commercial use. For commercial use, please
+    contact the Human-Computer Interaction Resource Network ( http://hcirn.com/ ).
+
+	------------------------
+	blind.protan =
+		cpu = 0.735; // confusion point, u coord
+		cpv = 0.265; // confusion point, v coord
+		abu = 0.115807; // color axis begining point (473nm), u coord
+		abv = 0.073581; // color axis begining point (473nm), v coord
+		aeu = 0.471899; // color axis ending point (574nm), u coord
+		aev = 0.527051; // color axis ending point (574nm), v coord
+	blind.deutan =
+		cpu =  1.14; // confusion point, u coord
+		cpv = -0.14; // confusion point, v coord
+		abu = 0.102776; // color axis begining point (477nm), u coord
+		abv = 0.102864; // color axis begining point (477nm), v coord
+		aeu = 0.505845; // color axis ending point (579nm), u coord
+		aev = 0.493211; // color axis ending point (579nm), v coord
+	blind.tritan =
+		cpu =  0.171; // confusion point, u coord
+		cpv = -0.003; // confusion point, v coord
+		abu = 0.045391; // color axis begining point (490nm), u coord
+		abv = 0.294976; // color axis begining point (490nm), v coord
+		aeu = 0.665764; // color axis ending point (610nm), u coord
+		aev = 0.334011; // color axis ending point (610nm), v coord
+			
+	m = (aev - abv) / (aeu - abu); // slope of color axis
+	yi = blind[t].abv - blind[t].abu * blind[t].m; // "y-intercept" of axis (on the "v" axis at u=0)
+
+*/
+'use strict';
+
+var colorProfile = 'sRGB';
+var gammaCorrection = 2.2;
+var matrixXyzRgb = [3.240712470389558, -0.969259258688888, 0.05563600315398933, -1.5372626602963142, 1.875996969313966, -0.2039948802843549, -0.49857440415943116, 0.041556132211625726, 1.0570636917433989];
+var matrixRgbXyz = [0.41242371206635076, 0.21265606784927693, 0.019331987577444885, 0.3575793401363035, 0.715157818248362, 0.11919267420354762, 0.1804662232369621, 0.0721864539171564, 0.9504491124870351]; // xy: coordinates, m: slope, yi: y-intercept
+
+var blinder = {
+  protan: {
+    x: 0.7465,
+    y: 0.2535,
+    m: 1.273463,
+    yi: -0.073894
+  },
+  deutan: {
+    x: 1.4,
+    y: -0.4,
+    m: 0.968437,
+    yi: 0.003331
+  },
+  tritan: {
+    x: 0.1748,
+    y: 0,
+    m: 0.062921,
+    yi: 0.292119
+  },
+  custom: {
+    x: 0.735,
+    y: 0.265,
+    m: -1.059259,
+    yi: 1.026914
+  }
+};
+
+var convertRgbToXyz = function (o) {
+  var M = matrixRgbXyz;
+  var z = {};
+  var R = o.R / 255;
+  var G = o.G / 255;
+  var B = o.B / 255;
+
+  if (colorProfile === 'sRGB') {
+    R = R > 0.04045 ? Math.pow((R + 0.055) / 1.055, 2.4) : R / 12.92;
+    G = G > 0.04045 ? Math.pow((G + 0.055) / 1.055, 2.4) : G / 12.92;
+    B = B > 0.04045 ? Math.pow((B + 0.055) / 1.055, 2.4) : B / 12.92;
+  } else {
+    R = Math.pow(R, gammaCorrection);
+    G = Math.pow(G, gammaCorrection);
+    B = Math.pow(B, gammaCorrection);
+  }
+
+  z.X = R * M[0] + G * M[3] + B * M[6];
+  z.Y = R * M[1] + G * M[4] + B * M[7];
+  z.Z = R * M[2] + G * M[5] + B * M[8];
+  return z;
+};
+
+var convertXyzToXyy = function (o) {
+  var n = o.X + o.Y + o.Z;
+
+  if (n === 0) {
+    return {
+      x: 0,
+      y: 0,
+      Y: o.Y
+    };
+  }
+
+  return {
+    x: o.X / n,
+    y: o.Y / n,
+    Y: o.Y
+  };
+};
+
+exports.Blind = function (rgb, type, anomalize) {
+  var z, v, n, line, c, slope, yi, dx, dy, dX, dY, dZ, dR, dG, dB, _r, _g, _b, ngx, ngz, M, adjust;
+
+  if (type === "achroma") {
+    // D65 in sRGB
+    z = rgb.R * 0.212656 + rgb.G * 0.715158 + rgb.B * 0.072186;
+    z = {
+      R: z,
+      G: z,
+      B: z
+    };
+
+    if (anomalize) {
+      v = 1.75;
+      n = v + 1;
+      z.R = (v * z.R + rgb.R) / n;
+      z.G = (v * z.G + rgb.G) / n;
+      z.B = (v * z.B + rgb.B) / n;
+    }
+
+    return z;
+  }
+
+  line = blinder[type];
+  c = convertXyzToXyy(convertRgbToXyz(rgb)); // The confusion line is between the source color and the confusion point
+
+  slope = (c.y - line.y) / (c.x - line.x);
+  yi = c.y - c.x * slope; // slope, and y-intercept (at x=0)
+  // Find the change in the x and y dimensions (no Y change)
+
+  dx = (line.yi - yi) / (slope - line.m);
+  dy = slope * dx + yi;
+  dY = 0; // Find the simulated colors XYZ coords
+
+  z = {};
+  z.X = dx * c.Y / dy;
+  z.Y = c.Y;
+  z.Z = (1 - (dx + dy)) * c.Y / dy; // Calculate difference between sim color and neutral color
+
+  ngx = 0.312713 * c.Y / 0.329016; // find neutral grey using D65 white-point
+
+  ngz = 0.358271 * c.Y / 0.329016;
+  dX = ngx - z.X;
+  dZ = ngz - z.Z; // find out how much to shift sim color toward neutral to fit in RGB space
+
+  M = matrixXyzRgb;
+  dR = dX * M[0] + dY * M[3] + dZ * M[6]; // convert d to linear RGB
+
+  dG = dX * M[1] + dY * M[4] + dZ * M[7];
+  dB = dX * M[2] + dY * M[5] + dZ * M[8];
+  z.R = z.X * M[0] + z.Y * M[3] + z.Z * M[6]; // convert z to linear RGB
+
+  z.G = z.X * M[1] + z.Y * M[4] + z.Z * M[7];
+  z.B = z.X * M[2] + z.Y * M[5] + z.Z * M[8];
+  _r = ((z.R < 0 ? 0 : 1) - z.R) / dR;
+  _g = ((z.G < 0 ? 0 : 1) - z.G) / dG;
+  _b = ((z.B < 0 ? 0 : 1) - z.B) / dB;
+  _r = _r > 1 || _r < 0 ? 0 : _r;
+  _g = _g > 1 || _g < 0 ? 0 : _g;
+  _b = _b > 1 || _b < 0 ? 0 : _b;
+  adjust = _r > _g ? _r : _g;
+
+  if (_b > adjust) {
+    adjust = _b;
+  } // shift proportionally...
+
+
+  z.R += adjust * dR;
+  z.G += adjust * dG;
+  z.B += adjust * dB; // apply gamma and clamp simulated color...
+
+  z.R = 255 * (z.R <= 0 ? 0 : z.R >= 1 ? 1 : Math.pow(z.R, 1 / gammaCorrection));
+  z.G = 255 * (z.G <= 0 ? 0 : z.G >= 1 ? 1 : Math.pow(z.G, 1 / gammaCorrection));
+  z.B = 255 * (z.B <= 0 ? 0 : z.B >= 1 ? 1 : Math.pow(z.B, 1 / gammaCorrection)); //
+
+  if (anomalize) {
+    v = 1.75;
+    n = v + 1;
+    z.R = (v * z.R + rgb.R) / n;
+    z.G = (v * z.G + rgb.G) / n;
+    z.B = (v * z.B + rgb.B) / n;
+  } //
+
+
+  return z;
+};
+},{}],"../../../node_modules/color-blind/lib/color-blind.js":[function(require,module,exports) {
+/*
+ * color-blind
+ * https://github.com/skratchdot/color-blind
+ *
+ * see blind.js for more information about the original source.
+ *
+ * Copyright (c) 2014 skratchdot
+ * Licensed under the MIT license.
+ */
+'use strict';
+
+var onecolor = require('onecolor');
+
+var Blind = require('./blind.js').Blind;
+
+var colorVisionData = {
+  protanomaly: {
+    type: "protan",
+    anomalize: true
+  },
+  protanopia: {
+    type: "protan"
+  },
+  deuteranomaly: {
+    type: "deutan",
+    anomalize: true
+  },
+  deuteranopia: {
+    type: "deutan"
+  },
+  tritanomaly: {
+    type: "tritan",
+    anomalize: true
+  },
+  tritanopia: {
+    type: "tritan"
+  },
+  achromatomaly: {
+    type: "achroma",
+    anomalize: true
+  },
+  achromatopsia: {
+    type: "achroma"
+  }
+};
+
+var denorm = function (ratio) {
+  return Math.round(ratio * 255);
+};
+
+var createBlinder = function (key) {
+  return function (colorString, returnRgb) {
+    var color = onecolor(colorString);
+
+    if (!color) {
+      return returnRgb ? {
+        R: 0,
+        G: 0,
+        B: 0
+      } : '#000000';
+    }
+
+    var rgb = new Blind({
+      R: denorm(color.red() || 0),
+      G: denorm(color.green() || 0),
+      B: denorm(color.blue() || 0)
+    }, colorVisionData[key].type, colorVisionData[key].anomalize); // blinder.tritanomaly('#000000') causes NaN / null
+
+    rgb.R = rgb.R || 0;
+    rgb.G = rgb.G || 0;
+    rgb.B = rgb.B || 0;
+
+    if (returnRgb) {
+      delete rgb.X;
+      delete rgb.Y;
+      delete rgb.Z;
+      return rgb;
+    }
+
+    return new onecolor.RGB(rgb.R % 256 / 255, rgb.G % 256 / 255, rgb.B % 256 / 255, 1).hex();
+  };
+}; // add our exported functions
+
+
+for (var key in colorVisionData) {
+  exports[key] = createBlinder(key);
+}
+},{"onecolor":"../../../node_modules/onecolor/one-color-all-debug.js","./blind.js":"../../../node_modules/color-blind/lib/blind.js"}],"../../../node_modules/d3/dist/package.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.dependencies = exports.devDependencies = exports.scripts = exports.files = exports.repository = exports.module = exports.jsdelivr = exports.unpkg = exports.main = exports.author = exports.license = exports.homepage = exports.keywords = exports.description = exports.version = exports.name = void 0;
+var name = "d3";
+exports.name = name;
+var version = "5.14.1";
+exports.version = version;
+var description = "Data-Driven Documents";
+exports.description = description;
+var keywords = ["dom", "visualization", "svg", "animation", "canvas"];
+exports.keywords = keywords;
+var homepage = "https://d3js.org";
+exports.homepage = homepage;
+var license = "BSD-3-Clause";
+exports.license = license;
+var author = {
+  "name": "Mike Bostock",
+  "url": "https://bost.ocks.org/mike"
+};
+exports.author = author;
+var main = "dist/d3.node.js";
+exports.main = main;
+var unpkg = "dist/d3.min.js";
+exports.unpkg = unpkg;
+var jsdelivr = "dist/d3.min.js";
+exports.jsdelivr = jsdelivr;
+var _module = "index.js";
+exports.module = _module;
+var repository = {
+  "type": "git",
+  "url": "https://github.com/d3/d3.git"
+};
+exports.repository = repository;
+var files = ["dist/**/*.js", "index.js"];
+exports.files = files;
+var scripts = {
+  "pretest": "rimraf dist && mkdir dist && json2module package.json > dist/package.js && rollup -c",
+  "test": "tape 'test/**/*-test.js'",
+  "prepublishOnly": "yarn test",
+  "postpublish": "git push && git push --tags && cd ../d3.github.com && git pull && cp ../d3/dist/d3.js d3.v5.js && cp ../d3/dist/d3.min.js d3.v5.min.js && git add d3.v5.js d3.v5.min.js && git commit -m \"d3 ${npm_package_version}\" && git push && cd - && cd ../d3-bower && git pull && cp ../d3/LICENSE ../d3/README.md ../d3/dist/d3.js ../d3/dist/d3.min.js . && git add -- LICENSE README.md d3.js d3.min.js && git commit -m \"${npm_package_version}\" && git tag -am \"${npm_package_version}\" v${npm_package_version} && git push && git push --tags && cd - && zip -j dist/d3.zip -- LICENSE README.md API.md CHANGES.md dist/d3.js dist/d3.min.js"
+};
+exports.scripts = scripts;
+var devDependencies = {
+  "json2module": "0.0",
+  "rimraf": "2",
+  "rollup": "1",
+  "rollup-plugin-ascii": "0.0",
+  "rollup-plugin-node-resolve": "3",
+  "rollup-plugin-terser": "5",
+  "tape": "4"
+};
+exports.devDependencies = devDependencies;
+var dependencies = {
+  "d3-array": "1",
+  "d3-axis": "1",
+  "d3-brush": "1",
+  "d3-chord": "1",
+  "d3-collection": "1",
+  "d3-color": "1",
+  "d3-contour": "1",
+  "d3-dispatch": "1",
+  "d3-drag": "1",
+  "d3-dsv": "1",
+  "d3-ease": "1",
+  "d3-fetch": "1",
+  "d3-force": "1",
+  "d3-format": "1",
+  "d3-geo": "1",
+  "d3-hierarchy": "1",
+  "d3-interpolate": "1",
+  "d3-path": "1",
+  "d3-polygon": "1",
+  "d3-quadtree": "1",
+  "d3-random": "1",
+  "d3-scale": "2",
+  "d3-scale-chromatic": "1",
+  "d3-selection": "1",
+  "d3-shape": "1",
+  "d3-time": "1",
+  "d3-time-format": "2",
+  "d3-timer": "1",
+  "d3-transition": "1",
+  "d3-voronoi": "1",
+  "d3-zoom": "1"
+};
+exports.dependencies = dependencies;
+},{}],"../../../node_modules/d3/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _exportNames = {
+  version: true
+};
+Object.defineProperty(exports, "version", {
+  enumerable: true,
+  get: function () {
+    return _package.version;
+  }
+});
+
+var _package = require("./dist/package.js");
+
+var _d3Array = require("d3-array");
+
+Object.keys(_d3Array).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Array[key];
+    }
+  });
+});
+
+var _d3Axis = require("d3-axis");
+
+Object.keys(_d3Axis).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Axis[key];
+    }
+  });
+});
+
+var _d3Brush = require("d3-brush");
+
+Object.keys(_d3Brush).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Brush[key];
+    }
+  });
+});
+
+var _d3Chord = require("d3-chord");
+
+Object.keys(_d3Chord).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Chord[key];
+    }
+  });
+});
+
+var _d3Collection = require("d3-collection");
+
+Object.keys(_d3Collection).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Collection[key];
+    }
+  });
+});
+
+var _d3Color = require("d3-color");
+
+Object.keys(_d3Color).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Color[key];
+    }
+  });
+});
+
+var _d3Contour = require("d3-contour");
+
+Object.keys(_d3Contour).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Contour[key];
+    }
+  });
+});
+
+var _d3Dispatch = require("d3-dispatch");
+
+Object.keys(_d3Dispatch).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Dispatch[key];
+    }
+  });
+});
+
+var _d3Drag = require("d3-drag");
+
+Object.keys(_d3Drag).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Drag[key];
+    }
+  });
+});
+
+var _d3Dsv = require("d3-dsv");
+
+Object.keys(_d3Dsv).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Dsv[key];
+    }
+  });
+});
+
+var _d3Ease = require("d3-ease");
+
+Object.keys(_d3Ease).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Ease[key];
+    }
+  });
+});
+
+var _d3Fetch = require("d3-fetch");
+
+Object.keys(_d3Fetch).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Fetch[key];
+    }
+  });
+});
+
+var _d3Force = require("d3-force");
+
+Object.keys(_d3Force).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Force[key];
+    }
+  });
+});
+
+var _d3Format = require("d3-format");
+
+Object.keys(_d3Format).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Format[key];
+    }
+  });
+});
+
+var _d3Geo = require("d3-geo");
+
+Object.keys(_d3Geo).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Geo[key];
+    }
+  });
+});
+
+var _d3Hierarchy = require("d3-hierarchy");
+
+Object.keys(_d3Hierarchy).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Hierarchy[key];
+    }
+  });
+});
+
+var _d3Interpolate = require("d3-interpolate");
+
+Object.keys(_d3Interpolate).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Interpolate[key];
+    }
+  });
+});
+
+var _d3Path = require("d3-path");
+
+Object.keys(_d3Path).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Path[key];
+    }
+  });
+});
+
+var _d3Polygon = require("d3-polygon");
+
+Object.keys(_d3Polygon).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Polygon[key];
+    }
+  });
+});
+
+var _d3Quadtree = require("d3-quadtree");
+
+Object.keys(_d3Quadtree).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Quadtree[key];
+    }
+  });
+});
+
+var _d3Random = require("d3-random");
+
+Object.keys(_d3Random).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Random[key];
+    }
+  });
+});
+
+var _d3Scale = require("d3-scale");
+
+Object.keys(_d3Scale).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Scale[key];
+    }
+  });
+});
+
+var _d3ScaleChromatic = require("d3-scale-chromatic");
+
+Object.keys(_d3ScaleChromatic).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3ScaleChromatic[key];
+    }
+  });
+});
+
+var _d3Selection = require("d3-selection");
+
+Object.keys(_d3Selection).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Selection[key];
+    }
+  });
+});
+
+var _d3Shape = require("d3-shape");
+
+Object.keys(_d3Shape).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Shape[key];
+    }
+  });
+});
+
+var _d3Time = require("d3-time");
+
+Object.keys(_d3Time).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Time[key];
+    }
+  });
+});
+
+var _d3TimeFormat = require("d3-time-format");
+
+Object.keys(_d3TimeFormat).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3TimeFormat[key];
+    }
+  });
+});
+
+var _d3Timer = require("d3-timer");
+
+Object.keys(_d3Timer).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Timer[key];
+    }
+  });
+});
+
+var _d3Transition = require("d3-transition");
+
+Object.keys(_d3Transition).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Transition[key];
+    }
+  });
+});
+
+var _d3Voronoi = require("d3-voronoi");
+
+Object.keys(_d3Voronoi).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Voronoi[key];
+    }
+  });
+});
+
+var _d3Zoom = require("d3-zoom");
+
+Object.keys(_d3Zoom).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _d3Zoom[key];
+    }
+  });
+});
+},{"./dist/package.js":"../../../node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
+var define;
+var global = arguments[3];
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.d3 = global.d3 || {})));
+}(this, (function (exports) { 'use strict';
+
+function ccw(polygon) {
+
+    var _p = polygon.slice(0), sum = 0;
+
+    _p.push(_p[0]);
+
+    for (var i = 0; i <= polygon.length - 1; i++) {
+
+        var j  = i + 1;
+        var p1 = _p[i].rotated;
+        var p2 = _p[j].rotated;
+
+        sum += (p2.x - p1.x) * (p2.y + p1.y);
+    }
+    // if the area is positive
+    // the curve is counter-clockwise
+    // because of the flipped y-Axis in the browser
+    return sum > 0 ? true : false;
+}
+
+function centroid(polygon){
+    var _x = 0, _y = 0, _z = 0, _n = polygon.length;
+
+    for (var i = _n - 1; i >= 0; i--) {
+        _x += polygon[i].rotated.x;
+        _y += polygon[i].rotated.y;
+        _z += polygon[i].rotated.z;
+    }
+    return {
+        x: _x / _n,
+        y: _y / _n,
+        z: _z / _n,
+    };
+}
+
+function rotateRzRyRx(po, angles){
+
+    var rc = angles.rotateCenter;
+
+    po.x -= rc[0];
+    po.y -= rc[1];
+    po.z -= rc[2];
+
+    var rz = rotateZ(po, angles.z);
+    var ry = rotateY(rz, angles.y);
+    var rx = rotateX(ry, angles.x);
+
+    rx.x += rc[0];
+    rx.y += rc[1];
+    rx.z += rc[2];
+
+    return rx;
+}
+
+function rotateX(p, a){
+    var sa = Math.sin(a), ca = Math.cos(a);
+    return {
+        x: p.x,
+        y: p.y * ca - p.z * sa,
+        z: p.y * sa + p.z * ca
+    };
+}
+
+function rotateY(p, a){
+    var sa = Math.sin(a), ca = Math.cos(a);
+    return {
+        x: p.z * sa + p.x * ca,
+        y: p.y,
+        z: p.z * ca - p.x * sa
+    };
+}
+
+function rotateZ(p, a){
+    var sa = Math.sin(a), ca = Math.cos(a);
+    return {
+        x: p.x * ca - p.y * sa,
+        y: p.x * sa + p.y * ca,
+        z: p.z
+    };
+}
+
+function point(points, options, point, angles){
+
+    for (var i = points.length - 1; i >= 0; i--) {
+
+        var p       = points[i];
+
+        p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
+        p.centroid  = p.rotated;
+        p.projected = options.project(p.rotated, options);
+    }
+    return points;
+}
+
+function cube(cubes, options, point$$1, angles){
+    for (var i = cubes.length - 1; i >= 0; i--) {
+
+        var cube = cubes[i];
+
+        var vertices = point([
+            cube[0],
+            cube[1],
+            cube[2],
+            cube[3],
+            cube[4],
+            cube[5],
+            cube[6],
+            cube[7]
+        ], options, point$$1, angles);
+
+        var v1 = vertices[0];
+        var v2 = vertices[1];
+        var v3 = vertices[2];
+        var v4 = vertices[3];
+        var v5 = vertices[4];
+        var v6 = vertices[5];
+        var v7 = vertices[6];
+        var v8 = vertices[7];
+
+        var front  = [v1, v2, v3, v4];
+        var back   = [v8, v7, v6, v5];
+        var left   = [v5, v6, v2, v1];
+        var right  = [v4, v3, v7, v8];
+        var top    = [v5, v1, v4, v8];
+        var bottom = [v2, v6, v7, v3];
+
+        front.centroid  = centroid(front);
+        back.centroid   = centroid(back);
+        left.centroid   = centroid(left);
+        right.centroid  = centroid(right);
+        top.centroid    = centroid(top);
+        bottom.centroid = centroid(bottom);
+
+        front.ccw  = ccw(front);
+        back.ccw   = ccw(back);
+        left.ccw   = ccw(left);
+        right.ccw  = ccw(right);
+        top.ccw    = ccw(top);
+        bottom.ccw = ccw(bottom);
+
+        front.face  = 'front';
+        back.face   = 'back';
+        left.face   = 'left';
+        right.face  = 'right';
+        top.face    = 'top';
+        bottom.face = 'bottom';
+
+        var faces = [front, back, left, right, top, bottom];
+
+        cube.faces = faces;
+        cube.centroid = {x: (left.centroid.x + right.centroid.x)/2, y: (top.centroid.y + bottom.centroid.y)/2, z: (front.centroid.z + back.centroid.z/2)};
+    }
+    return cubes;
+}
+
+function gridPlane(grid, options, point$$1, angles){
+
+    var points = point(grid, options, point$$1, angles);
+    var cnt    = 0, planes = [];
+    var numPts = options.row;
+    var numRow = points.length/numPts;
+
+    for (var i = numRow - 1; i > 0; i--) {
+        for (var j = numPts - 1; j > 0; j--) {
+
+            var p1 = j + i * numPts, p4 = p1 - 1, p2 = p4 - numPts + 1, p3 = p2 - 1;
+            var pl = [points[p1], points[p2], points[p3], points[p4]];
+
+            pl.plane    = 'plane_' + cnt++;
+            pl.ccw      = ccw(pl);
+            pl.centroid = centroid(pl);
+            planes.push(pl);
+        }
+    }
+
+    return planes;
+}
+
+function lineStrip(lineStrip, options, point, angles){
+
+    for (var i = lineStrip.length - 1; i >= 0; i--) {
+
+        var l = lineStrip[i], m = l.length/2, t = parseInt(m);
+
+        for (var j = l.length - 1; j >= 0; j--) {
+            var p = l[j];
+            p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
+            p.projected = options.project(p.rotated, options);
+        }
+
+        l.centroid = t === m ? centroid([ l[m - 1], l[m] ]) : { x: l[t].rotated.x, y: l[t].rotated.y, z: l[t].rotated.z };
+    }
+    return lineStrip;
+}
+
+function line(lines, options, point, angles){
+
+    for (var i = lines.length - 1; i >= 0; i--) {
+
+        var line      = lines[i];
+
+        var p1        = line[0];
+        var p2        = line[1];
+
+        p1.rotated    = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
+        p2.rotated    = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
+
+        p1.projected  = options.project(p1.rotated, options);
+        p2.projected  = options.project(p2.rotated, options);
+
+        line.centroid = centroid(line);
+    }
+    return lines;
+}
+
+function plane(planes, options, point, angles){
+
+    for (var i = planes.length - 1; i >= 0; i--) {
+
+        var plane    = planes[i];
+
+        var p1       = plane[0];
+        var p2       = plane[1];
+        var p3       = plane[2];
+        var p4       = plane[3];
+
+        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
+        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
+        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
+        p4.rotated   = rotateRzRyRx({x : point.x(p4), y : point.y(p4), z : point.z(p4)}, angles);
+
+        p1.projected = options.project(p1.rotated, options);
+        p2.projected = options.project(p2.rotated, options);
+        p3.projected = options.project(p3.rotated, options);
+        p4.projected = options.project(p4.rotated, options);
+
+        plane.ccw      = ccw(plane);
+        plane.centroid = centroid(plane);
+    }
+    return planes;
+}
+
+function triangle(triangles, options, point, angles){
+
+    for (var i = triangles.length - 1; i >= 0; i--) {
+        var tri      = triangles[i];
+        var p1       = tri[0];
+        var p2       = tri[1];
+        var p3       = tri[2];
+
+        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
+        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
+        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
+
+        p1.projected = options.project(p1.rotated, options);
+        p2.projected = options.project(p2.rotated, options);
+        p3.projected = options.project(p3.rotated, options);
+
+        tri.ccw      = ccw(tri);
+        tri.centroid = centroid(tri);
+    }
+    return triangles;
+}
+
+function drawLineStrip(lineStrip){
+    var lastPoint = lineStrip[lineStrip.length - 1];
+    var path = 'M' + lastPoint.projected.x + ',' + lastPoint.projected.y;
+    for (var i = lineStrip.length - 2; i >= 0; i--) {
+        var p = lineStrip[i].projected;
+        path += 'L' + p.x + ',' + p.y;
+    }
+    return path;
+}
+
+function drawPlane(d){
+	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'L' + d[3].projected.x + ',' + d[3].projected.y + 'Z';
+}
+
+function drawTriangle(d){
+	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'Z';
+}
+
+function orthographic(d, options){
+    return {
+        x: options.origin[0] + options.scale * d.x,
+        y: options.origin[1] + options.scale * d.y
+    };
+}
+
+function x(p) {
+    return p[0];
+}
+
+function y(p) {
+    return p[1];
+}
+
+function z(p) {
+    return p[2];
+}
+
+/**
+* @author Stefan Nieke / http://niekes.com/
+*/
+
+var _3d = function() {
+
+    var origin          = [0, 0],
+        scale           = 1,
+        projection      = orthographic,
+        angleX          = 0,
+        angleY          = 0,
+        angleZ          = 0,
+        rotateCenter    = [0,0,0],
+        x$$1               = x,
+        y$$1               = y,
+        z$$1               = z,
+        row             = undefined,
+        shape           = 'POINT',
+        processData = {
+            'CUBE'       : cube,
+            'GRID'       : gridPlane,
+            'LINE'       : line,
+            'LINE_STRIP' : lineStrip,
+            'PLANE'      : plane,
+            'POINT'      : point,
+            'SURFACE'    : gridPlane,
+            'TRIANGLE'   : triangle,
+        },
+        draw = {
+            'CUBE'       : drawPlane,
+            'GRID'       : drawPlane,
+            'LINE_STRIP' : drawLineStrip,
+            'PLANE'      : drawPlane,
+            'SURFACE'    : drawPlane,
+            'TRIANGLE'   : drawTriangle,
+        };
+
+    function _3d(data){
+        return processData[shape](
+            data,
+            { scale: scale, origin: origin, project: projection, row: row },
+            { x: x$$1, y: y$$1, z: z$$1 },
+            { x: angleX, y: angleY, z: angleZ, rotateCenter: rotateCenter }
+        );
+    }
+
+    _3d.origin = function(_){
+        return arguments.length ? (origin = _, _3d) : origin;
+    };
+
+    _3d.scale = function(_){
+        return arguments.length ? (scale = _, _3d) : scale;
+    };
+
+    _3d.rotateX = function(_){
+        return arguments.length ? (angleX = _, _3d) : angleX;
+    };
+
+    _3d.rotateY = function(_){
+        return arguments.length ? (angleY = _, _3d) : angleY;
+    };
+
+    _3d.rotateZ = function(_){
+        return arguments.length ? (angleZ = _, _3d) : angleZ;
+    };
+
+    _3d.shape = function(_, r){
+        return arguments.length ? (shape = _, row = r, _3d) : shape;
+    };
+
+    _3d.rotateCenter = function(_){
+        return arguments.length ? (rotateCenter = _, _3d) : rotateCenter;
+    };
+
+    _3d.x = function(_){
+        return arguments.length ? (x$$1 = typeof _ === 'function' ? _ : +_, _3d) : x$$1;
+    };
+
+    _3d.y = function(_){
+        return arguments.length ? (y$$1 = typeof _ === 'function' ? _ : +_, _3d) : y$$1;
+    };
+
+    _3d.z = function(_){
+        return arguments.length ? (z$$1 = typeof _ === 'function' ? _ : +_, _3d) : z$$1;
+    };
+
+    _3d.sort = function(a, b){
+        var _a = a.centroid.z, _b = b.centroid.z;
+        return _a < _b ? -1 : _a > _b ? 1 : _a >= _b ? 0 : NaN;
+    };
+
+    _3d.draw = function(d){
+        if(!((shape === 'POINT') || (shape === 'LINE'))){
+            return draw[shape](d);
+        }
+    };
+
+    return _3d;
+};
+
+exports._3d = _3d;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+
+},{}],"../../../node_modules/loadicons/index.js":[function(require,module,exports) {
 var define;
 /*
 Copyright 2018 Adobe. All rights reserved.
@@ -31591,1953 +33504,7 @@ var define;
     ])
   );
 });
-},{}],"../../../node_modules/d3/dist/package.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.dependencies = exports.devDependencies = exports.scripts = exports.files = exports.repository = exports.module = exports.jsdelivr = exports.unpkg = exports.main = exports.author = exports.license = exports.homepage = exports.keywords = exports.description = exports.version = exports.name = void 0;
-var name = "d3";
-exports.name = name;
-var version = "5.14.1";
-exports.version = version;
-var description = "Data-Driven Documents";
-exports.description = description;
-var keywords = ["dom", "visualization", "svg", "animation", "canvas"];
-exports.keywords = keywords;
-var homepage = "https://d3js.org";
-exports.homepage = homepage;
-var license = "BSD-3-Clause";
-exports.license = license;
-var author = {
-  "name": "Mike Bostock",
-  "url": "https://bost.ocks.org/mike"
-};
-exports.author = author;
-var main = "dist/d3.node.js";
-exports.main = main;
-var unpkg = "dist/d3.min.js";
-exports.unpkg = unpkg;
-var jsdelivr = "dist/d3.min.js";
-exports.jsdelivr = jsdelivr;
-var _module = "index.js";
-exports.module = _module;
-var repository = {
-  "type": "git",
-  "url": "https://github.com/d3/d3.git"
-};
-exports.repository = repository;
-var files = ["dist/**/*.js", "index.js"];
-exports.files = files;
-var scripts = {
-  "pretest": "rimraf dist && mkdir dist && json2module package.json > dist/package.js && rollup -c",
-  "test": "tape 'test/**/*-test.js'",
-  "prepublishOnly": "yarn test",
-  "postpublish": "git push && git push --tags && cd ../d3.github.com && git pull && cp ../d3/dist/d3.js d3.v5.js && cp ../d3/dist/d3.min.js d3.v5.min.js && git add d3.v5.js d3.v5.min.js && git commit -m \"d3 ${npm_package_version}\" && git push && cd - && cd ../d3-bower && git pull && cp ../d3/LICENSE ../d3/README.md ../d3/dist/d3.js ../d3/dist/d3.min.js . && git add -- LICENSE README.md d3.js d3.min.js && git commit -m \"${npm_package_version}\" && git tag -am \"${npm_package_version}\" v${npm_package_version} && git push && git push --tags && cd - && zip -j dist/d3.zip -- LICENSE README.md API.md CHANGES.md dist/d3.js dist/d3.min.js"
-};
-exports.scripts = scripts;
-var devDependencies = {
-  "json2module": "0.0",
-  "rimraf": "2",
-  "rollup": "1",
-  "rollup-plugin-ascii": "0.0",
-  "rollup-plugin-node-resolve": "3",
-  "rollup-plugin-terser": "5",
-  "tape": "4"
-};
-exports.devDependencies = devDependencies;
-var dependencies = {
-  "d3-array": "1",
-  "d3-axis": "1",
-  "d3-brush": "1",
-  "d3-chord": "1",
-  "d3-collection": "1",
-  "d3-color": "1",
-  "d3-contour": "1",
-  "d3-dispatch": "1",
-  "d3-drag": "1",
-  "d3-dsv": "1",
-  "d3-ease": "1",
-  "d3-fetch": "1",
-  "d3-force": "1",
-  "d3-format": "1",
-  "d3-geo": "1",
-  "d3-hierarchy": "1",
-  "d3-interpolate": "1",
-  "d3-path": "1",
-  "d3-polygon": "1",
-  "d3-quadtree": "1",
-  "d3-random": "1",
-  "d3-scale": "2",
-  "d3-scale-chromatic": "1",
-  "d3-selection": "1",
-  "d3-shape": "1",
-  "d3-time": "1",
-  "d3-time-format": "2",
-  "d3-timer": "1",
-  "d3-transition": "1",
-  "d3-voronoi": "1",
-  "d3-zoom": "1"
-};
-exports.dependencies = dependencies;
-},{}],"../../../node_modules/d3/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var _exportNames = {
-  version: true
-};
-Object.defineProperty(exports, "version", {
-  enumerable: true,
-  get: function () {
-    return _package.version;
-  }
-});
-
-var _package = require("./dist/package.js");
-
-var _d3Array = require("d3-array");
-
-Object.keys(_d3Array).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Array[key];
-    }
-  });
-});
-
-var _d3Axis = require("d3-axis");
-
-Object.keys(_d3Axis).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Axis[key];
-    }
-  });
-});
-
-var _d3Brush = require("d3-brush");
-
-Object.keys(_d3Brush).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Brush[key];
-    }
-  });
-});
-
-var _d3Chord = require("d3-chord");
-
-Object.keys(_d3Chord).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Chord[key];
-    }
-  });
-});
-
-var _d3Collection = require("d3-collection");
-
-Object.keys(_d3Collection).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Collection[key];
-    }
-  });
-});
-
-var _d3Color = require("d3-color");
-
-Object.keys(_d3Color).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Color[key];
-    }
-  });
-});
-
-var _d3Contour = require("d3-contour");
-
-Object.keys(_d3Contour).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Contour[key];
-    }
-  });
-});
-
-var _d3Dispatch = require("d3-dispatch");
-
-Object.keys(_d3Dispatch).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Dispatch[key];
-    }
-  });
-});
-
-var _d3Drag = require("d3-drag");
-
-Object.keys(_d3Drag).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Drag[key];
-    }
-  });
-});
-
-var _d3Dsv = require("d3-dsv");
-
-Object.keys(_d3Dsv).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Dsv[key];
-    }
-  });
-});
-
-var _d3Ease = require("d3-ease");
-
-Object.keys(_d3Ease).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Ease[key];
-    }
-  });
-});
-
-var _d3Fetch = require("d3-fetch");
-
-Object.keys(_d3Fetch).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Fetch[key];
-    }
-  });
-});
-
-var _d3Force = require("d3-force");
-
-Object.keys(_d3Force).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Force[key];
-    }
-  });
-});
-
-var _d3Format = require("d3-format");
-
-Object.keys(_d3Format).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Format[key];
-    }
-  });
-});
-
-var _d3Geo = require("d3-geo");
-
-Object.keys(_d3Geo).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Geo[key];
-    }
-  });
-});
-
-var _d3Hierarchy = require("d3-hierarchy");
-
-Object.keys(_d3Hierarchy).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Hierarchy[key];
-    }
-  });
-});
-
-var _d3Interpolate = require("d3-interpolate");
-
-Object.keys(_d3Interpolate).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Interpolate[key];
-    }
-  });
-});
-
-var _d3Path = require("d3-path");
-
-Object.keys(_d3Path).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Path[key];
-    }
-  });
-});
-
-var _d3Polygon = require("d3-polygon");
-
-Object.keys(_d3Polygon).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Polygon[key];
-    }
-  });
-});
-
-var _d3Quadtree = require("d3-quadtree");
-
-Object.keys(_d3Quadtree).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Quadtree[key];
-    }
-  });
-});
-
-var _d3Random = require("d3-random");
-
-Object.keys(_d3Random).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Random[key];
-    }
-  });
-});
-
-var _d3Scale = require("d3-scale");
-
-Object.keys(_d3Scale).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Scale[key];
-    }
-  });
-});
-
-var _d3ScaleChromatic = require("d3-scale-chromatic");
-
-Object.keys(_d3ScaleChromatic).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3ScaleChromatic[key];
-    }
-  });
-});
-
-var _d3Selection = require("d3-selection");
-
-Object.keys(_d3Selection).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Selection[key];
-    }
-  });
-});
-
-var _d3Shape = require("d3-shape");
-
-Object.keys(_d3Shape).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Shape[key];
-    }
-  });
-});
-
-var _d3Time = require("d3-time");
-
-Object.keys(_d3Time).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Time[key];
-    }
-  });
-});
-
-var _d3TimeFormat = require("d3-time-format");
-
-Object.keys(_d3TimeFormat).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3TimeFormat[key];
-    }
-  });
-});
-
-var _d3Timer = require("d3-timer");
-
-Object.keys(_d3Timer).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Timer[key];
-    }
-  });
-});
-
-var _d3Transition = require("d3-transition");
-
-Object.keys(_d3Transition).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Transition[key];
-    }
-  });
-});
-
-var _d3Voronoi = require("d3-voronoi");
-
-Object.keys(_d3Voronoi).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Voronoi[key];
-    }
-  });
-});
-
-var _d3Zoom = require("d3-zoom");
-
-Object.keys(_d3Zoom).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _d3Zoom[key];
-    }
-  });
-});
-},{"./dist/package.js":"../../../node_modules/d3/dist/package.js","d3-array":"../../../node_modules/d3-array/src/index.js","d3-axis":"../../../node_modules/d3-axis/src/index.js","d3-brush":"../../../node_modules/d3-brush/src/index.js","d3-chord":"../../../node_modules/d3-chord/src/index.js","d3-collection":"../../../node_modules/d3-collection/src/index.js","d3-color":"../../../node_modules/d3-color/src/index.js","d3-contour":"../../../node_modules/d3-contour/src/index.js","d3-dispatch":"../../../node_modules/d3-dispatch/src/index.js","d3-drag":"../../../node_modules/d3-drag/src/index.js","d3-dsv":"../../../node_modules/d3-dsv/src/index.js","d3-ease":"../../../node_modules/d3-ease/src/index.js","d3-fetch":"../../../node_modules/d3-fetch/src/index.js","d3-force":"../../../node_modules/d3-force/src/index.js","d3-format":"../../../node_modules/d3-format/src/index.js","d3-geo":"../../../node_modules/d3-geo/src/index.js","d3-hierarchy":"../../../node_modules/d3-hierarchy/src/index.js","d3-interpolate":"../../../node_modules/d3-interpolate/src/index.js","d3-path":"../../../node_modules/d3-path/src/index.js","d3-polygon":"../../../node_modules/d3-polygon/src/index.js","d3-quadtree":"../../../node_modules/d3-quadtree/src/index.js","d3-random":"../../../node_modules/d3-random/src/index.js","d3-scale":"../../../node_modules/d3-scale/src/index.js","d3-scale-chromatic":"../../../node_modules/d3-scale-chromatic/src/index.js","d3-selection":"../../../node_modules/d3-selection/src/index.js","d3-shape":"../../../node_modules/d3-shape/src/index.js","d3-time":"../../../node_modules/d3-time/src/index.js","d3-time-format":"../../../node_modules/d3-time-format/src/index.js","d3-timer":"../../../node_modules/d3-timer/src/index.js","d3-transition":"../../../node_modules/d3-transition/src/index.js","d3-voronoi":"../../../node_modules/d3-voronoi/src/index.js","d3-zoom":"../../../node_modules/d3-zoom/src/index.js"}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
-var define;
-var global = arguments[3];
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.d3 = global.d3 || {})));
-}(this, (function (exports) { 'use strict';
-
-function ccw(polygon) {
-
-    var _p = polygon.slice(0), sum = 0;
-
-    _p.push(_p[0]);
-
-    for (var i = 0; i <= polygon.length - 1; i++) {
-
-        var j  = i + 1;
-        var p1 = _p[i].rotated;
-        var p2 = _p[j].rotated;
-
-        sum += (p2.x - p1.x) * (p2.y + p1.y);
-    }
-    // if the area is positive
-    // the curve is counter-clockwise
-    // because of the flipped y-Axis in the browser
-    return sum > 0 ? true : false;
-}
-
-function centroid(polygon){
-    var _x = 0, _y = 0, _z = 0, _n = polygon.length;
-
-    for (var i = _n - 1; i >= 0; i--) {
-        _x += polygon[i].rotated.x;
-        _y += polygon[i].rotated.y;
-        _z += polygon[i].rotated.z;
-    }
-    return {
-        x: _x / _n,
-        y: _y / _n,
-        z: _z / _n,
-    };
-}
-
-function rotateRzRyRx(po, angles){
-
-    var rc = angles.rotateCenter;
-
-    po.x -= rc[0];
-    po.y -= rc[1];
-    po.z -= rc[2];
-
-    var rz = rotateZ(po, angles.z);
-    var ry = rotateY(rz, angles.y);
-    var rx = rotateX(ry, angles.x);
-
-    rx.x += rc[0];
-    rx.y += rc[1];
-    rx.z += rc[2];
-
-    return rx;
-}
-
-function rotateX(p, a){
-    var sa = Math.sin(a), ca = Math.cos(a);
-    return {
-        x: p.x,
-        y: p.y * ca - p.z * sa,
-        z: p.y * sa + p.z * ca
-    };
-}
-
-function rotateY(p, a){
-    var sa = Math.sin(a), ca = Math.cos(a);
-    return {
-        x: p.z * sa + p.x * ca,
-        y: p.y,
-        z: p.z * ca - p.x * sa
-    };
-}
-
-function rotateZ(p, a){
-    var sa = Math.sin(a), ca = Math.cos(a);
-    return {
-        x: p.x * ca - p.y * sa,
-        y: p.x * sa + p.y * ca,
-        z: p.z
-    };
-}
-
-function point(points, options, point, angles){
-
-    for (var i = points.length - 1; i >= 0; i--) {
-
-        var p       = points[i];
-
-        p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
-        p.centroid  = p.rotated;
-        p.projected = options.project(p.rotated, options);
-    }
-    return points;
-}
-
-function cube(cubes, options, point$$1, angles){
-    for (var i = cubes.length - 1; i >= 0; i--) {
-
-        var cube = cubes[i];
-
-        var vertices = point([
-            cube[0],
-            cube[1],
-            cube[2],
-            cube[3],
-            cube[4],
-            cube[5],
-            cube[6],
-            cube[7]
-        ], options, point$$1, angles);
-
-        var v1 = vertices[0];
-        var v2 = vertices[1];
-        var v3 = vertices[2];
-        var v4 = vertices[3];
-        var v5 = vertices[4];
-        var v6 = vertices[5];
-        var v7 = vertices[6];
-        var v8 = vertices[7];
-
-        var front  = [v1, v2, v3, v4];
-        var back   = [v8, v7, v6, v5];
-        var left   = [v5, v6, v2, v1];
-        var right  = [v4, v3, v7, v8];
-        var top    = [v5, v1, v4, v8];
-        var bottom = [v2, v6, v7, v3];
-
-        front.centroid  = centroid(front);
-        back.centroid   = centroid(back);
-        left.centroid   = centroid(left);
-        right.centroid  = centroid(right);
-        top.centroid    = centroid(top);
-        bottom.centroid = centroid(bottom);
-
-        front.ccw  = ccw(front);
-        back.ccw   = ccw(back);
-        left.ccw   = ccw(left);
-        right.ccw  = ccw(right);
-        top.ccw    = ccw(top);
-        bottom.ccw = ccw(bottom);
-
-        front.face  = 'front';
-        back.face   = 'back';
-        left.face   = 'left';
-        right.face  = 'right';
-        top.face    = 'top';
-        bottom.face = 'bottom';
-
-        var faces = [front, back, left, right, top, bottom];
-
-        cube.faces = faces;
-        cube.centroid = {x: (left.centroid.x + right.centroid.x)/2, y: (top.centroid.y + bottom.centroid.y)/2, z: (front.centroid.z + back.centroid.z/2)};
-    }
-    return cubes;
-}
-
-function gridPlane(grid, options, point$$1, angles){
-
-    var points = point(grid, options, point$$1, angles);
-    var cnt    = 0, planes = [];
-    var numPts = options.row;
-    var numRow = points.length/numPts;
-
-    for (var i = numRow - 1; i > 0; i--) {
-        for (var j = numPts - 1; j > 0; j--) {
-
-            var p1 = j + i * numPts, p4 = p1 - 1, p2 = p4 - numPts + 1, p3 = p2 - 1;
-            var pl = [points[p1], points[p2], points[p3], points[p4]];
-
-            pl.plane    = 'plane_' + cnt++;
-            pl.ccw      = ccw(pl);
-            pl.centroid = centroid(pl);
-            planes.push(pl);
-        }
-    }
-
-    return planes;
-}
-
-function lineStrip(lineStrip, options, point, angles){
-
-    for (var i = lineStrip.length - 1; i >= 0; i--) {
-
-        var l = lineStrip[i], m = l.length/2, t = parseInt(m);
-
-        for (var j = l.length - 1; j >= 0; j--) {
-            var p = l[j];
-            p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
-            p.projected = options.project(p.rotated, options);
-        }
-
-        l.centroid = t === m ? centroid([ l[m - 1], l[m] ]) : { x: l[t].rotated.x, y: l[t].rotated.y, z: l[t].rotated.z };
-    }
-    return lineStrip;
-}
-
-function line(lines, options, point, angles){
-
-    for (var i = lines.length - 1; i >= 0; i--) {
-
-        var line      = lines[i];
-
-        var p1        = line[0];
-        var p2        = line[1];
-
-        p1.rotated    = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
-        p2.rotated    = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
-
-        p1.projected  = options.project(p1.rotated, options);
-        p2.projected  = options.project(p2.rotated, options);
-
-        line.centroid = centroid(line);
-    }
-    return lines;
-}
-
-function plane(planes, options, point, angles){
-
-    for (var i = planes.length - 1; i >= 0; i--) {
-
-        var plane    = planes[i];
-
-        var p1       = plane[0];
-        var p2       = plane[1];
-        var p3       = plane[2];
-        var p4       = plane[3];
-
-        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
-        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
-        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
-        p4.rotated   = rotateRzRyRx({x : point.x(p4), y : point.y(p4), z : point.z(p4)}, angles);
-
-        p1.projected = options.project(p1.rotated, options);
-        p2.projected = options.project(p2.rotated, options);
-        p3.projected = options.project(p3.rotated, options);
-        p4.projected = options.project(p4.rotated, options);
-
-        plane.ccw      = ccw(plane);
-        plane.centroid = centroid(plane);
-    }
-    return planes;
-}
-
-function triangle(triangles, options, point, angles){
-
-    for (var i = triangles.length - 1; i >= 0; i--) {
-        var tri      = triangles[i];
-        var p1       = tri[0];
-        var p2       = tri[1];
-        var p3       = tri[2];
-
-        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
-        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
-        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
-
-        p1.projected = options.project(p1.rotated, options);
-        p2.projected = options.project(p2.rotated, options);
-        p3.projected = options.project(p3.rotated, options);
-
-        tri.ccw      = ccw(tri);
-        tri.centroid = centroid(tri);
-    }
-    return triangles;
-}
-
-function drawLineStrip(lineStrip){
-    var lastPoint = lineStrip[lineStrip.length - 1];
-    var path = 'M' + lastPoint.projected.x + ',' + lastPoint.projected.y;
-    for (var i = lineStrip.length - 2; i >= 0; i--) {
-        var p = lineStrip[i].projected;
-        path += 'L' + p.x + ',' + p.y;
-    }
-    return path;
-}
-
-function drawPlane(d){
-	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'L' + d[3].projected.x + ',' + d[3].projected.y + 'Z';
-}
-
-function drawTriangle(d){
-	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'Z';
-}
-
-function orthographic(d, options){
-    return {
-        x: options.origin[0] + options.scale * d.x,
-        y: options.origin[1] + options.scale * d.y
-    };
-}
-
-function x(p) {
-    return p[0];
-}
-
-function y(p) {
-    return p[1];
-}
-
-function z(p) {
-    return p[2];
-}
-
-/**
-* @author Stefan Nieke / http://niekes.com/
-*/
-
-var _3d = function() {
-
-    var origin          = [0, 0],
-        scale           = 1,
-        projection      = orthographic,
-        angleX          = 0,
-        angleY          = 0,
-        angleZ          = 0,
-        rotateCenter    = [0,0,0],
-        x$$1               = x,
-        y$$1               = y,
-        z$$1               = z,
-        row             = undefined,
-        shape           = 'POINT',
-        processData = {
-            'CUBE'       : cube,
-            'GRID'       : gridPlane,
-            'LINE'       : line,
-            'LINE_STRIP' : lineStrip,
-            'PLANE'      : plane,
-            'POINT'      : point,
-            'SURFACE'    : gridPlane,
-            'TRIANGLE'   : triangle,
-        },
-        draw = {
-            'CUBE'       : drawPlane,
-            'GRID'       : drawPlane,
-            'LINE_STRIP' : drawLineStrip,
-            'PLANE'      : drawPlane,
-            'SURFACE'    : drawPlane,
-            'TRIANGLE'   : drawTriangle,
-        };
-
-    function _3d(data){
-        return processData[shape](
-            data,
-            { scale: scale, origin: origin, project: projection, row: row },
-            { x: x$$1, y: y$$1, z: z$$1 },
-            { x: angleX, y: angleY, z: angleZ, rotateCenter: rotateCenter }
-        );
-    }
-
-    _3d.origin = function(_){
-        return arguments.length ? (origin = _, _3d) : origin;
-    };
-
-    _3d.scale = function(_){
-        return arguments.length ? (scale = _, _3d) : scale;
-    };
-
-    _3d.rotateX = function(_){
-        return arguments.length ? (angleX = _, _3d) : angleX;
-    };
-
-    _3d.rotateY = function(_){
-        return arguments.length ? (angleY = _, _3d) : angleY;
-    };
-
-    _3d.rotateZ = function(_){
-        return arguments.length ? (angleZ = _, _3d) : angleZ;
-    };
-
-    _3d.shape = function(_, r){
-        return arguments.length ? (shape = _, row = r, _3d) : shape;
-    };
-
-    _3d.rotateCenter = function(_){
-        return arguments.length ? (rotateCenter = _, _3d) : rotateCenter;
-    };
-
-    _3d.x = function(_){
-        return arguments.length ? (x$$1 = typeof _ === 'function' ? _ : +_, _3d) : x$$1;
-    };
-
-    _3d.y = function(_){
-        return arguments.length ? (y$$1 = typeof _ === 'function' ? _ : +_, _3d) : y$$1;
-    };
-
-    _3d.z = function(_){
-        return arguments.length ? (z$$1 = typeof _ === 'function' ? _ : +_, _3d) : z$$1;
-    };
-
-    _3d.sort = function(a, b){
-        var _a = a.centroid.z, _b = b.centroid.z;
-        return _a < _b ? -1 : _a > _b ? 1 : _a >= _b ? 0 : NaN;
-    };
-
-    _3d.draw = function(d){
-        if(!((shape === 'POINT') || (shape === 'LINE'))){
-            return draw[shape](d);
-        }
-    };
-
-    return _3d;
-};
-
-exports._3d = _3d;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
-},{}],"charts.js":[function(require,module,exports) {
-"use strict";
-
-var d3 = _interopRequireWildcard(require("d3"));
-
-var d33d = _interopRequireWildcard(require("d3-3d"));
-
-var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
-Object.assign(d3, d33d);
-var chart3dColorspace = document.getElementById('chart3dColorspace');
-var dest = document.querySelector('.chart3D');
-/*
-Create 2d and 3d chart heights and widths based on known
-paddings and panel dimensions, based on viewport height/width.
-*/
-
-function createChartWidth() {
-  var leftPanel = 304;
-  var rightPanel = 240;
-  var paddings = 100;
-  var offset = leftPanel + rightPanel + paddings;
-  var viewportWidth = window.innerWidth;
-
-  if ((viewportWidth - offset) / 2 > 300) {
-    return (viewportWidth - offset) / 2;
-  } else {
-    return 300;
-  }
-}
-
-function createChartHeight() {
-  var headerHeight = 58;
-  var tabHeight = 48;
-  var paddings = 164;
-  var offset = headerHeight + tabHeight + paddings;
-  var viewportHeight = window.innerHeight;
-  var height = (viewportHeight - offset) / 3;
-
-  if (height < 160) {
-    return 160;
-  } else {
-    return height;
-  }
-}
-
-function create3dChartWidth() {
-  var leftPanel = 304;
-  var rightPanel = 240;
-  var paddings = 72;
-  var offset = leftPanel + rightPanel + paddings;
-  var viewportWidth = window.innerWidth;
-  return viewportWidth - offset;
-}
-
-function create3dChartHeight() {
-  var headerHeight = 58;
-  var tabHeight = 48;
-  var paddings = 164 / 2;
-  var feedbackText = 100;
-  var offset = headerHeight + tabHeight + paddings + feedbackText;
-  var viewportHeight = window.innerHeight;
-  return viewportHeight - offset;
-}
-
-var chartWidth = create3dChartWidth();
-var chartHeight = create3dChartHeight();
-var modelScale;
-var yOrigin;
-var viewportHeight = window.innerHeight;
-
-if (viewportHeight < 640) {
-  modelScale = 20;
-  yOrigin = chartHeight;
-} else if (viewportHeight >= 640 && viewportHeight < 800) {
-  modelScale = 30;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 800 && viewportHeight < 900) {
-  modelScale = 40;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 900) {
-  modelScale = 50;
-  yOrigin = chartHeight / 1.25;
-}
-
-var origin = [chartWidth / 1.85, chartHeight / 1.25],
-    j = 10,
-    scale = modelScale,
-    scatter = [],
-    yLine = [],
-    xGrid = [],
-    colorPlot = [],
-    beta = 0,
-    alpha = 0,
-    key = function key(d) {
-  return d.id;
-},
-    startAngle = Math.PI / 10;
-
-dest.style.width = chartWidth;
-dest.style.height = chartHeight;
-var svg = d3.select(dest).call(d3.drag().on('drag', dragged).on('start', dragStart).on('end', dragEnd)).append('g');
-var mx, my, mouseX, mouseY;
-
-var grid3d = d3._3d().shape('GRID', 20).origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
-
-var point3d = d3._3d().x(function (d) {
-  return d.x;
-}).y(function (d) {
-  return d.y;
-}).z(function (d) {
-  return d.z;
-}).origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
-
-var yScale3d = d3._3d().shape('LINE_STRIP').origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
-
-function processData(data, tt) {
-  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
-  var chartColors = getChartColors(colorInterpSpace);
-  var color = d3.scaleOrdinal(chartColors);
-  /* ----------- GRID ----------- */
-
-  var xGrid = svg.selectAll('path.grid').data(data[0], key);
-  xGrid.enter().append('path').attr('class', '_3d grid').merge(xGrid).attr('d', grid3d.draw);
-  xGrid.exit().remove();
-  /* ----------- POINTS ----------- */
-
-  var points = svg.selectAll('circle').data(data[1], key);
-  points.enter().append('circle').attr('class', '_3d').attr('opacity', 0).attr('cx', posPointX).attr('cy', posPointY).merge(points).transition().duration(tt).attr('r', 5) // .attr('stroke', function(d){ return d3.color(color(d.id)).darker(3); })
-  .attr('fill', function (d) {
-    return color(d.id);
-  }).attr('opacity', 1).attr('cx', posPointX).attr('cy', posPointY);
-  points.exit().remove();
-  /* ----------- y-Scale ----------- */
-
-  var yScale = svg.selectAll('path.yScale').data(data[2]);
-  yScale.enter().append('path').attr('class', '_3d yScale').merge(yScale).attr('stroke', '#6e6e6e').attr('stroke-width', .5).attr('d', yScale3d.draw);
-  yScale.exit().remove();
-  /* ----------- y-Scale Text ----------- */
-
-  var yText = svg.selectAll('text.yText').data(data[2][0]);
-  yText.enter().append('text').attr('class', '_3d yText').attr('dx', '.3em').merge(yText).each(function (d) {
-    d.centroid = {
-      x: d.rotated.x,
-      y: d.rotated.y,
-      z: d.rotated.z
-    };
-  }).attr('x', function (d) {
-    return d.projected.x;
-  }).attr('y', function (d) {
-    return d.projected.y;
-  }) // .text(function(d){ return d[1]*10 <= 0 ? d[1]*-10 : ''; });
-  // .text(function(d) {return d;});
-  .text('-');
-  yText.exit().remove();
-  d3.selectAll('._3d').sort(d3._3d().sort);
-}
-
-function posPointX(d) {
-  return d.projected.x;
-}
-
-function posPointY(d) {
-  return d.projected.y;
-}
-
-var pi = Math.PI;
-
-function init3dChart() {
-  var cnt = 0;
-  xGrid = [], scatter = [], yLine = [], colorPlot = []; // Taking J from origin argument...
-  // z = -10; z < 10; z++ is what it's saying.
-
-  for (var z = -j; z < j; z++) {
-    for (var x = -j; x < j; x++) {
-      xGrid.push([x, 1, z]); // This is where the point data is gathered:
-
-      scatter.push({
-        x: x,
-        y: d3.randomUniform(0, -10)(),
-        z: z,
-        id: 'point_' + cnt++
-      }); // dividing LAB data by 10 to fit current grid. Negative y let since chart is in negative space?
-      // colorPlot.push({x: LABArrayA[j]/10, y: LABArrayL[j]/10 * -1, z: LABArrayB[j]/10, id: 'point_' + cnt++});
-    }
-  }
-
-  var spaceOpt = document.getElementById('chart3dColorspace').value;
-  var pi = Math.PI;
-
-  if (spaceOpt == 'CAM02') {
-    for (var i = 0; i < CAMArrayA.length; i++) {
-      colorPlot.push({
-        x: CAMArrayA[i] / 10,
-        y: CAMArrayJ[i] / 10 * -1,
-        z: CAMArrayB[i] / 10,
-        id: 'point_' + cnt++
-      });
-    }
-  }
-
-  if (spaceOpt == 'LCH') {
-    for (var _i = 0; _i < LCHArrayC.length; _i++) {
-      var angle = LCHArrayH[_i] * (pi / 180);
-      var r = LCHArrayC[_i]; // Polar:
-
-      colorPlot.push({
-        x: r * Math.cos(angle) / 13,
-        y: LCHArrayL[_i] / 13 * -1,
-        z: r * Math.sin(angle) / 13,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: LCHArrayH[i]/(Math.PI * 10), y: LCHArrayL[i]/10 * -1, z: LCHArrayC[i]/10, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'LAB') {
-    for (var _i2 = 0; _i2 < LABArrayA.length; _i2++) {
-      colorPlot.push({
-        x: LABArrayA[_i2] / 13,
-        y: LABArrayL[_i2] / 13 * -1,
-        z: LABArrayB[_i2] / 13,
-        id: 'point_' + cnt++
-      });
-    }
-  }
-
-  if (spaceOpt == 'HSL') {
-    for (var _i3 = 0; _i3 < HSLArrayL.length; _i3++) {
-      var _angle = HSLArrayH[_i3] * (pi / 180);
-
-      var _r = HSLArrayS[_i3]; // Polar:
-
-      colorPlot.push({
-        x: _r * Math.cos(_angle) * 8,
-        y: HSLArrayL[_i3] * 8 * -1,
-        z: _r * Math.sin(_angle) * 8,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSLArrayH[i]/(10*pi) - 7, y: HSLArrayL[i]*10 * -1, z: HSLArrayS[i]*10 - 7, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'HSLuv') {
-    for (var _i4 = 0; _i4 < HSLuvArrayL.length; _i4++) {
-      var _angle2 = HSLuvArrayL[_i4] * (pi / 180);
-
-      var _r2 = HSLuvArrayU[_i4]; // Polar:
-
-      colorPlot.push({
-        x: _r2 * Math.cos(_angle2) / 12,
-        y: HSLuvArrayV[_i4] / 10 * -1,
-        z: _r2 * Math.sin(_angle2) / 12,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSLuvArrayL[i]/(10*pi) - 7, y: HSLuvArrayV[i]/10 * -1, z: HSLuvArrayU[i]/10 -10, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'HSV') {
-    for (var _i5 = 0; _i5 < HSVArrayL.length; _i5++) {
-      var _angle3 = HSVArrayH[_i5] * (pi / 180);
-
-      var _r3 = HSVArrayS[_i5]; // Polar:
-
-      colorPlot.push({
-        x: _r3 * Math.cos(_angle3) * 8,
-        y: HSVArrayL[_i5] * 8 * -1,
-        z: _r3 * Math.sin(_angle3) * 8 - 1.5,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSVArrayH[i]/(10*pi) - 7, y: HSVArrayL[i]*10 * -1, z: HSVArrayS[i]*10 -7, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'RGB') {
-    for (var _i6 = 0; _i6 < RGBArrayR.length; _i6++) {
-      colorPlot.push({
-        x: RGBArrayR[_i6] / 30 - 5,
-        y: RGBArrayG[_i6] / 30 * -1,
-        z: RGBArrayB[_i6] / 30 - 5,
-        id: 'point_' + cnt++
-      });
-    }
-  }
-
-  d3.range(-1, 11, 1).forEach(function (d) {
-    return yLine.push([-j, -d, -j]);
-  });
-  var data = [grid3d(xGrid), point3d(colorPlot), yScale3d([yLine])];
-  processData(data, 500); // 500 is the duration
-}
-
-function dragStart() {
-  mx = d3.event.x;
-  my = d3.event.y;
-}
-
-function dragged() {
-  mouseX = mouseX || 0;
-  mouseY = mouseY || 0;
-  beta = (d3.event.x - mx + mouseX) * Math.PI / 600;
-  alpha = (d3.event.y - my + mouseY) * Math.PI / 600 * -1;
-  var data = [grid3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(xGrid), point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(colorPlot), yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine])];
-  processData(data, 0);
-}
-
-function dragEnd() {
-  mouseX = d3.event.x - mx + mouseX;
-  mouseY = d3.event.y - my + mouseY;
-} // d3.selectAll('button').on('click', init3dChart);
-
-
-function createChartHeader(x, dest) {
-  var container = document.getElementById(dest);
-  var subhead = document.createElement('h6');
-  subhead.className = 'spectrum-Subheading';
-  subhead.innerText = x;
-  container.appendChild(subhead);
-} // Make 2d color charts
-
-
-function createChart(data, yLabel, xLabel, dest, yMin, yMax) {
-  var xy_chart = d3_xy_chart().width(createChartWidth()).height(createChartHeight()).xlabel(xLabel).ylabel(yLabel);
-  var svg = d3.select(dest).append("svg").datum(data).call(xy_chart);
-
-  function d3_xy_chart() {
-    var width = createChartWidth(),
-        height = createChartHeight(),
-        xlabel = "X Axis Label",
-        ylabel = "Y Axis Label";
-
-    function chart(selection) {
-      selection.each(function (datasets) {
-        // If no min/max defined, base on min/max from data
-        if (yMin == undefined) {
-          yMin = d3.min(datasets, function (d) {
-            return d3.min(d.y);
-          });
-        }
-
-        if (yMax == undefined) {
-          yMax = d3.max(datasets, function (d) {
-            return d3.max(d.y);
-          });
-        } //
-        // Create the plot.
-        //
-
-
-        var margin = {
-          top: 8,
-          right: 8,
-          bottom: 20,
-          left: 32
-        };
-        var innerwidth = width - margin.left - margin.right;
-        var innerheight = height - margin.top - margin.bottom;
-        var x_scale = d3.scaleLinear().range([0, innerwidth]).domain([d3.min(datasets, function (d) {
-          return d3.min(d.x);
-        }), d3.max(datasets, function (d) {
-          return d3.max(d.x);
-        })]);
-        var y_scale = d3.scaleLinear().range([innerheight, 0]).domain([yMin, yMax]); // d3.min(datasets, function(d) { return d3.min(d.y); }),
-        // d3.max(datasets, function(d) { return d3.max(d.y); }) ]) ;
-
-        var color_scale = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(datasets.length));
-        var x_axis = d3.axisBottom(x_scale);
-        var y_axis = d3.axisLeft(y_scale);
-        var x_grid = d3.axisBottom(x_scale).tickSize(-innerheight).tickFormat("");
-        var y_grid = d3.axisLeft(y_scale).tickSize(-innerwidth).tickFormat("");
-        var draw_line = d3.line().curve(d3.curveLinear).x(function (d) {
-          return x_scale(d[0]);
-        }).y(function (d) {
-          return y_scale(d[1]);
-        });
-        var svg = d3.select(this).attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        svg.append("g").attr("class", "x grid").attr("transform", "translate(0," + innerheight + ")").call(x_grid);
-        svg.append("g").attr("class", "y grid").call(y_grid);
-        svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + innerheight + ")").call(x_axis).append("text").attr("dy", "-.71em").attr("x", innerwidth).style("text-anchor", "end").text(xlabel);
-        svg.append("g").attr("class", "y axis").call(y_axis).append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", "0.71em").style("text-anchor", "end").text(ylabel);
-        var data_lines = svg.selectAll(".d3_xy_chart_line").data(datasets.map(function (d) {
-          return d3.zip(d.x, d.y);
-        })).enter().append("g").attr("class", "d3_xy_chart_line");
-        data_lines.append("path").attr("class", "line").attr("d", function (d) {
-          return draw_line(d);
-        }).attr("stroke", function (_, i) {
-          return color_scale(i);
-        });
-        data_lines.append("text").datum(function (d, i) {
-          return {
-            name: datasets[i].label,
-            final: d[d.length - 1]
-          };
-        }).attr("transform", function (d) {
-          return "translate(" + x_scale(d.final[0]) + "," + y_scale(d.final[1]) + ")";
-        }).attr("x", 3).attr("dy", ".35em").attr("fill", function (_, i) {
-          return color_scale(i);
-        }).text(function (d) {
-          return d.name;
-        });
-      });
-    }
-
-    chart.width = function (value) {
-      if (!arguments.length) return width;
-      width = value;
-      return chart;
-    };
-
-    chart.height = function (value) {
-      if (!arguments.length) return height;
-      height = value;
-      return chart;
-    };
-
-    chart.xlabel = function (value) {
-      if (!arguments.length) return xlabel;
-      xlabel = value;
-      return chart;
-    };
-
-    chart.ylabel = function (value) {
-      if (!arguments.length) return ylabel;
-      ylabel = value;
-      return chart;
-    };
-
-    return chart;
-  }
-}
-
-function toggleGraphs() {
-  var panel = document.getElementById('colorMetrics');
-  var toggle = document.getElementById('toggleMetrics');
-  panel.classList.toggle('visible');
-  toggle.classList.toggle('is-selected');
-}
-
-function createAllCharts(mode) {
-  mode = document.getElementById('chart2dColorspace').value;
-  var chart3 = document.getElementById('chart3Wrapper');
-
-  if (mode == "LCH") {
-    createChartHeader('Chroma / Lightness', 'chart1');
-    createChart(lchDataC, 'Chroma', 'Lightness', "#chart1", 0, 100);
-    createChartHeader('Hue / Lightness', 'chart2');
-    createChart(lchDataH, 'Hue', 'Lightness', "#chart2", 0, 360);
-    createChartHeader('Chroma / Hue', 'chart3');
-    createChart(lchDataCH, 'Chroma', 'Hue', "#chart3", 0, 100);
-  }
-
-  if (mode == "LAB") {
-    createChartHeader('Green Red / Lightness', 'chart1');
-    createChart(labDataA, 'Green - Red', 'Lightness', "#chart1");
-    createChartHeader('Blue Yellow / Lightness', 'chart2');
-    createChart(labDataB, 'Blue - Yellow', 'Lightness', "#chart2");
-    createChartHeader('Green Red / Blue Yellow', 'chart3');
-    createChart(labDataAB, 'Green - Red', 'Blue - Yellow', "#chart3");
-  }
-
-  if (mode == "CAM02") {
-    createChartHeader('Green Red / Lightness', 'chart1');
-    createChart(camDataA, 'Green - Red', 'Lightness', "#chart1");
-    createChartHeader('Blue Yellow / Lightness', 'chart2');
-    createChart(camDataB, 'Blue - Yellow', 'Lightness', "#chart2");
-    createChartHeader('Green Red / Blue Yellow', 'chart3');
-    createChart(camDataAB, 'Green - Red', 'Blue - Yellow', "#chart3");
-  }
-
-  if (mode == "HSL") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hslDataH, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hslDataS, 'Saturation', 'Lightness', "#chart2", 0, 1);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hslDataHS, 'Saturation', 'Hue', "#chart3", 0, 1);
-  }
-
-  if (mode == "HSLuv") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hsluvDataL, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hsluvDataU, 'Saturation', 'Lightness', "#chart2", 0, 100);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hsluvDataLU, 'Saturation', 'Hue', "#chart3", 0, 100);
-  }
-
-  if (mode == "HSV") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hsvDataH, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hsvDataS, 'Saturation', 'Lightness', "#chart2", 0, 1);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hsvDataHS, 'Saturation', 'Hue', "#chart3", 0, 1);
-  }
-
-  if (mode == "RGB") {
-    createChartHeader('Red / Green', 'chart1');
-    createChart(rgbDataR, 'Red', 'Green', "#chart1", 0, 255);
-    createChartHeader('Green / Blue', 'chart2');
-    createChart(rgbDataG, 'Green', 'Blue', "#chart2", 0, 255);
-    createChartHeader('Blue / Red', 'chart3');
-    createChart(rgbDataB, 'Blue', 'Red', "#chart3", 0, 255);
-  }
-
-  createChartHeader('Contrast Ratios', 'contrastChart');
-  createChart(window.contrastData, 'Contrast', 'Swatches', "#contrastChart");
-  init3dChart();
-}
-
-var chartColors = [];
-
-function getChartColors(mode) {
-  var shift = document.getElementById('shiftInput').value;
-  var chartColors = []; // GENERATE PROPER SCALE OF COLORS FOR 3d CHART:
-
-  var chartRGB = contrastColors.createScale({
-    swatches: 340,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-
-  for (var i = 0; i < chartRGB.colorsHex.length; i++) {
-    chartColors.push(chartRGB.colorsHex[i]);
-  }
-
-  return chartColors;
-}
-
-function showCharts(mode, interpolation) {
-  document.getElementById('chart1').innerHTML = ' ';
-  document.getElementById('chart2').innerHTML = ' ';
-  document.getElementById('chart3').innerHTML = ' ';
-  document.getElementById('contrastChart').innerHTML = ' ';
-  chartColors = getChartColors(interpolation);
-  createAllCharts(mode);
-}
-
-;
-exports.init3dChart = init3dChart; // exports.update3dChart = update3dChart;
-// exports.updateCharts = updateCharts;
-
-exports.showCharts = showCharts; // window.update3dChart = update3dChart;
-// window.updateCharts = updateCharts;
-},{"d3":"../../../node_modules/d3/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js"}],"data.js":[function(require,module,exports) {
-"use strict";
-
-var d3 = _interopRequireWildcard(require("d3"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
-// Create data based on colorspace
-function createData(colors) {
-  var CAM_J = [];
-  var CAM_A = [];
-  var CAM_B = [];
-  var LAB_L = [];
-  var LAB_A = [];
-  var LAB_B = [];
-  var LCH_L = [];
-  var LCH_C = [];
-  var LCH_H = [];
-  var HSL_H = [];
-  var HSL_S = [];
-  var HSL_L = [];
-  var HSV_H = [];
-  var HSV_S = [];
-  var HSV_V = [];
-  var HSLuv_L = [];
-  var HSLuv_U = [];
-  var HSLuv_V = [];
-  var RGB_R = [];
-  var RGB_G = [];
-  var RGB_B = [];
-
-  for (var i = 4; i < colors.length; i++) {
-    // Clip array to eliminate NaN values
-    CAM_J.push(d3.jab(colors[i]).J);
-    CAM_A.push(d3.jab(colors[i]).a);
-    CAM_B.push(d3.jab(colors[i]).b);
-    LAB_L.push(d3.lab(colors[i]).l);
-    LAB_A.push(d3.lab(colors[i]).a);
-    LAB_B.push(d3.lab(colors[i]).b);
-    LCH_L.push(d3.hcl(colors[i]).l);
-    LCH_C.push(d3.hcl(colors[i]).c);
-    LCH_H.push(d3.hcl(colors[i]).h);
-    RGB_R.push(d3.rgb(colors[i]).r);
-    RGB_G.push(d3.rgb(colors[i]).g);
-    RGB_B.push(d3.rgb(colors[i]).b);
-    HSL_H.push(d3.hsl(colors[i]).h);
-    HSL_S.push(d3.hsl(colors[i]).s);
-    HSL_L.push(d3.hsl(colors[i]).l);
-    HSV_H.push(d3.hsv(colors[i]).h);
-    HSV_S.push(d3.hsv(colors[i]).s);
-    HSV_V.push(d3.hsv(colors[i]).v);
-    HSLuv_L.push(d3.hsluv(colors[i]).l);
-    HSLuv_U.push(d3.hsluv(colors[i]).u);
-    HSLuv_V.push(d3.hsluv(colors[i]).v);
-  } // Filter out "NaN" values from these arrays
-
-
-  CAM_J = CAM_J.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  CAM_A = CAM_A.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  CAM_B = CAM_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_L = LAB_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_A = LAB_A.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_B = LAB_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_L = LCH_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_C = LCH_C.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_H = LCH_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_R = RGB_R.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_G = RGB_G.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_B = RGB_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_H = HSL_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_S = HSL_S.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_L = HSL_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_H = HSV_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_S = HSV_S.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_V = HSV_V.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_L = HSLuv_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_U = HSLuv_U.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_V = HSLuv_V.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  window.CAMArrayJ = [];
-  window.CAMArrayA = [];
-  window.CAMArrayB = [];
-  window.LABArrayL = [];
-  window.LABArrayA = [];
-  window.LABArrayB = [];
-  window.LCHArrayL = [];
-  window.LCHArrayC = [];
-  window.LCHArrayH = [];
-  window.RGBArrayR = [];
-  window.RGBArrayG = [];
-  window.RGBArrayB = [];
-  window.HSLArrayH = [];
-  window.HSLArrayS = [];
-  window.HSLArrayL = [];
-  window.HSVArrayH = [];
-  window.HSVArrayS = [];
-  window.HSVArrayL = [];
-  window.HSLuvArrayL = [];
-  window.HSLuvArrayU = [];
-  window.HSLuvArrayV = [];
-  window.CAMArrayJmin = [];
-  window.CAMArrayAmin = [];
-  window.CAMArrayBmin = [];
-  window.LABArrayLmin = [];
-  window.LABArrayAmin = [];
-  window.LABArrayBmin = [];
-  window.LCHArrayLmin = [];
-  window.LCHArrayCmin = [];
-  window.LCHArrayHmin = [];
-  window.RGBArrayRmin = [];
-  window.RGBArrayGmin = [];
-  window.RGBArrayBmin = [];
-  window.HSLArrayHmin = [];
-  window.HSLArraySmin = [];
-  window.HSLArrayLmin = [];
-  window.HSVArrayHmin = [];
-  window.HSVArraySmin = [];
-  window.HSVArrayLmin = [];
-  window.HSLuvArrayLmin = [];
-  window.HSLuvArrayUmin = [];
-  window.HSLuvArrayVmin = []; // Shorten the numbers in the array for chart purposes
-
-  var maxVal = 300;
-  var delta = Math.floor(CAM_J.length / maxVal);
-
-  for (var _i = 0; _i < CAM_J.length; _i = _i + delta) {
-    CAMArrayJ.push(CAM_J[_i]);
-  }
-
-  for (var _i2 = 0; _i2 < CAM_A.length; _i2 = _i2 + delta) {
-    CAMArrayA.push(CAM_A[_i2]);
-  }
-
-  for (var _i3 = 0; _i3 < CAM_B.length; _i3 = _i3 + delta) {
-    CAMArrayB.push(CAM_B[_i3]);
-  }
-
-  for (var _i4 = 0; _i4 < LAB_L.length; _i4 = _i4 + delta) {
-    LABArrayL.push(LAB_L[_i4]);
-  }
-
-  for (var _i5 = 0; _i5 < LAB_A.length; _i5 = _i5 + delta) {
-    LABArrayA.push(LAB_A[_i5]);
-  }
-
-  for (var _i6 = 0; _i6 < LAB_B.length; _i6 = _i6 + delta) {
-    LABArrayB.push(LAB_B[_i6]);
-  }
-
-  for (var _i7 = 0; _i7 < LCH_L.length; _i7 = _i7 + delta) {
-    LCHArrayL.push(LCH_L[_i7]);
-  }
-
-  for (var _i8 = 0; _i8 < LCH_C.length; _i8 = _i8 + delta) {
-    LCHArrayC.push(LCH_C[_i8]);
-  }
-
-  for (var _i9 = 0; _i9 < LCH_H.length; _i9 = _i9 + delta) {
-    LCHArrayH.push(LCH_H[_i9]);
-  }
-
-  for (var _i10 = 0; _i10 < RGB_R.length; _i10 = _i10 + delta) {
-    RGBArrayR.push(RGB_R[_i10]);
-  }
-
-  for (var _i11 = 0; _i11 < RGB_G.length; _i11 = _i11 + delta) {
-    RGBArrayG.push(RGB_G[_i11]);
-  }
-
-  for (var _i12 = 0; _i12 < RGB_B.length; _i12 = _i12 + delta) {
-    RGBArrayB.push(RGB_B[_i12]);
-  }
-
-  for (var _i13 = 0; _i13 < HSL_H.length; _i13 = _i13 + delta) {
-    HSLArrayH.push(HSL_H[_i13]);
-  }
-
-  for (var _i14 = 0; _i14 < HSL_S.length; _i14 = _i14 + delta) {
-    HSLArrayS.push(HSL_S[_i14]);
-  }
-
-  for (var _i15 = 0; _i15 < HSL_L.length; _i15 = _i15 + delta) {
-    HSLArrayL.push(HSL_L[_i15]);
-  }
-
-  for (var _i16 = 0; _i16 < HSV_H.length; _i16 = _i16 + delta) {
-    HSVArrayH.push(HSV_H[_i16]);
-  }
-
-  for (var _i17 = 0; _i17 < HSV_S.length; _i17 = _i17 + delta) {
-    HSVArrayS.push(HSV_S[_i17]);
-  }
-
-  for (var _i18 = 0; _i18 < HSV_V.length; _i18 = _i18 + delta) {
-    HSVArrayL.push(HSV_V[_i18]);
-  }
-
-  for (var _i19 = 0; _i19 < HSLuv_L.length; _i19 = _i19 + delta) {
-    HSLuvArrayL.push(HSLuv_L[_i19]);
-  }
-
-  for (var _i20 = 0; _i20 < HSLuv_U.length; _i20 = _i20 + delta) {
-    HSLuvArrayU.push(HSLuv_U[_i20]);
-  }
-
-  for (var _i21 = 0; _i21 < HSLuv_V.length; _i21 = _i21 + delta) {
-    HSLuvArrayV.push(HSLuv_V[_i21]);
-  } // Minimized data set
-
-
-  var maxValmin = 25;
-  var deltamin = Math.floor(CAM_J.length / maxValmin);
-
-  for (var _i22 = 0; _i22 < CAM_J.length; _i22 = _i22 + deltamin) {
-    CAMArrayJmin.push(CAM_J[_i22]);
-  }
-
-  for (var _i23 = 0; _i23 < CAM_A.length; _i23 = _i23 + deltamin) {
-    CAMArrayAmin.push(CAM_A[_i23]);
-  }
-
-  for (var _i24 = 0; _i24 < CAM_B.length; _i24 = _i24 + deltamin) {
-    CAMArrayBmin.push(CAM_B[_i24]);
-  }
-
-  for (var _i25 = 0; _i25 < LAB_L.length; _i25 = _i25 + deltamin) {
-    LABArrayLmin.push(LAB_L[_i25]);
-  }
-
-  for (var _i26 = 0; _i26 < LAB_A.length; _i26 = _i26 + deltamin) {
-    LABArrayAmin.push(LAB_A[_i26]);
-  }
-
-  for (var _i27 = 0; _i27 < LAB_B.length; _i27 = _i27 + deltamin) {
-    LABArrayBmin.push(LAB_B[_i27]);
-  }
-
-  for (var _i28 = 0; _i28 < LCH_L.length; _i28 = _i28 + deltamin) {
-    LCHArrayLmin.push(LCH_L[_i28]);
-  }
-
-  for (var _i29 = 0; _i29 < LCH_C.length; _i29 = _i29 + deltamin) {
-    LCHArrayCmin.push(LCH_C[_i29]);
-  }
-
-  for (var _i30 = 0; _i30 < LCH_H.length; _i30 = _i30 + deltamin) {
-    LCHArrayHmin.push(LCH_H[_i30]);
-  }
-
-  for (var _i31 = 0; _i31 < RGB_R.length; _i31 = _i31 + deltamin) {
-    RGBArrayRmin.push(RGB_R[_i31]);
-  }
-
-  for (var _i32 = 0; _i32 < RGB_G.length; _i32 = _i32 + deltamin) {
-    RGBArrayGmin.push(RGB_G[_i32]);
-  }
-
-  for (var _i33 = 0; _i33 < RGB_B.length; _i33 = _i33 + deltamin) {
-    RGBArrayBmin.push(RGB_B[_i33]);
-  }
-
-  for (var _i34 = 0; _i34 < HSL_H.length; _i34 = _i34 + deltamin) {
-    HSLArrayHmin.push(HSL_H[_i34]);
-  }
-
-  for (var _i35 = 0; _i35 < HSL_S.length; _i35 = _i35 + deltamin) {
-    HSLArraySmin.push(HSL_S[_i35]);
-  }
-
-  for (var _i36 = 0; _i36 < HSL_L.length; _i36 = _i36 + deltamin) {
-    HSLArrayLmin.push(HSL_L[_i36]);
-  }
-
-  for (var _i37 = 0; _i37 < HSV_H.length; _i37 = _i37 + deltamin) {
-    HSVArrayHmin.push(HSV_H[_i37]);
-  }
-
-  for (var _i38 = 0; _i38 < HSV_S.length; _i38 = _i38 + deltamin) {
-    HSVArraySmin.push(HSV_S[_i38]);
-  }
-
-  for (var _i39 = 0; _i39 < HSV_V.length; _i39 = _i39 + deltamin) {
-    HSVArrayLmin.push(HSV_V[_i39]);
-  }
-
-  for (var _i40 = 0; _i40 < HSLuv_L.length; _i40 = _i40 + deltamin) {
-    HSLuvArrayLmin.push(HSLuv_L[_i40]);
-  }
-
-  for (var _i41 = 0; _i41 < HSLuv_U.length; _i41 = _i41 + deltamin) {
-    HSLuvArrayUmin.push(HSLuv_U[_i41]);
-  }
-
-  for (var _i42 = 0; _i42 < HSLuv_V.length; _i42 = _i42 + deltamin) {
-    HSLuvArrayVmin.push(HSLuv_V[_i42]);
-  }
-
-  var fillRange = function fillRange(start, end) {
-    return Array(end - start + 1).fill().map(function (item, index) {
-      return start + index;
-    });
-  };
-
-  var dataX = fillRange(0, CAMArrayJ.length - 1);
-  var dataXcyl = fillRange(0, LCHArrayL.length - 1);
-  var dataXcontrast = fillRange(0, ratioInputs.length - 1);
-  window.labFullData = [{
-    x: LABArrayL,
-    y: LABArrayA,
-    z: LABArrayB
-  }];
-  window.camDataA = [{
-    x: CAMArrayJmin,
-    y: CAMArrayAmin
-  }];
-  window.camDataB = [{
-    x: CAMArrayJmin,
-    y: CAMArrayBmin
-  }];
-  window.camDataAB = [{
-    x: CAMArrayAmin,
-    y: CAMArrayBmin
-  }];
-  window.labDataA = [{
-    x: LABArrayLmin,
-    y: LABArrayAmin
-  }];
-  window.labDataB = [{
-    x: LABArrayLmin,
-    y: LABArrayBmin
-  }];
-  window.labDataAB = [{
-    x: LABArrayAmin,
-    y: LABArrayBmin
-  }];
-  window.lchDataC = [{
-    x: LCHArrayLmin,
-    y: LCHArrayCmin
-  }];
-  window.lchDataH = [{
-    x: LCHArrayLmin,
-    y: LCHArrayHmin
-  }];
-  window.lchDataCH = [{
-    x: LCHArrayHmin,
-    y: LCHArrayCmin
-  }];
-  window.rgbDataR = [{
-    x: RGBArrayRmin,
-    y: RGBArrayGmin
-  }];
-  window.rgbDataG = [{
-    x: RGBArrayGmin,
-    y: RGBArrayBmin
-  }];
-  window.rgbDataB = [{
-    x: RGBArrayBmin,
-    y: RGBArrayRmin
-  }];
-  window.hslDataH = [{
-    x: HSLArrayLmin,
-    y: HSLArrayHmin
-  }];
-  window.hslDataS = [{
-    x: HSLArrayLmin,
-    y: HSLArraySmin
-  }];
-  window.hslDataHS = [{
-    x: HSLArrayHmin,
-    y: HSLArraySmin
-  }];
-  window.hsvDataH = [{
-    x: HSVArrayLmin,
-    y: HSVArrayHmin
-  }];
-  window.hsvDataS = [{
-    x: HSVArrayLmin,
-    y: HSVArraySmin
-  }];
-  window.hsvDataHS = [{
-    x: HSVArrayHmin,
-    y: HSVArraySmin
-  }];
-  window.hsluvDataL = [{
-    x: HSLuvArrayVmin,
-    y: HSLuvArrayLmin
-  }];
-  window.hsluvDataU = [{
-    x: HSLuvArrayVmin,
-    y: HSLuvArrayUmin
-  }];
-  window.hsluvDataLU = [{
-    x: HSLuvArrayLmin,
-    y: HSLuvArrayUmin
-  }];
-  window.contrastData = [{
-    x: dataXcontrast,
-    y: ratioInputs.map(function (d) {
-      return parseFloat(d);
-    }) // convert to number
-
-  }];
-}
-
-exports.createData = createData;
-},{"d3":"../../../node_modules/d3/index.js"}],"index.js":[function(require,module,exports) {
+},{}],"theme.js":[function(require,module,exports) {
 "use strict";
 
 require("@spectrum-css/vars/dist/spectrum-global.css");
@@ -33580,6 +33547,8 @@ require("@spectrum-css/slider/dist/index-vars.css");
 
 require("@spectrum-css/tabs/dist/index-vars.css");
 
+require("@spectrum-css/toast/dist/index-vars.css");
+
 require("@spectrum-css/illustratedmessage/dist/index-vars.css");
 
 require("./scss/colorinputs.scss");
@@ -33592,9 +33561,7 @@ require("@adobe/focus-ring-polyfill");
 
 var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
 
-var _loadicons = _interopRequireDefault(require("loadicons"));
-
-var _clipboard = _interopRequireDefault(require("clipboard"));
+var blinder = _interopRequireWildcard(require("color-blind"));
 
 var d3 = _interopRequireWildcard(require("d3"));
 
@@ -33606,9 +33573,9 @@ var d3hsv = _interopRequireWildcard(require("d3-hsv"));
 
 var d33d = _interopRequireWildcard(require("d3-3d"));
 
-var charts = _interopRequireWildcard(require("./charts.js"));
+var _loadicons = _interopRequireDefault(require("loadicons"));
 
-var chartData = _interopRequireWildcard(require("./data.js"));
+var _clipboard = _interopRequireDefault(require("clipboard"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33616,60 +33583,30 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
-// expose functions so they can be ran in the console
-window.createScale = contrastColors.createScale;
-window.luminance = contrastColors.luminance;
-window.contrast = contrastColors.contrast;
-window.generateContrastColors = contrastColors.generateContrastColors;
-window.contrastColors = contrastColors;
-window.generateBaseScale = contrastColors.generateBaseScale;
-window.generateAdaptiveTheme = contrastColors.generateAdaptiveTheme;
-(0, _loadicons.default)('./spectrum-css-icons.svg');
-(0, _loadicons.default)('./spectrum-icons.svg');
-new _clipboard.default('.copyButton');
-new _clipboard.default('.colorOutputBlock');
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+// Import d3 plugins and add them to the d3 namespace
 Object.assign(d3, d3cam02, d3hsluv, d3hsv, d33d);
-var bgFieldInput = document.getElementById('bgField');
-var background = bgFieldInput.value; // var colorBlock = document.getElementById('color');
+(0, _loadicons.default)('./spectrum-css-icons.svg');
+(0, _loadicons.default)('./spectrum-icons.svg'); // import {randomId, throttle, deleteColor} from './index.js'
 
-var demoHeading = document.getElementById('demoHeading');
-var demoWrapper = document.getElementById('demoWrapper');
-var userColorBlock = document.getElementById('userColor');
-var userBgBlock = document.getElementById('userBg');
-var ratioInput = document.getElementById('ratio');
-var colorOutputField = document.getElementById('colorOutput');
-var colorspace = document.getElementById('mode');
-var ratioFields = document.getElementsByClassName('ratio-Field');
-window.ratioInputs = [];
-var newColors;
-var pathName;
-window.colorArgs = null;
-bgFieldInput.onchange = throttle(colorInput, 50);
+new _clipboard.default('.copyButton');
+new _clipboard.default('.themeOutputSwatch');
+window.generateAdaptiveTheme = contrastColors.generateAdaptiveTheme;
+var currentBackgroundColor;
+var cvdModeDropdown = document.getElementById('cvdMode');
 
-function debounce(func, wait, immediate) {
-  var timerId = null;
-  return function debounced() {
-    var context = this;
-    var args = arguments;
-    clearTimeout(timerId);
-
-    if (immediate && !timerId) {
-      func.apply(context, args);
-    }
-
-    timerId = setTimeout(function () {
-      timerId = null;
-      if (!immediate) func.apply(context, args);
-    }, wait);
-  };
+function randomId() {
+  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
 }
 
 function throttle(func, wait) {
@@ -33693,376 +33630,199 @@ function throttle(func, wait) {
   };
 }
 
-exports.throttle = throttle;
-
-function paramSetup() {
-  colorspaceOptions();
-  var url = new URL(window.location);
-  var params = new URLSearchParams(url.search.slice(1));
-  pathName = url.pathname; // // If parameters exist, use parameter; else use default html input values
-
-  if (params.has('colorKeys')) {
-    var cr = params.get('colorKeys');
-    var crs = cr.split(',');
-
-    if (crs[0] == 0) {
-      crs = ['#707070'];
-    }
-
-    for (var i = 0; i < crs.length; i++) {
-      addColor(crs[i]);
-    }
-  }
-
-  if (params.has('base')) {
-    document.getElementById('bgField').value = "#" + params.get('base');
-  }
-
-  if (params.has('ratios')) {
-    // transform parameter values into array of numbers
-    var rat = params.get('ratios');
-    var ratios = rat.split(',');
-    ratios = ratios.map(Number);
-
-    if (ratios[0] == 0) {
-      // if no parameter value, default to [3, 4.5]
-      ratios = [3, 4.5];
-    } else {}
-
-    for (var _i = 0; _i < ratios.length; _i++) {
-      addRatio(ratios[_i]);
-    }
-  }
-
-  if (params.has('mode')) {
-    document.querySelector('select[name="mode"]').value = params.get('mode');
-  } else {
-    addColor('#6fa7ff');
-    addRatio(3);
-    addRatio(4.5);
-  }
-
-  colorInput();
-}
-
-paramSetup(); // Add ratio inputs
-
-function addRatio(v) {
-  var s = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '#cacaca';
-
-  // increment by default
-  if (v == undefined) {
-    // find highest value
-    var hi = Math.max.apply(Math, _toConsumableArray(ratioInputs));
-    var lo = Math.min.apply(Math, _toConsumableArray(ratioInputs));
-
-    if (hi < 20) {
-      v = Number(hi + 1).toFixed(2);
-    }
-
-    if (hi == 21) {
-      v = Number(hi - 1).toFixed(2);
-    }
-  }
-
-  var ratios = document.getElementById('ratioInput-wrapper');
-  var div = document.createElement('div');
-  var sliderWrapper = document.getElementById('colorSlider-wrapper');
-  var slider = document.createElement('input');
-  var randId = randomId();
-  div.className = 'ratio-Item';
-  div.id = randId + '-item';
-  var sw = document.createElement('span');
-  sw.className = 'ratio-Swatch';
-  sw.id = randId + '-sw';
-  sw.style.backgroundColor = s;
-  var input = document.createElement('input');
-  input.className = 'spectrum-Textfield ratio-Field';
-  input.type = "number";
-  input.min = '-10';
-  input.max = '21';
-  input.step = '.01';
-  input.placeholder = 4.5;
-  input.id = randId;
-  input.value = v;
-  input.onkeydown = checkRatioStepModifiers;
-  input.oninput = debounce(colorInput, 100);
-  var button = document.createElement('button');
-  button.className = 'spectrum-ActionButton spectrum-ActionButton--quiet';
-  button.title = 'Delete contrast ratio';
-  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
-  slider.type = 'range';
-  slider.min = '0';
-  slider.max = '100';
-  slider.value = v;
-  slider.step = '.01';
-  slider.className = 'colorSlider';
-  slider.id = randId + "-sl";
-  slider.disabled = true;
-  sliderWrapper.appendChild(slider);
-  button.onclick = deleteRatio;
-  div.appendChild(sw);
-  div.appendChild(input);
-  div.appendChild(button);
-  ratios.appendChild(div);
-}
-
-function newColor(e) {
-  var parent = e.target.parentNode.id;
-  var id = parent.replace('-item', '');
-  var self = document.getElementById(id);
-  var v = self.value;
-  var swId = parent.replace('-item', '-sw');
-  var sw = document.getElementById(swId);
-
-  if (v.startsWith("#") !== true && v.length == 6) {
-    h = '#';
-    v = h.concat(v);
-    self.value = v;
-  }
-
-  sw.value = v;
-  colorInput();
-}
-
-function addColor(s) {
-  var colorInputs = document.getElementById('keyColor-wrapper');
-  var div = document.createElement('div');
-  var randId = randomId();
-  div.className = 'keyColor';
-  div.id = randId + '-item'; // var sw = document.createElement('span');
-
-  var sw = document.createElement('input');
-  sw.type = "color";
-  sw.value = s;
-  sw.oninput = throttle(colorInput, 50);
-  sw.className = 'keyColor-Item';
-  sw.id = randId + '-sw';
-  sw.style.backgroundColor = s;
-  var button = document.createElement('button');
-  button.className = 'spectrum-ActionButton';
-  button.title = 'Delete key color';
-  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
-  button.onclick = deleteColor;
-  div.appendChild(sw);
-  div.appendChild(button);
-  colorInputs.appendChild(div);
-} // When adding new ratios in UI, run colorinput as well
-
-
-window.addNewRatio = function addNewRatio() {
-  addRatio();
-  colorInput();
-}; // When adding new colors in UI, run colorinput as well
-
-
-window.addNewColor = function addNewColor() {
-  addColor();
-  colorInput();
-};
-
-window.addBulk = function addBulk() {
-  document.getElementById('addBulkColorDialog').classList.add("is-open");
-  document.getElementById('dialogOverlay').style.display = 'block';
-  var bgInput = document.getElementById('bgField_2');
-  var bg = document.getElementById('bgField');
-  bgInput.value = bg.value;
-};
-
-window.cancelBulk = function cancelBulk() {
-  document.getElementById('addBulkColorDialog').classList.remove("is-open");
-  document.getElementById('dialogOverlay').style.display = 'none';
-};
-
-window.bulkColorInput = function bulkColorInput() {
-  var bulkInputs = document.getElementById('bulkColors');
-  var bulkValues = bulkInputs.value.replace(/\r\n/g, "\n").replace(/[,\/]/g, "\n").replace(" ", "").replace(/['\/]/g, "").replace(/["\/]/g, "").split("\n");
-  var isSwatch = document.getElementById('importAsSwatch').checked;
-  var bgInput = document.getElementById('bgField_2').value; // input in Dialog
-
-  var bg = document.getElementById('bgField'); // input in UI
-  // add key colors for each input
-
-  for (var i = 0; i < bulkValues.length; i++) {
-    addColor(d3.color(bulkValues[i]).formatHex());
-  }
-
-  if (isSwatch) {
-    // create ratio inputs for each contrast
-    for (var _i2 = 0; _i2 < bulkValues.length; _i2++) {
-      var cr = contrastColors.contrast([d3.rgb(bulkValues[_i2]).r, d3.rgb(bulkValues[_i2]).g, d3.rgb(bulkValues[_i2]).b], [d3.rgb(bgInput).r, d3.rgb(bgInput).g, d3.rgb(bgInput).b]);
-      addRatio(cr.toFixed(2));
-    }
-
-    bg.value = bgInput;
-  } // Hide dialog
-
-
-  cancelBulk(); // Run colorinput
-
-  colorInput(); // clear inputs on close
-
-  bulkInputs.value = " ";
-}; // Test with #a9e6dc,#7cd6c7,#5ec3bb,#48b1b2,#3b9da5,#308b9a,#22738a,#195b72,#134555
-// Should return crs of 1.40, 1.71, 2.10, 2.56, 3.21, 3.97, 5.40, 7.55, 10.45
-
-
-window.clearAllColors = function clearAllColors() {
-  document.getElementById('keyColor-wrapper').innerHTML = ' ';
-  colorInput();
-}; // Delete ratio input
-
-
-function deleteRatio(e) {
-  var id = e.target.parentNode.id;
-  var self = document.getElementById(id);
-  var sliderid = id.replace('-item', '') + '-sl';
-  var slider = document.getElementById(sliderid);
-  self.remove();
-  slider.remove();
-  colorInput();
-}
-
 function deleteColor(e) {
   var id = e.target.parentNode.id;
   var self = document.getElementById(id);
   self.remove();
-  colorInput();
+  themeUpdateParams();
 }
 
-exports.deleteColor = deleteColor;
+function paramSetup() {
+  var url = new URL(window.location);
+  var params = new URLSearchParams(url.search.slice(1));
+  var pathName = url.pathname;
 
-window.openTab = function openTab(evt, tabName) {
-  // Declare all variables
-  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
+  if (params.has('name')) {
+    var themeNameInput = document.getElementById('themeName');
+    themeNameInput.value = params.get('name').toString();
+  }
 
-  tabcontent = document.getElementsByClassName("tabcontent");
+  if (params.has('config') && params.get('config') !== undefined) {
+    var configParam = params.get('config');
+    var config = JSON.parse(configParam);
+    var colorScales = config.colorScales;
+    var baseScale = config.baseScale;
+    var brightness = config.brightness;
+    var contrast;
 
-  for (var _i3 = 0; _i3 < tabcontent.length; _i3++) {
-    tabcontent[_i3].style.display = "none";
-  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+    if (!config.contrast) {
+      contrast = 1;
+    } else {
+      contrast = config.contrast;
+    }
 
+    for (var i = 0; i < colorScales.length; i++) {
+      var colorName = colorScales[i].name;
+      var keyColors = colorScales[i].colorKeys;
+      var colorSpace = colorScales[i].colorspace;
+      var ratios = colorScales[i].ratios; // Create color scale item
 
-  tablinks = document.getElementsByClassName("main-Tabs-item");
+      addColorScale(colorName, keyColors, colorSpace, ratios);
+    }
 
-  for (var _i4 = 0; _i4 < tablinks.length; _i4++) {
-    tablinks[_i4].className = tablinks[_i4].className.replace(" is-selected", "");
-  } // Show the current tab, and add an "active" class to the button that opened the tab
+    var slider = document.getElementById('themeBrightnessSlider');
+    var sliderVal = document.getElementById('themeBrightnessValue');
+    slider.value = brightness;
+    sliderVal.innerHTML = brightness;
+    var contrastSlider = document.getElementById('themeContrastSlider');
+    var contrastSliderVal = document.getElementById('themeContrastValue');
+    contrastSlider.value = contrast;
+    contrastSliderVal.innerHTML = contrast;
+    var themeBase = document.getElementById('themeBase');
+    themeBase.value = baseScale;
+  }
 
-
-  document.getElementById(tabName).style.display = "flex";
-  evt.currentTarget.className += " is-selected";
-};
-
-window.openAppTab = function openAppTab(evt, tabName) {
-  // Declare all variables
-  var i, appTabContent, apptablinks; // Get main tab containers and hide them
-
-  appTabContent = document.getElementsByClassName("appTabContent");
-
-  for (var _i5 = 0; _i5 < appTabContent.length; _i5++) {
-    appTabContent[_i5].style.display = "none";
-  } // Get all main tabs with class="spectrum-Tabs-item" and remove the class "active"
-
-
-  apptablinks = document.getElementsByClassName("app-Tabs-item");
-
-  for (var _i6 = 0; _i6 < apptablinks.length; _i6++) {
-    apptablinks[_i6].className = apptablinks[_i6].className.replace(" is-selected", "");
-  } // Show the current tab, and add an "active" class to the button that opened the tab
-
-
-  document.getElementById(tabName).style.display = "grid";
-  evt.currentTarget.className += " is-selected";
-}; // Open default tabs
-
-
-document.getElementById("tabDemo").click();
-
-function randomId() {
-  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+  sliderInput(); // themeInput();
 }
 
-exports.randomId = randomId;
+paramSetup();
+/* ---------------------------  */
 
-function createDemo(c, z) {
-  var smallText = 'Small text demo';
-  var largeText = 'Large text';
-  var buttonText = 'Button';
-  var wrap = document.getElementById('demoWrapper');
+/*     CREATE THEME SCRIPTS     */
+
+/* ---------------------------
+1. Generate Color Scale object
+2. For each color scale object, function for color inputs.
+3. AddColor function (per object)
+4. Delete object
+5. Add object (run generate color)
+6. Param setup
+7. Param input (read if has params )
+8. Function output
+9. Colors output (for each object, output colors in panel)
+10. Toggle configs visibility
+11. Brightness slider value sync
+12. Base color input options based on color objects available
+13. Add color from Leonardo URL
+14.
+*/
+
+var predefinedColorNames = ['Azure', 'Forest', 'Cerulean', 'Blue', 'Pink', 'Red', 'Indigo', 'Purple', 'Blue', 'Green', 'Crimson', 'Salmon', 'Orange', 'Tangerine', 'Yellow', 'Brown', 'Umber', 'Ochre', 'Periwinkle', 'Sage', 'Rose', 'Lavender', 'Lilac', 'Mauve', 'Mustard', 'Seafoam', 'Celery', 'Teal', 'Turquise', 'Sky', 'Gray', 'Slate'];
+window.addColorScale = addColorScale;
+
+function addColorScale(c, k, s, r) {
+  // for checking to see if items already exist
+  var items = document.getElementsByClassName('themeColor_item'); // create unique ID for color object
+
+  var thisId = randomId(); // generate color input objects:
+  // gradient, inputs, etc.
+
+  var wrapper = document.getElementById('themeColorWrapper');
+  var emptyState = document.getElementById('themeColorEmptyState'); // Remove empty state
+
+  if (emptyState.classList.contains('is-hidden')) {// Do nothing
+  } else {
+    emptyState.classList.add('is-hidden');
+  } // Create theme item
+
+
   var item = document.createElement('div');
-  item.className = 'demoItem';
-  var demo = document.createElement('div');
-  demo.className = 'spectrum-Typography demo';
-  var h = document.createElement('h4');
-  h.className = 'spectrum-Heading2 demoHeading';
-  var title = document.createTextNode(largeText);
-  var p = document.createElement('p');
-  p.className = 'spectrum-Body3 demoText';
-  var text = document.createTextNode(smallText);
-  var b = document.createElement('button');
-  b.className = 'spectrum-Button demoButton';
-  var bF = document.createElement('button');
-  bF.className = 'spectrum-Button demoButton';
-  var label = document.createTextNode(buttonText);
-  var label2 = document.createTextNode(buttonText);
-  h.appendChild(title);
-  p.appendChild(text);
-  b.appendChild(label);
-  bF.appendChild(label2);
-  demo.appendChild(h);
-  demo.appendChild(p);
-  demo.appendChild(b);
-  demo.appendChild(bF);
-  var demoIn = document.createElement('div');
-  demoIn.className = 'spectrum-Typography demoInverted';
-  var hIn = document.createElement('h4');
-  hIn.className = 'spectrum-Heading2 demoHeading';
-  var pIn = document.createElement('p');
-  pIn.className = 'spectrum-Body3 demoText';
-  var bIn = document.createElement('button');
-  bIn.className = 'spectrum-Button demoButton';
-  var bFIn = document.createElement('button');
-  bFIn.className = 'spectrum-Button demoButton';
-  var titleIn = document.createTextNode('Large text');
-  var textIn = document.createTextNode(smallText);
-  var labelIn = document.createTextNode(buttonText);
-  var labelIn2 = document.createTextNode(buttonText);
-  hIn.appendChild(titleIn);
-  pIn.appendChild(textIn);
-  bIn.appendChild(labelIn);
-  bFIn.appendChild(labelIn2);
-  demoIn.appendChild(hIn);
-  demoIn.appendChild(pIn);
-  demoIn.appendChild(bIn);
-  demoIn.appendChild(bFIn);
-  item.appendChild(demo);
-  item.appendChild(demoIn);
-  wrap.appendChild(item);
-  demoIn.style.backgroundColor = c;
-  demoIn.style.color = z;
-  demo.style.color = c;
-  p.style.color = c;
-  h.style.color = c;
-  b.style.color = c;
-  bF.style.backgroundColor = c;
-  bF.style.borderColor = c;
-  bF.style.color = z;
-  bFIn.style.color = c;
-  bFIn.style.backgroundColor = z;
-  bFIn.style.borderColor = z;
-  b.style.borderColor = c;
-  pIn.style.color = z;
-  hIn.style.color = z;
-  bIn.style.color = z;
-  bIn.style.borderColor = z;
-  demoWrapper.style.backgroundColor = z;
-}
+  item.className = 'themeColor_item';
+  item.id = thisId; // Create gradient
 
-function colorspaceOptions() {
-  colorspace.options.length = 0;
-  chart3dColorspace.options.length = 0;
-  chart2dColorspace.options.length = 0;
+  var gradient = document.createElement('div');
+  gradient.className = 'themeColor_gradient';
+  var gradientId = thisId.concat('_gradient');
+  gradient.id = gradientId; // Create form container
+
+  var inputs = document.createElement('div');
+  inputs.className = 'spectrum-Form spectrum-Form--row themeColor_configs'; // Color Name Input
+
+  var colorName = document.createElement('div');
+  colorName.className = 'spectrum-Form-item';
+  var colorNameLabel = document.createElement('label');
+  colorNameLabel.className = 'spectrum-FieldLabel';
+  colorNameLabel.for = thisId.concat('_colorName');
+  var colorNameInput = document.createElement('input');
+  colorNameInput.type = 'text';
+  colorNameInput.className = 'spectrum-Textfield colorNameInput';
+  colorNameInput.id = thisId.concat('_colorName');
+  colorNameInput.name = thisId.concat('_colorName'); // if first color item, just name it gray.
+
+  if (c == undefined) {
+    if (items.length == 0) {
+      // if first color with undefined c argument:
+      colorNameInput.value = 'Gray';
+    } else {
+      // if not first, c not defined, randomly assign color name:
+      colorNameInput.value = predefinedColorNames[Math.floor(Math.random() * predefinedColorNames.length)];
+    }
+  } else {
+    // if c defined argument, this should be color name.
+    colorNameInput.value = c;
+  }
+
+  colorNameInput.oninput = throttle(themeUpdateParams, 10);
+  colorNameLabel.innerHTML = 'Color scale name';
+  colorName.appendChild(colorNameLabel);
+  colorName.appendChild(colorNameInput); // Key Color Input
+
+  var keyColors = document.createElement('div');
+  keyColors.className = 'spectrum-Form-item';
+  var keyColorsLabel = document.createElement('label');
+  keyColorsLabel.className = 'spectrum-FieldLabel';
+  keyColorsLabel.for = thisId.concat('_keyColors');
+  var keyColorsInput = document.createElement('div');
+  keyColorsInput.className = 'keyColorsWrapper';
+  var keyColorsId = thisId.concat('_keyColors');
+  keyColorsInput.id = keyColorsId;
+  keyColorsLabel.innerHTML = 'Key colors';
+  keyColors.appendChild(keyColorsLabel);
+  keyColors.appendChild(keyColorsInput); // Key Colors Actions
+
+  var addColors = document.createElement('div');
+  addColors.className = 'spectrum-Form-item labelSpacer keyColorActions';
+  var addButton = document.createElement('button');
+  addButton.className = 'spectrum-ActionButton';
+  var buttonId = thisId.concat('_addKeyColor');
+  addButton.id = buttonId;
+  addButton.title = "Add key color";
+  addButton.addEventListener('click', themeAddColorUpdate);
+  addButton.innerHTML = "\n  <svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Add\">\n    <use xlink:href=\"#spectrum-icon-18-Add\" />\n  </svg>\n  ";
+  var bulkButton = document.createElement('button');
+  bulkButton.className = 'spectrum-ActionButton';
+  var bulkId = thisId.concat('_addBulk');
+  bulkButton.title = "Add bulk key colors";
+  bulkButton.id = bulkId;
+  bulkButton.addEventListener('click', addBulk);
+  bulkButton.innerHTML = "\n  <svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Add\">\n    <use xlink:href=\"#spectrum-icon-18-BoxAdd\" />\n  </svg>\n  ";
+  addColors.appendChild(addButton);
+  addColors.appendChild(bulkButton); // Interpolation mode
+
+  var interp = document.createElement('div');
+  interp.className = 'spectrum-Form-item';
+  var interpLabel = document.createElement('label');
+  interpLabel.className = 'spectrum-FieldLabel';
+  interpLabel.for = thisId.concat('_mode');
+  var interpLabelText = 'Colorspace interpolation';
+  var interpDropdown = document.createElement('div');
+  interpDropdown.className = 'spectrum-Dropdown';
+  interpDropdown.id = thisId.concat('_modeDropdown');
+  var interpSelect = document.createElement('select');
+  interpSelect.className = 'spectrum-FieldButton spectrum-Dropdown-trigger';
+  interpSelect.id = thisId.concat('_mode');
+  interpSelect.name = thisId.concat('_mode');
+  interpSelect.oninput = throttle(themeUpdateParams, 20);
+  var interpDropdownIcon = document.createElement('span');
+  interpDropdownIcon.className = 'spectrum-Dropdown-iconWrapper';
+  interpDropdownIcon.innerHTML = "\n  <svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" class=\"spectrum-Icon spectrum-UIIcon-ChevronDownMedium spectrum-Dropdown-icon\">\n    <use xlink:href=\"#spectrum-css-icon-ChevronDownMedium\"></use>\n  </svg>";
+  interpLabel.innerHTML = interpLabelText;
+  interpDropdown.appendChild(interpSelect);
+  interpDropdown.appendChild(interpDropdownIcon);
+  interp.appendChild(interpLabel);
+  interp.appendChild(interpDropdown); // Interpolation options
+
+  interpSelect.options.length = 0;
   var opts = {
     'CAM02': 'CIECAM02',
     'LCH': 'Lch',
@@ -34072,402 +33832,879 @@ function colorspaceOptions() {
     'HSV': 'HSV',
     'RGB': 'RGB'
   };
-  var opts2 = {
-    'CAM02': 'CIECAM02 (recommended)',
-    'LCH': 'Lch',
-    'LAB': 'Lab',
-    'HSL': 'HSL',
-    'HSLuv': 'HSLuv',
-    'HSV': 'HSV',
-    'RGB': 'RGB'
-  };
 
   for (var index in opts) {
-    colorspace.options[colorspace.options.length] = new Option(opts[index], index);
-    chart3dColorspace.options[chart3dColorspace.options.length] = new Option(opts2[index], index);
-    chart2dColorspace.options[chart2dColorspace.options.length] = new Option(opts2[index], index);
+    interpSelect.options[interpSelect.options.length] = new Option(opts[index], index);
   }
 
-  chart3dColorspace.value = 'CAM02';
-  chart2dColorspace.value = 'CAM02';
-} // Ramp function to create HTML canvas color scale
+  if (s == undefined) {
+    interpSelect.value = 'CAM02';
+  } else {
+    interpSelect.value = s;
+  } // Ratios
 
 
-function ramp(color, n) {
-  n = window.innerHeight - 284;
-  var container = d3.select('#colorScale');
-  var canvas = container.append("canvas").attr("height", n).attr("width", 1);
-  var context = canvas.node().getContext("2d");
-  canvas.style.width = "40px";
-  canvas.style.imageRendering = "pixelated";
+  var ratios = document.createElement('div');
+  ratios.className = 'spectrum-Form-item';
+  var ratiosLabel = document.createElement('label');
+  ratiosLabel.className = 'spectrum-FieldLabel';
+  ratiosLabel.innerHTML = 'Contrast ratios';
+  ratiosLabel.for = thisId.concat('_ratios');
+  var ratiosInput = document.createElement('input');
+  ratiosInput.type = 'text';
 
-  for (var i = 0; i < n; ++i) {
-    // only do this for actual colors
-    if (color[i] !== undefined) {
-      context.fillStyle = color[i]; // color[i / (n - 1)]
+  if (r == undefined) {
+    ratiosInput.value = '3, 4.5';
+  } else {
+    ratiosInput.value = r;
+  }
 
-      context.fillRect(0, i, 1, 1);
+  ratiosInput.className = 'spectrum-Textfield';
+  ratiosInput.id = thisId.concat('_ratios');
+  ratiosInput.name = thisId.concat('_ratios');
+  ratiosInput.oninput = throttle(themeUpdateParams, 10);
+  ratios.appendChild(ratiosLabel);
+  ratios.appendChild(ratiosInput); // Actions
+
+  var actions = document.createElement('div');
+  actions.className = 'spectrum-ButtonGroup spectrum-Form-item labelSpacer';
+  var edit = document.createElement('button');
+  edit.className = 'spectrum-ActionButton';
+  edit.title = "Edit color scale in new tab";
+  edit.innerHTML = "\n  <!-- <span class=\"spectrum-ActionButton-label\">Add from URL</span> -->\n  <svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Add\">\n    <use xlink:href=\"#spectrum-icon-18-Edit\" />\n  </svg>";
+  edit.addEventListener('click', themeEditItem); // edit.addEventListener('click', openEditColorScale) // TODO => create openEditColorScale function to open colors tab w/ settings of this object.
+
+  var deleteColor = document.createElement('button');
+  deleteColor.className = 'spectrum-ActionButton';
+  deleteColor.title = 'Delete color scale';
+  deleteColor.id = thisId.concat('_delete');
+  deleteColor.innerHTML = "\n  <!-- <span class=\"spectrum-ActionButton-label\">Add Color</span> -->\n  <svg xmlns:xlink=\"http://www.w3.org/1999/xlink\" class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Add\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
+  deleteColor.addEventListener('click', themeDeleteItem);
+  actions.appendChild(edit);
+  actions.appendChild(deleteColor); // Put it all together
+
+  inputs.appendChild(colorName);
+  inputs.appendChild(keyColors);
+  inputs.appendChild(addColors);
+  inputs.appendChild(interp);
+  inputs.appendChild(ratios);
+  inputs.appendChild(actions);
+  item.appendChild(gradient);
+  item.appendChild(inputs);
+  wrapper.appendChild(item); // Then run functions on the basic placeholder inputs
+  // document.getElementById(buttonId).click();
+
+  if (k == undefined) {
+    document.getElementById(buttonId).click();
+  } else {
+    for (var i = 0; i < k.length; i++) {
+      themeAddColor(k[i], buttonId);
     }
+  } // generate the number of values equal to the width of the item
+
+
+  var n = window.innerWidth - 272;
+  var rampData = contrastColors.createScale({
+    swatches: n,
+    colorKeys: ['#000000'],
+    colorspace: 'LAB'
+  });
+  var colors = rampData.colors;
+  themeRamp(colors, n, gradientId);
+  toggleControls();
+  baseScaleOptions();
+  var select = document.getElementById('view');
+  var value = select.value;
+
+  if (value == 'viewScaleOnly') {
+    inputs.classList.add('is-hidden');
+    gradient.classList.add('is-large');
+  } else if (value == 'viewScaleConfig') {} else if (value == 'viewSwatch') {
+    inputs.classList.add('is-hidden');
+  }
+
+  document.getElementById(thisId.concat('_colorName')).addEventListener('input', baseScaleOptions);
+  document.getElementById(thisId.concat('_delete')).addEventListener('click', themeDeleteItem);
+}
+
+window.addColorScaleUpdate = addColorScaleUpdate;
+
+function addColorScaleUpdate(c, k, s, r) {
+  addColorScale(c, k, s, r);
+  themeInput();
+  var config = getThemeData();
+  var name = getThemeName();
+  config = JSON.stringify(config);
+  updateParams(name, config);
+} // Update theme when theme name is changed
+
+
+document.getElementById('themeName').addEventListener('input', throttle(themeUpdateParams, 50)); // Update theme when base color selection is changed
+
+document.getElementById('themeBase').addEventListener('input', throttle(themeUpdateParams, 50));
+
+function themeRamp(colors) {
+  var n = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.innerWidth - 272;
+  var dest = arguments.length > 2 ? arguments[2] : undefined;
+  var container = document.getElementById(dest);
+  container = d3.select(container);
+  var canvas = container.append("canvas").attr("width", n).attr("height", 1);
+  var context = canvas.node().getContext("2d");
+  canvas.style.height = "32px";
+  canvas.style.width = n;
+  canvas.style.imageRendering = "pixelated";
+  canvas.className = 'themeColor_canvas';
+
+  for (var i = 1; i < n; ++i) {
+    context.fillStyle = colors[i];
+    context.fillRect(i, 0, 1, 32);
   }
 
   return canvas;
 }
 
-function checkRatioStepModifiers(e) {
-  if (!e.shiftKey) return;
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-  e.preventDefault();
-  var value = Number(e.target.value);
-  var newValue;
+function themeSwatchRamp(colors, dest) {
+  var container = document.getElementById(dest);
+  var wrapper = document.createElement('div');
+  wrapper.className = 'gradientColorSwatchWrapper is-hidden';
 
-  switch (e.key) {
-    case 'ArrowDown':
-      newValue = value - 1;
-      e.target.value = newValue.toFixed(2);
-      e.target.oninput();
-      break;
-
-    case 'ArrowUp':
-      newValue = value + 1;
-      e.target.value = newValue.toFixed(2);
-      e.target.oninput();
-      break;
-
-    default:
-  }
-} // Calculate Color and generate Scales
-
-
-window.colorInput = colorInput;
-
-function colorInput() {
-  document.getElementById('colorScale').innerHTML = '';
-  var spaceOpt = document.getElementById('chart3dColorspace').value;
-  var inputs = document.getElementsByClassName('keyColor-Item');
-  var background = document.getElementById('bgField').value;
-  var mode = document.querySelector('select[name="mode"]').value; // Clamp ratios convert decimal numbers to whole negatives and disallow
-  // inputs less than 1 and greater than -1.
-
-  for (var i = 0; i < ratioFields.length; i++) {
-    val = ratioFields[i].value;
-
-    if (val < 1 && val > -1) {
-      ratioFields[i].value = (10 / (val * 10)).toFixed(2) * -1;
-    } else {}
+  for (var i = 0; i < colors.length; i++) {
+    var swatch = document.createElement('div');
+    swatch.className = 'gradientColorSwatch';
+    swatch.style.backgroundColor = colors[i];
+    wrapper.appendChild(swatch);
   }
 
-  var rfIds = [];
-
-  for (var _i7 = 0; _i7 < ratioFields.length; _i7++) {
-    rfIds.push(ratioFields[_i7].id);
-  }
-
-  ratioInputs = [];
-  var inputColors = []; // For each ratio input field, push the value into the args array for generateContrastColors
-
-  for (var _i8 = 0; _i8 < ratioFields.length; _i8++) {
-    ratioInputs.push(ratioFields[_i8].value);
-  }
-
-  for (var _i9 = 0; _i9 < inputs.length; _i9++) {
-    inputColors.push(inputs[_i9].value);
-  } // Convert input value into a split array of hex values.
+  container.appendChild(wrapper);
+} // Recreation of addColor function, specifying items needed for theme UI
 
 
-  var tempArgs = []; // remove any whitespace from inputColors
-
-  tempArgs.push(inputColors);
-  colorArgs = tempArgs.join("").split(',').filter(String);
-  var shift = 1;
-  var clamping = document.getElementById('sequentialClamp').checked; // Generate scale data so we have access to all 3000 swatches to draw the gradient on the left
-
-  var scaleData = contrastColors.createScale({
-    swatches: 3000,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-  var n = window.innerHeight - 282;
-  var rampData = contrastColors.createScale({
-    swatches: n,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-  newColors = contrastColors.generateContrastColors({
-    colorKeys: colorArgs,
-    base: background,
-    ratios: ratioInputs,
-    colorspace: mode,
-    shift: shift
-  }); // Create values for sliders
-
-  var Values = [];
-  var maxVal = 100;
-
-  for (var _i10 = 0; _i10 < newColors.length; _i10++) {
-    Values.push(maxVal * (d3.hsluv(newColors[_i10]).v / 100)); // wrong direction. Needs inversed.
-    // Values.push(maxVal * (d3.hsluv(newColors[i]).v / 100))
-  } // Values.sort(function(a, b){return a-b});
-  // Values.sort(function(a, b){return a-b});
-
-
-  var values = [];
-  values = values.concat(0, Values, maxVal);
-  values.sort(function (a, b) {
-    return a + b;
-  });
-  var reverseShift = 1 / shift;
-  var sqrtValues = d3.scalePow().exponent(reverseShift).domain([1, maxVal]).range([1, maxVal]);
-  sqrtValues = values.map(function (d) {
-    if (sqrtValues(d) < 0) {
-      return 0;
-    } else {
-      return sqrtValues(d);
-    }
-  });
-
-  for (var _i11 = 0; _i11 < newColors.length; _i11++) {
-    // Calculate value of color and apply to slider position/value
-    var val = d3.hsluv(newColors[_i11]).v;
-    var newVal = sqrtValues[_i11 + 1];
-    val = newVal; // Find corresponding input/slider id
-
-    var slider = document.getElementById(rfIds[_i11] + '-sl');
-    slider.value = val; // apply color to subsequent swatch
-
-    var swatch = document.getElementById(rfIds[_i11] + '-sw');
-    swatch.style.backgroundColor = newColors[_i11];
-  } // Generate Gradient as HTML Canvas element
-
-
-  var filteredColors = rampData.colors;
-  ramp(filteredColors, n);
-  var backgroundR = d3.rgb(background).r;
-  var backgroundG = d3.rgb(background).g;
-  var backgroundB = d3.rgb(background).b;
-  var colorOutputWrapper = document.getElementById('colorOutputs');
-  colorOutputWrapper.innerHTML = '';
-  var wrap = document.getElementById('demoWrapper');
-  wrap.innerHTML = '';
-
-  for (var _i12 = 0; _i12 < newColors.length; _i12++) {
-    var colorOutput = document.createElement('div');
-    var colorOutputVal = newColors[_i12];
-    var colorOutputText = document.createTextNode(d3.rgb(colorOutputVal).hex());
-    var bg = d3.color(background).rgb();
-    var outputRatio = contrastColors.contrast([d3.rgb(newColors[_i12]).r, d3.rgb(newColors[_i12]).g, d3.rgb(newColors[_i12]).b], [bg.r, bg.g, bg.b]);
-    var ratioText = document.createTextNode(outputRatio.toFixed(2));
-    var s1 = document.createElement('span');
-    var s2 = document.createElement('span');
-    colorOutputWrapper.appendChild(colorOutput);
-    colorOutput.className = 'colorOutputBlock';
-    colorOutput.style.backgroundColor = colorOutputVal;
-    colorOutput.setAttribute('data-clipboard-text', colorOutputVal);
-    s1.appendChild(colorOutputText);
-    s1.className = 'colorOutputValue';
-    s2.appendChild(ratioText);
-    colorOutput.appendChild(s1);
-    colorOutput.appendChild(s2);
-
-    if (contrastColors.luminance(d3.rgb(newColors[_i12]).r, d3.rgb(newColors[_i12]).g, d3.rgb(newColors[_i12]).b) < 0.275) {
-      colorOutput.style.color = "#ffffff";
-    } else {
-      colorOutput.style.color = '#000000';
-    }
-
-    createDemo(newColors[_i12], background);
-  }
-
-  var copyColors = document.getElementById('copyAllColors');
-  copyColors.setAttribute('data-clipboard-text', newColors); // update URL parameters
-
-  updateParams(inputColors, background.substr(1), ratioInputs, mode);
-  var data = chartData.createData(scaleData.colors);
-  charts.showCharts('CAM02', data);
-  colorSpaceFeedback('CAM02'); // manually enter default of CAM02
+function themeAddColor(c) {
+  var thisId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.id;
+  // let thisId = this.id;
+  var parent = thisId.replace('_addKeyColor', '');
+  var destId = parent.concat('_keyColors');
+  var dest = document.getElementById(destId);
+  var div = document.createElement('div');
+  var randId = randomId();
+  div.className = 'keyColor';
+  div.id = randId + '-item';
+  var sw = document.createElement('input');
+  sw.type = "color";
+  sw.value = c;
+  sw.oninput = throttle(themeUpdateParams, 50);
+  sw.className = 'keyColor-Item';
+  sw.id = randId + '-sw';
+  sw.style.backgroundColor = c;
+  var button = document.createElement('button');
+  button.className = 'spectrum-ActionButton';
+  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
+  button.addEventListener('click', deleteColor);
+  div.appendChild(sw);
+  div.appendChild(button);
+  dest.appendChild(div);
 }
 
-window.onresize = colorInput; // Passing variable parameters to URL
+function themeAddColorUpdate(c) {
+  var thisId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.id;
+  themeAddColor(c, thisId = this.id);
+  var config = getThemeData();
+  var name = getThemeName();
+  config = JSON.stringify(config);
+  updateParams(name, config);
+}
 
-function updateParams(c, b, r, m) {
-  var url = new URL(window.location);
+function themeDeleteItem(e) {
+  var id = e.target.parentNode.parentNode.parentNode.id;
+  var self = document.getElementById(id);
+  self.remove();
+  baseScaleOptions();
+  toggleControls();
+  themeUpdateParams();
+  var items = document.getElementsByClassName('themeColor_item');
+
+  if (items.length == 0) {
+    clearParams();
+    document.documentElement.style.setProperty('--theme-background', '#f5f5f5');
+  }
+}
+
+function themeEditItem(e) {
+  var id = e.target.parentNode.parentNode.parentNode.id;
+  var thisElement = document.getElementById(id);
+  var c = getColorItemData(id).colorArgs;
+  var b = 'ffffff'; // get generated background color...
+
+  var m = getColorItemData(id).mode;
+  var r = getColorItemData(id).ratios; // take the configs and craft a URL for editing the palette
+
+  var location = window.location.origin;
+  var url = new URL(location);
   var params = new URLSearchParams(url.search.slice(1));
-  var tabColor = document.getElementById("tabColor");
   params.set('colorKeys', c);
   params.set('base', b);
   params.set('ratios', r);
-  params.set('mode', m);
-  var cStrings = c.toString().replace(/[#\/]/g, '"#').replace(/[,\/]/g, '",');
-  cStrings = cStrings + '"';
-  window.history.replaceState({}, '', '?' + params); // update the page's URL.
+  params.set('mode', m); // window.history.replaceState({}, '', '?' + params); // update the page's URL.
+  // open new tab with url based on color scale's parameters
 
-  var p = document.getElementById('params');
-  p.innerHTML = " ";
-  var call = 'generateContrastColors({ ';
-  var pcol = 'colorKeys: [' + cStrings + '], ';
-  var pbas = 'base: "#' + b + '", ';
-  var prat = 'ratios: [' + r + '], ';
-  var pmod = ' colorspace: "' + m + '"});';
-  var text1 = document.createTextNode(call);
-  var text2 = document.createTextNode(pcol);
-  var text3 = document.createTextNode(pbas);
-  var text4 = document.createTextNode(prat);
-  var text7 = document.createTextNode(pmod);
-  p.appendChild(text1);
-  p.appendChild(text2);
-  p.appendChild(text3);
-  p.appendChild(text4);
-  p.appendChild(text7);
-} // Sort swatches in UI
+  var newURL = location.toString().concat('/?').concat(params);
+  window.open(newURL, "_blank"); // Now how do we apply this *back* to the theme itself?...
+  // I don't think this is possible without some serious magic from a real engineer.
+} // Create options for colors to use as base scale
 
 
-function sort() {
-  ratioInputs.sort(function (a, b) {
-    return a - b;
-  }); // Update ratio inputs with new values
+function baseScaleOptions() {
+  var baseSelect = document.getElementById('themeBase');
+  baseSelect.options.length = 0;
+  var colorNames = document.getElementsByClassName('colorNameInput');
+  var opts = {};
 
-  for (var i = 0; i < ratioInputs.length; i++) {
-    ratioFields[i].value = ratioInputs[i];
+  for (var i = 0; i < colorNames.length; i++) {
+    var colorname = colorNames[i].value;
+    opts[colorname] = colorname;
+  }
+
+  for (var index in opts) {
+    baseSelect.options[baseSelect.options.length] = new Option(opts[index], index);
   }
 }
 
-window.sortRatios = function sortRatios() {
-  sort();
-  colorInput();
+function toggleControls() {
+  var items = document.getElementsByClassName('themeColor_item');
+  var brightnessSliderWrap = document.getElementById('brightnessSliderWrapper');
+  var brightnessSlider = document.getElementById('themeBrightnessSlider');
+  var contrastSliderWrap = document.getElementById('contrastSliderWrapper');
+  var contrastSlider = document.getElementById('themeContrastSlider');
+  var themeBaseLabel = document.getElementById('themeBaseLabel');
+  var modeDropdown = document.getElementById('modeDropdown');
+  var baseSelect = document.getElementById('themeBase');
+
+  if (items.length > 0) {
+    // if there are items, enable fields
+    brightnessSliderWrap.classList.remove('is-disabled');
+    contrastSliderWrap.classList.remove('is-disabled');
+    themeBaseLabel.classList.remove('is-disabled');
+    modeDropdown.classList.remove('is-disabled');
+    brightnessSlider.disabled = false;
+    contrastSlider.disabled = false;
+    baseSelect.disabled = false;
+  } else if (items.length == 0) {
+    // disable fields
+    brightnessSliderWrap.classList.add('is-disabled');
+    contrastSliderWrap.classList.add('is-disabled');
+    themeBaseLabel.classList.add('is-disabled');
+    modeDropdown.classList.add('is-disabled');
+    brightnessSlider.disabled = true;
+    contrastSlider.disabled = true;
+    baseSelect.disabled = true;
+    baseSelect.value = ' ';
+  }
+}
+
+function cvdColors(colors) {
+  var cvdMode = cvdModeDropdown.value; // if not an array
+
+  if (!Array.isArray(colors)) {
+    if (cvdMode == 'Deuteranomaly') {
+      colors = blinder.deuteranomaly(colors);
+      showToast();
+    } else if (cvdMode == 'Deuteranopia') {
+      colors = blinder.deuteranopia(colors);
+      showToast();
+    } else if (cvdMode == 'Protanomaly') {
+      colors = blinder.protanomaly(colors);
+      showToast();
+    } else if (cvdMode == 'Protanopia') {
+      colors = blinder.protanopia(colors);
+      showToast();
+    } else if (cvdMode == 'Tritanomaly') {
+      colors = blinder.tritanomaly(colors);
+      showToast();
+    } else if (cvdMode == 'Tritanopia') {
+      colors = blinder.tritanopia(colors);
+      showToast();
+    } else if (cvdMode == 'Achromatomaly') {
+      colors = blinder.achromatomaly(colors);
+      showToast();
+    } else if (cvdMode == 'Achromatopsia') {
+      colors = blinder.achromatopsia(colors);
+      showToast();
+    } else {
+      hideToast();
+    }
+
+    colors = d3.rgb(colors).formatRgb();
+  } // must be an array.
+  else {
+      if (cvdMode == 'Deuteranomaly') {
+        colors = colors.map(function (c) {
+          return blinder.deuteranomaly(c);
+        });
+      } else if (cvdMode == 'Deuteranopia') {
+        colors = colors.map(function (c) {
+          return blinder.deuteranopia(c);
+        });
+      } else if (cvdMode == 'Protanomaly') {
+        colors = colors.map(function (c) {
+          return blinder.protanomaly(c);
+        });
+      } else if (cvdMode == 'Protanopia') {
+        colors = colors.map(function (c) {
+          return blinder.protanopia(c);
+        });
+      } else if (cvdMode == 'Tritanomaly') {
+        colors = colors.map(function (c) {
+          return blinder.tritanomaly(c);
+        });
+      } else if (cvdMode == 'Tritanopia') {
+        colors = colors.map(function (c) {
+          return blinder.tritanopia(c);
+        });
+      } else if (cvdMode == 'Achromatomaly') {
+        colors = colors.map(function (c) {
+          return blinder.achromatomaly(c);
+        });
+      } else if (cvdMode == 'Achromatopsia') {
+        colors = colors.map(function (c) {
+          return blinder.achromatopsia(c);
+        });
+      } else {// do nothing
+      }
+
+      colors = colors.map(function (c) {
+        return d3.rgb(c).formatRgb();
+      });
+    }
+
+  return colors;
+}
+
+var themeName = document.getElementById('themeName');
+window.themeInput = themeInput;
+
+function themeInput() {
+  var items = document.getElementsByClassName('themeColor_item');
+  var colorScales = [];
+  var themeOutputs = document.getElementById('themeOutputs');
+  themeOutputs.innerHTML = ' ';
+  var themeConfigs = getThemeData();
+  var paramsOutput = document.getElementById('themeParams');
+
+  if (items.length == 0) {
+    // If no items, clear parameters and URL
+    themeConfigs.baseScale = undefined;
+    themeConfigs.colorScales = undefined;
+    themeConfigs.brightness = undefined;
+    themeConfigs.contrast = undefined;
+    clearParams();
+    var emptyState = document.getElementById('themeColorEmptyState');
+    emptyState.classList.remove('is-hidden');
+    paramsOutput.innerHTML = ' ';
+  } // Create color scale objects
+  else if (items.length > 0) {
+      for (var i = 0; i < items.length; i++) {
+        var id = items[i].id;
+        var thisElement = document.getElementById(id);
+        var colorData = getColorItemData(id);
+        var colorArgs = colorData.colorArgs;
+        var mode = colorData.mode;
+        var gradientId = id.concat('_gradient');
+        var gradient = document.getElementById(gradientId);
+        gradient.innerHTML = ' ';
+        var n = window.innerWidth - 272;
+        var rampData = contrastColors.createScale({
+          swatches: n,
+          colorKeys: colorArgs,
+          colorspace: mode
+        });
+        var colors = rampData.colors;
+        colors = cvdColors(colors);
+        themeRamp(colors, n, gradientId);
+      }
+
+      var theme = contrastColors.generateAdaptiveTheme({
+        baseScale: themeConfigs.baseScale,
+        colorScales: themeConfigs.colorScales,
+        brightness: themeConfigs.brightness,
+        contrast: themeConfigs.contrast
+      }); // Loop again after generating theme.
+
+      for (var _i = 0; _i < items.length; _i++) {
+        var _id = items[_i].id;
+
+        var _thisElement = document.getElementById(_id);
+
+        var _gradientId = _id.concat('_gradient');
+
+        var _gradient = document.getElementById(_gradientId);
+
+        var colorObjs = theme[_i + 1].values;
+        var arr = [];
+
+        for (var _i2 = 0; _i2 < colorObjs.length; _i2++) {
+          arr.push(cvdColors(colorObjs[_i2].value));
+        }
+
+        themeSwatchRamp(arr, _gradientId);
+      }
+
+      var themeColorArray = [];
+      var varPrefix = '--'; // Iterate each color from theme except 1st object (background)
+
+      for (var _i3 = 0; _i3 < theme.length; _i3++) {
+        var wrapper = document.createElement('div');
+        var swatchWrapper = document.createElement('div');
+        swatchWrapper.className = 'themeOutputColor'; // Iterate each color value
+
+        if (theme[_i3].values) {
+          var p = document.createElement('p');
+          p.className = 'spectrum-Subheading';
+          p.innerHTML = theme[_i3].name;
+          wrapper.appendChild(p);
+
+          for (var j = 0; j < theme[_i3].values.length; j++) {
+            // for each value object
+            var key = theme[_i3].values[j].name; // output "name" of color
+
+            var prop = varPrefix.concat(key);
+            var originalValue = theme[_i3].values[j].value; // output value of color
+            // transform original color based on preview mode
+
+            var value = cvdColors(originalValue); // create CSS property
+
+            document.documentElement.style.setProperty(prop, value); // create swatch
+
+            var div = document.createElement('div');
+            div.className = 'themeOutputSwatch'; // copy text should be for value of original color, not of preview color.
+
+            div.setAttribute('data-clipboard-text', originalValue);
+            div.setAttribute('tabindex', '0');
+            div.style.backgroundColor = value;
+            swatchWrapper.appendChild(div);
+            themeColorArray.push(originalValue);
+          }
+
+          wrapper.appendChild(swatchWrapper);
+        } else if (theme[_i3].background) {
+          var _p = document.createElement('p');
+
+          _p.className = 'spectrum-Subheading';
+          _p.innerHTML = 'Background';
+          wrapper.appendChild(_p); // grab background color data
+
+          var _key = 'theme-background'; // "name" of color
+
+          var _prop = varPrefix.concat(_key);
+
+          var _originalValue = theme[_i3].background; // output value of color
+          // set global variable value. Probably shouldn't do it this way.
+
+          currentBackgroundColor = _originalValue;
+
+          var _value = cvdColors(_originalValue); // create CSS property
+
+
+          document.documentElement.style.setProperty(_prop, _value); // create swatch
+
+          var _div = document.createElement('div');
+
+          _div.className = 'themeOutputSwatch';
+
+          _div.setAttribute('tabindex', '0');
+
+          _div.setAttribute('data-clipboard-text', _originalValue);
+
+          _div.style.backgroundColor = _value;
+          swatchWrapper.appendChild(_div);
+          wrapper.appendChild(swatchWrapper);
+          themeColorArray.push(_originalValue);
+        }
+
+        themeOutputs.appendChild(wrapper);
+      } // Run toggle to ensure proper visibility shown based on view mode
+
+
+      toggleConfigs();
+      var copyThemeColors = document.getElementById('copyThemeColors');
+      copyThemeColors.setAttribute('data-clipboard-text', themeColorArray);
+      paramsOutput.innerHTML = JSON.stringify(themeConfigs, null, 2);
+    }
+}
+
+window.themeUpdateParams = themeUpdateParams;
+
+function themeUpdateParams() {
+  themeInput();
+  var config = getThemeData();
+  var name = getThemeName();
+  config = JSON.stringify(config);
+  updateParams(name, config);
+}
+
+var sliderB = document.getElementById('themeBrightnessSlider');
+var sliderC = document.getElementById('themeContrastSlider');
+sliderB.addEventListener('input', sliderValue);
+sliderC.addEventListener('input', sliderValue);
+window.sliderValue = sliderValue;
+
+function sliderValue(e) {
+  var id = e.target.id;
+  var slider = document.getElementById(id);
+  var labelId = id.replace('Slider', 'Value');
+  var label = document.getElementById(labelId);
+  label.innerHTML = slider.value;
+}
+
+window.sliderInput = sliderInput;
+
+function sliderInput() {
+  var items = document.getElementsByClassName('themeColor_item'); // If theme items are present, run themeInput
+
+  if (items !== undefined) {
+    themeUpdateParams();
+  }
+}
+
+window.addBulk = addBulk;
+
+function addBulk(e) {
+  var id = e.target.parentNode.parentNode.parentNode.id;
+  var button = document.getElementById('bulkAddButton');
+  button.addEventListener('click', bulkItemColorInput);
+  var dialog = document.getElementsByClassName('addBulkColorDialog');
+
+  for (var i = 0; i < dialog.length; i++) {
+    dialog[i].classList.add("is-open");
+    dialog[i].id = id.concat('_dialog');
+  }
+
+  document.getElementById('dialogOverlay').style.display = 'block';
+}
+
+window.cancelBulk = cancelBulk;
+
+function cancelBulk() {
+  var dialog = document.getElementsByClassName('addBulkColorDialog');
+
+  for (var i = 0; i < dialog.length; i++) {
+    dialog[i].classList.remove("is-open");
+    dialog[i].id = ' ';
+  }
+
+  document.getElementById('dialogOverlay').style.display = 'none';
+}
+
+window.addFromURLDialog = addFromURLDialog;
+
+function addFromURLDialog() {
+  var button = document.getElementById('addFromURLButton');
+  button.addEventListener('click', addFromURL);
+  var dialog = document.getElementById('addFromURLDialog');
+  dialog.classList.add("is-open");
+  document.getElementById('dialogOverlay').style.display = 'block';
+}
+
+window.cancelURL = cancelURL;
+
+function cancelURL() {
+  var dialog = document.getElementById('addFromURLDialog');
+  dialog.classList.remove("is-open");
+  document.getElementById('dialogOverlay').style.display = 'none';
+}
+
+window.bulkItemColorInput = function bulkItemColorInput(e) {
+  var id = e.target.parentNode.parentNode.id;
+  var itemId = id.replace('_dialog', '');
+  var keyInputId = itemId.concat('_keyColors');
+  var buttonId = itemId.concat('_addKeyColor');
+  var keyInputs = document.getElementById(keyInputId);
+  var bulkInputs = document.getElementById('bulkColors');
+  var bulkValues = bulkInputs.value.replace(/\r\n/g, "\n").replace(/[,\/]/g, "\n").replace(" ", "").replace(/['\/]/g, "").replace(/["\/]/g, "").split("\n"); // let isSwatch = document.getElementById('importAsSwatch').checked;
+
+  var bgInput = currentBackgroundColor; // add key colors for each input
+
+  for (var i = 0; i < bulkValues.length; i++) {
+    themeAddColor(d3.color(bulkValues[i]).formatHex(), itemId);
+  } // if (isSwatch) {
+  //   // create ratio inputs for each contrast
+  //   for (let i=0; i<bulkValues.length; i++) {
+  //     let cr = contrastColors.contrast([d3.rgb(bulkValues[i]).r, d3.rgb(bulkValues[i]).g, d3.rgb(bulkValues[i]).b], [d3.rgb(bgInput).r, d3.rgb(bgInput).g, d3.rgb(bgInput).b]);
+  //     addRatio(cr.toFixed(2));
+  //   }
+  //   bg.value = bgInput;
+  // }
+  // Hide dialog
+
+
+  cancelBulk(); // Run colorinput
+
+  themeUpdateParams(); // clear inputs on close
+
+  bulkInputs.value = " ";
 };
 
-function returnRatioCube(lum) {
-  var a = 1.45;
-  var b = 0.7375;
-  var c = 2.5;
-  var x = lum / 100;
-  var exp = x * -1 / a + b;
-  var y = Math.pow(exp, 3) * c;
-  var r = y * 20 + 1;
+window.addFromURL = addFromURL;
 
-  if (r > 1) {
-    return r;
+function addFromURL() {
+  var input = document.getElementById('addFromURLinput');
+  var value = input.value;
+  var url = new URL(value);
+  var params = new URLSearchParams(url.search.slice(1));
+  var pathName = url.pathname;
+  var crs, ratios, mode;
+  var cName = predefinedColorNames[Math.floor(Math.random() * predefinedColorNames.length)]; // // If parameters exist, use parameter; else use default html input values
+
+  if (params.has('colorKeys')) {
+    var cr = params.get('colorKeys');
+    crs = cr.split(',');
   }
 
-  if (r < 1 && r >= 0) {
-    return 1;
+  if (params.has('ratios')) {
+    // transform parameter values into array of numbers
+    var rat = params.get('ratios');
+    ratios = rat.split(',');
+    ratios = ratios.map(Number);
+
+    if (ratios[0] == 0) {
+      // if no parameter value, default to [3, 4.5]
+      ratios = [3, 4.5];
+    } else {}
   }
+
+  if (params.has('mode')) {
+    mode = params.get('mode');
+  } else {// do nothing
+  }
+
+  addColorScaleUpdate(cName, crs, mode, ratios);
+  cancelURL(); // Run colorinput
+  // throttle(themeInput, 10);
+  // Clear out value when done
+
+  input.value = ' ';
 }
 
-function interpolateLumArray() {
-  var lums = [];
+window.toggleConfigs = toggleConfigs;
 
-  for (var i = 0; i < newColors.length; i++) {
-    lums.push(d3.hsluv(newColors[i]).v);
-  }
+function toggleConfigs() {
+  var select = document.getElementById('view');
+  var value = select.value;
+  var configs = document.getElementsByClassName('themeColor_configs');
+  var gradient = document.getElementsByClassName('themeColor_gradient');
+  var swatches = document.getElementsByClassName('gradientColorSwatchWrapper');
 
-  var startLum = Math.min.apply(Math, lums);
-  var endLum = Math.max.apply(Math, lums);
-  var interpolator = d3.interpolateNumber(startLum, endLum);
+  if (value == 'viewScaleOnly') {
+    for (var i = 0; i < configs.length; i++) {
+      if (!configs[i].classList.contains('is-hidden')) {
+        configs[i].classList.add('is-hidden');
+      }
 
-  for (var _i13 = 1; _i13 < lums.length - 1; _i13++) {
-    lums[_i13] = interpolator(_i13 / lums.length);
-  }
+      if (!gradient[i].classList.contains('is-large')) {
+        gradient[i].classList.add('is-large');
+      }
 
-  lums.sort(function (a, b) {
-    return b - a;
-  });
-  return lums;
-} // Redistribute contrast swatches
+      if (gradient[i].classList.contains('is-hidden')) {
+        gradient[i].classList.remove('is-hidden');
+      }
 
+      if (!swatches[i].classList.contains('is-hidden')) {
+        swatches[i].classList.add('is-hidden');
+      }
 
-window.distributeCube = function distributeCube() {
-  sort();
-  setTimeout(function () {
-    var lums = interpolateLumArray();
-
-    for (var i = 1; i < lums.length - 1; i++) {
-      ratioFields[i].value = returnRatioCube(lums[i]).toFixed(2);
+      if (swatches[i].classList.contains('is-large')) {
+        swatches[i].classList.remove('is-large');
+      }
     }
-  }, 300);
-  setTimeout(function () {
-    colorInput();
-  }, 450);
-}; // Function to distribute swatches based on linear interpolation between HSLuv
-// lightness values.
+  } else if (value == 'viewScaleConfig') {
+    for (var _i4 = 0; _i4 < configs.length; _i4++) {
+      if (configs[_i4].classList.contains('is-hidden')) {
+        configs[_i4].classList.remove('is-hidden');
+      }
 
+      if (gradient[_i4].classList.contains('is-large')) {
+        gradient[_i4].classList.remove('is-large');
+      }
 
-window.distributeLum = function distributeLum() {
-  var lums = interpolateLumArray();
-  var NewContrast = [];
+      if (gradient[_i4].classList.contains('is-hidden')) {
+        gradient[_i4].classList.remove('is-hidden');
+      }
 
-  for (var i = 1; i < newColors.length - 1; i++) {
-    // Re-assign V value as lums[i]
-    var L = d3.hsluv(newColors[i]).l;
-    var U = d3.hsluv(newColors[i]).u;
-    var V = lums[i];
-    var NewRGB = d3.hsluv(L, U, V);
-    var rgbArray = [d3.rgb(NewRGB).r, d3.rgb(NewRGB).g, d3.rgb(NewRGB).b];
-    var baseRgbArray = [d3.rgb(background).r, d3.rgb(background).g, d3.rgb(background).b];
-    NewContrast.push(contrastColors.contrast(rgbArray, baseRgbArray).toFixed(2));
-  } // Concatenate first and last contrast array with new contrast array (middle)
+      if (!swatches[_i4].classList.contains('is-hidden')) {
+        swatches[_i4].classList.add('is-hidden');
+      }
 
+      if (swatches[_i4].classList.contains('is-large')) {
+        swatches[_i4].classList.remove('is-large');
+      }
+    }
+  } else if (value == 'viewSwatch') {
+    for (var _i5 = 0; _i5 < configs.length; _i5++) {
+      if (!configs[_i5].classList.contains('is-hidden')) {
+        configs[_i5].classList.add('is-hidden');
+      }
 
-  var newRatios = [];
-  newRatios = newRatios.concat(ratioInputs[0], NewContrast, ratioInputs[ratioInputs.length - 1]); // Delete all ratios
+      if (!gradient[_i5].classList.contains('is-large')) {
+        gradient[_i5].classList.add('is-large');
+      }
 
-  var ratioItems = document.getElementsByClassName('ratio-Item');
+      if (!gradient[_i5].classList.contains('is-hidden')) {
+        gradient[_i5].classList.add('is-hidden');
+      }
 
-  while (ratioItems.length > 0) {
-    ratioItems[0].parentNode.removeChild(ratioItems[0]);
+      if (swatches[_i5].classList.contains('is-hidden')) {
+        swatches[_i5].classList.remove('is-hidden');
+      }
+
+      if (!swatches[_i5].classList.contains('is-large')) {
+        swatches[_i5].classList.add('is-large');
+      }
+    }
   }
-
-  var sliders = document.getElementById('colorSlider-wrapper');
-  sliders.innerHTML = ' '; // Add all new
-
-  for (var _i14 = 0; _i14 < newRatios.length; _i14++) {
-    addRatio(newRatios[_i14]);
-  }
-
-  colorInput();
-}; // Create alert feedback for each colorspace
-
-
-function colorSpaceFeedback(spaceOpt) {
-  var alertWrapper = document.getElementById('chart3dAlert');
-  alertWrapper.innerHTML = ' ';
-  var alert = document.createElement('div');
-  alert.className = 'spectrum-Alert';
-
-  if (spaceOpt == 'CAM02') {
-    alert.classList.add('spectrum-Alert--info');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">Recommended color space for color evaluation</div>\n      <div class=\"spectrum-Alert-content\">CIECAM02 is a perceptually uniform model of color. Irregularities seen in this space reflect perceived irregularities in color.\n        <a href=\"https://en.wikipedia.org/wiki/CIECAM02\" target=\"_blank\" class=\"spectrum-Link\">Learn more about CIECAM02</a>\n      </div>";
-  }
-
-  if (spaceOpt == 'LAB' || spaceOpt == 'LCH') {
-    alert.classList.add('spectrum-Alert--info');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">Acceptable color space for color evaluation</div>\n      <div class=\"spectrum-Alert-content\">Lab (Lch in cylindrical form) is a well-known and used color space based on human perception of color.\n        <a href=\"https://en.wikipedia.org/wiki/CIELAB_color_space\" target=\"_blank\" class=\"spectrum-Link\">Learn more about LAB & LCH </a>\n      </div>";
-  }
-
-  if (spaceOpt == 'HSL' || spaceOpt == 'HSV' || spaceOpt == 'HSLuv' || spaceOpt == 'RGB') {
-    alert.classList.add('spectrum-Alert--warning');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">This color space not recommended for evaluating color models</div>\n      <div class=\"spectrum-Alert-content\">Irregularities seen in this color space do not accurately represent perceptual irregularities in the color scale itself.\n        <a href=\"https://en.wikipedia.org/wiki/HSL_and_HSV\" target=\"_blank\" class=\"spectrum-Link\">Learn more about RGB color spaces</a>\n      </div>";
-  }
-
-  alertWrapper.appendChild(alert);
 }
 
-exports.colorSpaceFeedback = colorSpaceFeedback;
-window.colorSpaceFeedback = colorSpaceFeedback;
+window.showToast = showToast;
 
-function updateCharts(selectObject) {
-  var spaceOpt = selectObject.value;
-  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
-  charts.init3dChart();
-  charts.showCharts(spaceOpt, colorInterpSpace);
-  colorSpaceFeedback(spaceOpt);
+function showToast() {
+  var toast = document.getElementById("toastCVDpreview");
+
+  if (toast.classList.contains("is-visible")) {// do nothing
+  } else {
+    toast.classList.remove("spectrum-Exit");
+    toast.classList.add("spectrum-Bounce");
+    toast.classList.add("is-visible");
+  }
 }
 
-window.updateCharts = updateCharts; // Temporary
+window.hideToast = hideToast;
 
-window.generateBaseScale = generateBaseScale;
-window.minPositive = minPositive;
-window.ratioName = ratioName;
-},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/typography/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/tabs/dist/index-vars.css","@spectrum-css/illustratedmessage/dist/index-vars.css":"../../../node_modules/@spectrum-css/illustratedmessage/dist/index-vars.css","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/charts.scss":"scss/charts.scss","./scss/style.scss":"scss/style.scss","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","./charts.js":"charts.js","./data.js":"data.js"}]},{},["index.js"], null)
-//# sourceMappingURL=/src.e31bb0bc.js.map
+function hideToast() {
+  var toast = document.getElementById("toastCVDpreview");
+  toast.classList.remove("spectrum-Bounce");
+  toast.classList.add("spectrum-Exit");
+  toast.classList.remove("is-visible");
+}
+
+window.exitPreview = exitPreview;
+
+function exitPreview() {
+  cvdModeDropdown.value = "None";
+  themeInput();
+  hideToast();
+}
+
+window.neverShowToast = neverShowToast;
+
+function neverShowToast() {
+  var toast = document.getElementById("toastCVDpreview");
+  toast.classList.remove("spectrum-Bounce");
+  toast.classList.add("spectrum-Exit");
+  toast.classList.remove("is-visible");
+  toast.classList.add("hidden");
+} // Passing variable parameters to URL
+
+
+function updateParams(n, t) {
+  var url = new URL(window.location);
+  var params = new URLSearchParams(url.search.slice(1));
+  var tabColor = document.getElementById("tabColor");
+  params.set('name', n); // Theme name
+
+  params.set('config', t); // Configurations
+
+  window.history.replaceState({}, '', '?' + params); // update the page's URL.
+}
+
+function clearParams() {
+  var uri = window.location.toString();
+  var cleanURL = uri.substring(0, uri.indexOf("?"));
+  window.history.replaceState({}, document.title, cleanURL);
+} /////////////////////////////////////
+//   Functions for GETTING data    //
+/////////////////////////////////////
+// GET Color Scale Data
+
+
+function getColorItemData(id) {
+  var thisElement = document.getElementById(id); // 1. find color name
+
+  var colorNameInput = id.concat('_colorName');
+  var colorName = document.getElementById(colorNameInput).value; // 2. find all key colors
+
+  var colorKeys = thisElement.getElementsByClassName('keyColor-Item');
+  var inputColors = [];
+  var tempArgs = [];
+
+  for (var i = 0; i < colorKeys.length; i++) {
+    inputColors.push(colorKeys[i].value);
+  } // Convert input value into a split array of hex values.
+  // remove any whitespace from inputColors
+
+
+  tempArgs.push(inputColors);
+  var colorArgs = tempArgs.join("").split(',').filter(String); // 3. find mode
+
+  var modeId = id.concat('_mode');
+  var modeSelect = document.getElementById(modeId);
+  var mode = modeSelect.value; // 4. find ratios
+
+  var ratiosId = id.concat('_ratios');
+  var ratiosInput = document.getElementById(ratiosId);
+  var rVals = ratiosInput.value;
+  var r = new Array(rVals);
+  var rSplit = r.join("").split(',');
+  var ratios = rSplit.map(function (x) {
+    return parseFloat(x);
+  }); // TODO: remove all values of NaN
+
+  return {
+    colorName: colorName,
+    colorArgs: colorArgs,
+    mode: mode,
+    ratios: ratios
+  };
+}
+
+function getThemeName() {
+  // Get name
+  var themeNameInput = document.getElementById('themeName');
+  var themeName = themeNameInput.value;
+  return themeName;
+} // GET Theme Data
+
+
+function getThemeData() {
+  // Get base scale
+  var baseSelect = document.getElementById('themeBase');
+  var baseSelectValue = baseSelect.value; // Get brightness
+
+  var brightnessSlider = document.getElementById('themeBrightnessSlider');
+  var brightness = brightnessSlider.value; // Get contrast
+
+  var contrastSlider = document.getElementById('themeContrastSlider');
+  var contrast = contrastSlider.value; // For each item
+
+  var items = document.getElementsByClassName('themeColor_item');
+  var colorScales = [];
+
+  for (var i = 0; i < items.length; i++) {
+    var id = items[i].id;
+    var thisElement = document.getElementById(id);
+    var colorData = getColorItemData(id);
+    var colorObj = {
+      name: colorData.colorName,
+      colorKeys: colorData.colorArgs,
+      colorspace: colorData.mode,
+      ratios: colorData.ratios
+    };
+    colorScales.push(colorObj);
+  }
+
+  return {
+    baseScale: baseSelectValue,
+    colorScales: colorScales,
+    brightness: brightness,
+    contrast: contrast
+  };
+}
+},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/toast/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/illustratedmessage/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/colorinputs.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/charts.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/style.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js","color-blind":"../../../node_modules/color-blind/lib/color-blind.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js"}]},{},["theme.js"], null)
+//# sourceMappingURL=/theme.817f3fc2.js.map
