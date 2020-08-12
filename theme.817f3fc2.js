@@ -29824,34 +29824,7 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./src/hsv":"../../../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../../../node_modules/d3-hsv/src/interpolateHsv.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createScale = createScale;
-exports.luminance = luminance;
-exports.contrast = contrast;
-exports.binarySearch = binarySearch;
-exports.generateBaseScale = generateBaseScale;
-exports.generateContrastColors = generateContrastColors;
-exports.minPositive = minPositive;
-exports.ratioName = ratioName;
-exports.generateAdaptiveTheme = generateAdaptiveTheme;
-
-var d3 = _interopRequireWildcard(require("d3"));
-
-var d3cam02 = _interopRequireWildcard(require("d3-cam02"));
-
-var d3hsluv = _interopRequireWildcard(require("d3-hsluv"));
-
-var d3hsv = _interopRequireWildcard(require("d3-hsv"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
+},{"./src/hsv":"../../../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../../../node_modules/d3-hsv/src/interpolateHsv.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/d3.js":[function(require,module,exports) {
 /*
 Copyright 2019 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -29863,38 +29836,385 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-// Work around node and babel's difference of opinion on the read-onlyness of default
-function assign(dest, ...src) {
-  for (let obj of src) {
-    for (let prop in obj) {
-      if (prop !== 'default') {
-        dest[prop] = obj[prop];
+
+const d3 = require('d3');
+const d3cam02 = require('d3-cam02');
+const d3hsluv = require('d3-hsluv');
+const d3hsv = require('d3-hsv');
+
+const d3plus = {
+  ...d3,
+  ...d3cam02,
+  ...d3hsluv,
+  ...d3hsv
+};
+
+d3plus.interpolateJch = (start, end) => {
+  // constant, linear, and colorInterpolate are taken from d3-interpolate
+  // the colorInterpolate function is `nogamma` in the d3-interpolate's color.js
+  const constant = x => () => x;
+  const linear = (a, d) => t => a + t * d;
+  const colorInterpolate = (a, b) => {
+    const d = b - a;
+    return d ? linear(a, d) : constant(isNaN(a) ? b : a);
+  }
+
+  start = d3.jch(start);
+  end = d3.jch(end);
+
+  const zero = Math.abs(start.h - end.h);
+  const plus = Math.abs(start.h - (end.h + 360));
+  const minus = Math.abs(start.h - (end.h - 360));
+  if (plus < zero && plus < minus) {
+    end.h += 360;
+  }
+  if (minus < zero && minus < plus) {
+    end.h -= 360;
+  }
+
+  const startc = d3.hcl(start + '').c;
+  const endc = d3.hcl(end + '').c;
+  if (!startc) {
+    start.h = end.h;
+  }
+  if (!endc) {
+    end.h = start.h;
+  }
+
+  const J = colorInterpolate(start.J, end.J),
+        C = colorInterpolate(start.C, end.C),
+        h = colorInterpolate(start.h, end.h),
+        opacity = colorInterpolate(start.opacity, end.opacity);
+
+  return t => {
+    start.J = J(t);
+    start.C = C(t);
+    start.h = h(t);
+    start.opacity = opacity(t);
+    return start + '';
+  };
+};
+
+module.exports = d3plus;
+
+},{"d3":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/curve.js":[function(require,module,exports) {
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+
+const base3 = (t, p1, p2, p3, p4) => {
+  const t1 = -3 * p1 + 9 * p2 - 9 * p3 + 3 * p4,
+      t2 = t * t1 + 6 * p1 - 12 * p2 + 6 * p3;
+  return t * t2 - 3 * p1 + 3 * p2;
+};
+
+const belzen = exports.bezlen = (x1, y1, x2, y2, x3, y3, x4, y4, z) => {
+  if (z == null) {
+    z = 1;
+  }
+  z = z > 1 ? 1 : z < 0 ? 0 : z;
+  var z2 = z / 2,
+    n = 12,
+    Tvalues = [-.1252,.1252,-.3678,.3678,-.5873,.5873,-.7699,.7699,-.9041,.9041,-.9816,.9816],
+    Cvalues = [0.2491,0.2491,0.2335,0.2335,0.2032,0.2032,0.1601,0.1601,0.1069,0.1069,0.0472,0.0472],
+    sum = 0;
+  for (var i = 0; i < n; i++) {
+    var ct = z2 * Tvalues[i] + z2,
+      xbase = base3(ct, x1, x2, x3, x4),
+      ybase = base3(ct, y1, y2, y3, y4),
+      comb = xbase * xbase + ybase * ybase;
+    sum += Cvalues[i] * Math.sqrt(comb);
+  }
+  return z2 * sum;
+};
+
+const findDotsAtSegment = exports.findDotsAtSegment = (p1x, p1y, c1x, c1y, c2x, c2y, p2x, p2y, t) => {
+  const t1 = 1 - t,
+    t12 = t1 * t1,
+    t13 = t12 * t1,
+    t2 = t * t,
+    t3 = t2 * t,
+    x = t13 * p1x + t12 * 3 * t * c1x + t1 * 3 * t * t * c2x + t3 * p2x,
+    y = t13 * p1y + t12 * 3 * t * c1y + t1 * 3 * t * t * c2y + t3 * p2y;
+  return {
+    x: x,
+    y: y
+  };
+};
+
+const catmullRom2bezier = exports.catmullRom2bezier = (crp, z) => {
+  const d = [];
+  let end = {x: +crp[0], y: +crp[1]};
+  for (let i = 0, iLen = crp.length; iLen - 2 * !z > i; i += 2) {
+    const p = [
+      {x: +crp[i - 2], y: +crp[i - 1]},
+      {x: +crp[i],     y: +crp[i + 1]},
+      {x: +crp[i + 2], y: +crp[i + 3]},
+      {x: +crp[i + 4], y: +crp[i + 5]}
+    ];
+    if (z) {
+      if (!i) {
+        p[0] = {x: +crp[iLen - 2], y: +crp[iLen - 1]};
+      } else if (iLen - 4 == i) {
+        p[3] = {x: +crp[0], y: +crp[1]};
+      } else if (iLen - 2 == i) {
+        p[2] = {x: +crp[0], y: +crp[1]};
+        p[3] = {x: +crp[2], y: +crp[3]};
+      }
+    } else {
+      if (iLen - 4 == i) {
+        p[3] = p[2];
+      } else if (!i) {
+        p[0] = {x: +crp[i], y: +crp[i + 1]};
+      }
+    }
+    d.push([
+      end.x,
+      end.y,
+      (-p[0].x + 6 * p[1].x + p[2].x) / 6,
+      (-p[0].y + 6 * p[1].y + p[2].y) / 6,
+      (p[1].x + 6 * p[2].x - p[3].x) / 6,
+      (p[1].y + 6 * p[2].y - p[3].y) / 6,
+      p[2].x,
+      p[2].y
+    ]);
+    end = p[2];
+  }
+
+  return d;
+};
+
+const prepareCurve = exports.prepareCurve = (p1x, p1y, c1x, c1y, c2x, c2y, p2x, p2y) => {
+  const len = Math.floor(bezlen(p1x, p1y, c1x, c1y, c2x, c2y, p2x, p2y) * .75);
+  const map = new Map;
+  for (let i = 0; i <= len; i++) {
+    const t = i / len;
+    map.set(t, findDotsAtSegment(p1x, p1y, c1x, c1y, c2x, c2y, p2x, p2y, t));
+  }
+  return x => {
+    const keys = Array.from(map.keys());
+    let p = map.get(keys[0]);
+    const last = map.get(keys[keys.length - 1]);
+    if (x < p.x || x > last.x) {
+      return null;
+    }
+    for (let i = 0; i < keys.length; i++) {
+      const value = map.get(keys[i]);
+      if (value.x >= x) {
+        const x1 = p.x;
+        const x2 = value.x;
+        const y1 = p.y;
+        const y2 = value.y;
+        if (!i) {
+          return y2;
+        }
+        return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+      }
+      p = value;
+    }
+  };
+};
+
+},{}],"../../../node_modules/@adobe/leonardo-contrast-colors/index.js":[function(require,module,exports) {
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+
+const d3 = require('./d3.js');
+
+const { catmullRom2bezier, prepareCurve } = require('./curve.js');
+const { color } = require('./d3.js');
+
+function smoothScale(ColorsArray, domains, space) {
+  const points = space.channels.map(() => []);
+  ColorsArray.forEach((color, i) =>
+    points.forEach((point, j) =>
+      point.push(domains[i], color[space.channels[j]])
+    )
+  );
+  if (space.name == "hcl") {
+    const point = points[1];
+    for (let i = 1; i < point.length; i += 2) {
+      if (isNaN(point[i])) {
+        point[i] = 0;
       }
     }
   }
+  points.forEach(point => {
+    const nans = [];
+    // leading NaNs
+    for (let i = 1; i < point.length; i += 2) {
+      if (isNaN(point[i])) {
+        nans.push(i);
+      } else {
+        nans.forEach(j => point[j] = point[i]);
+        nans.length = 0;
+        break;
+      }
+    }
+    // all are grey case
+    if (nans.length) {
+      // hue is not important except for JCh
+      const safeJChHue = d3.jch("#ccc").h;
+      nans.forEach(j => point[j] = safeJChHue);
+    }
+    nans.length = 0;
+    // trailing NaNs
+    for (let i = point.length - 1; i > 0; i -= 2) {
+      if (isNaN(point[i])) {
+        nans.push(i);
+      } else {
+        nans.forEach(j => point[j] = point[i]);
+        break;
+      }
+    }
+    // other NaNs
+    for (let i = 1; i < point.length; i += 2) {
+      if (isNaN(point[i])) {
+        point.splice(i - 1, 2);
+        i -= 2;
+      }
+    }
+    // force hue to go on the shortest route
+    if (space.name in {hcl: 1, hsl: 1, hsluv: 1, hsv: 1, jch: 1}) {
+      let prev = point[1];
+      let addon = 0;
+      for (let i = 3; i < point.length; i += 2) {
+        const p = point[i] + addon;
+        const zero = Math.abs(prev - p);
+        const plus = Math.abs(prev - (p + 360));
+        const minus = Math.abs(prev - (p - 360));
+        if (plus < zero && plus < minus) {
+          addon += 360;
+        }
+        if (minus < zero && minus < plus) {
+          addon -= 360;
+        }
+        point[i] += addon;
+        prev = point[i];
+      }
+    }
+  })
+  const prep = points.map(point =>
+    catmullRom2bezier(point).map(curve =>
+      prepareCurve(...curve)
+    )
+  );
+  return d => {
+    const ch = prep.map(p => {
+      for (let i = 0; i < p.length; i++) {
+        const res = p[i](d);
+        if (res != null) {
+          return res;
+        }
+      }
+    });
+
+    if (space.name == 'jch' && ch[1] < 0) {
+      ch[1] = 0;
+    }
+
+    return d3[space.name](...ch) + "";
+  };
 }
 
-assign(d3, d3hsluv, d3hsv, d3cam02);
+const colorSpaces = {
+  CAM02: {
+    name: 'jab',
+    channels: ['J', 'a', 'b'],
+    interpolator: d3.interpolateJab,
+    function: d3.jab
+  },
+  CAM02p: {
+    name: 'jch',
+    channels: ['J', 'C', 'h'],
+    interpolator: d3.interpolateJch,
+    function: d3.jch
+  },
+  LCH: {
+    name: 'lch', // named per correct color definition order
+    channels: ['h', 'c', 'l'],
+    interpolator: d3.interpolateHcl,
+    white: d3.hcl(NaN, 0, 100),
+    black: d3.hcl(NaN, 0, 0),
+    function: d3.hcl
+  },
+  LAB: {
+    name: 'lab',
+    channels: ['l', 'a', 'b'],
+    interpolator: d3.interpolateLab,
+    function: d3.lab
+  },
+  HSL: {
+    name: 'hsl',
+    channels: ['h', 's', 'l'],
+    interpolator: d3.interpolateHsl,
+    function: d3.hsl
+  },
+  HSLuv: {
+    name: 'hsluv',
+    channels: ['l', 'u', 'v'],
+    interpolator: d3.interpolateHsluv,
+    white: d3.hsluv(NaN, NaN, 100),
+    black: d3.hsluv(NaN, NaN, 0),
+    function: d3.hsluv
+  },
+  RGB: {
+    name: 'rgb',
+    channels: ['r', 'g', 'b'],
+    interpolator: d3.interpolateRgb,
+    function: d3.rgb
+  },
+  HSV: {
+    name: 'hsv',
+    channels: ['h', 's', 'v'],
+    interpolator: d3.interpolateHsv,
+    function: d3.hsv
+  },
+  HEX: {
+    name: 'hex',
+    channels: ['r', 'g', 'b'],
+    interpolator: d3.interpolateRgb,
+    function: d3.rgb
+  }
+};
 
 function cArray(c) {
-  let L = d3.hsluv(c).l;
-  let U = d3.hsluv(c).u;
-  let V = d3.hsluv(c).v;
-  return new Array(L, U, V);
+  const color = d3.hsluv(c);
+  const L = color.l;
+  const U = color.u;
+  const V = color.v;
+
+  return [L, U, V];
 }
 
 function removeDuplicates(originalArray, prop) {
   var newArray = [];
-  var lookupObject = {};
+  var lookupObject  = {};
 
-  for (var i in originalArray) {
+  for(var i in originalArray) {
     lookupObject[originalArray[i][prop]] = originalArray[i];
   }
 
-  for (i in lookupObject) {
+  for(i in lookupObject) {
     newArray.push(lookupObject[i]);
   }
-
   return newArray;
 }
 
@@ -29903,116 +30223,93 @@ function createScale({
   colorKeys,
   colorspace = 'LAB',
   shift = 1,
-  fullScale = true
+  fullScale = true,
+  smooth = false
 } = {}) {
-  let domains = colorKeys.map(key => swatches - swatches * (d3.hsluv(key).v / 100)).sort((a, b) => a - b).concat(swatches);
-  domains.unshift(0); // Test logarithmic domain (for non-contrast-based scales)
+  const space = colorSpaces[colorspace];
+  if (!space) {
+    throw new Error(`Colorspace “${colorspace}” not supported`);
+  }
 
-  let sqrtDomains = d3.scalePow().exponent(shift).domain([1, swatches]).range([1, swatches]);
-  sqrtDomains = domains.map(d => {
+  let domains = colorKeys
+    .map(key => swatches - swatches * (d3.hsluv(key).v / 100))
+    .sort((a, b) => a - b)
+    .concat(swatches);
+
+  domains.unshift(0);
+
+  // Test logarithmic domain (for non-contrast-based scales)
+  let sqrtDomains = d3.scalePow()
+    .exponent(shift)
+    .domain([1, swatches])
+    .range([1, swatches]);
+
+  sqrtDomains = domains.map((d) => {
     if (sqrtDomains(d) < 0) {
       return 0;
     }
-
     return sqrtDomains(d);
-  }); // Transform square root in order to smooth gradient
+  });
 
+  // Transform square root in order to smooth gradient
   domains = sqrtDomains;
-  let sortedColor = colorKeys // Convert to HSLuv and keep track of original indices
-  .map((c, i) => {
-    return {
-      colorKeys: cArray(c),
-      index: i
-    };
-  }) // Sort by lightness
-  .sort((c1, c2) => c2.colorKeys[2] - c1.colorKeys[2]) // Retrieve original RGB color
-  .map(data => colorKeys[data.index]);
-  let inverseSortedColor = colorKeys // Convert to HSLuv and keep track of original indices
-  .map((c, i) => {
-    return {
-      colorKeys: cArray(c),
-      index: i
-    };
-  }) // Sort by lightness
-  .sort((c1, c2) => c1.colorKeys[2] - c2.colorKeys[2]) // Retrieve original RGB color
-  .map(data => colorKeys[data.index]);
+
+  let sortedColor = colorKeys
+    // Convert to HSLuv and keep track of original indices
+    .map((c, i) => { return { colorKeys: cArray(c), index: i } })
+    // Sort by lightness
+    .sort((c1, c2) => c2.colorKeys[2] - c1.colorKeys[2])
+    // Retrieve original RGB color
+    .map(data => colorKeys[data.index]);
+
+  let inverseSortedColor = colorKeys
+    // Convert to HSLuv and keep track of original indices
+    .map((c, i) => { return {colorKeys: cArray(c), index: i} })
+    // Sort by lightness
+    .sort((c1, c2) => c1.colorKeys[2] - c2.colorKeys[2])
+    // Retrieve original RGB color
+    .map(data => colorKeys[data.index]);
+
   let ColorsArray = [];
+
   let scale;
-
-  if (colorspace == 'CAM02') {
-    if (fullScale == true) {
-      ColorsArray = ColorsArray.concat('#ffffff', sortedColor, '#000000');
-    } else {
-      ColorsArray = ColorsArray.concat(sortedColor);
-    }
-
-    ColorsArray = ColorsArray.map(d => d3.jab(d));
-    scale = d3.scaleLinear().range(ColorsArray).domain(domains).interpolate(d3.interpolateJab);
-  } else if (colorspace == 'LCH') {
-    ColorsArray = ColorsArray.map(d => d3.hcl(d));
-
-    if (fullScale == true) {
-      ColorsArray = ColorsArray.concat(d3.hcl(NaN, 0, 100), sortedColor, d3.hcl(NaN, 0, 0));
-    } else {
-      ColorsArray = ColorsArray.concat(sortedColor);
-    }
-
-    scale = d3.scaleLinear().range(ColorsArray).domain(domains).interpolate(d3.interpolateHcl);
-  } else if (colorspace == 'LAB') {
-    if (fullScale == true) {
-      ColorsArray = ColorsArray.concat('#ffffff', sortedColor, '#000000');
-    } else {
-      ColorsArray = ColorsArray.concat(sortedColor);
-    }
-
-    ColorsArray = ColorsArray.map(d => d3.lab(d));
-    scale = d3.scaleLinear().range(ColorsArray).domain(domains).interpolate(d3.interpolateLab);
-  } else if (colorspace == 'HSL') {
-    if (fullScale == true) {
-      ColorsArray = ColorsArray.concat('#ffffff', sortedColor, '#000000');
-    } else {
-      ColorsArray = ColorsArray.concat(sortedColor);
-    }
-
-    ColorsArray = ColorsArray.map(d => d3.hsl(d));
-    scale = d3.scaleLinear().range(ColorsArray).domain(domains).interpolate(d3.interpolateHsl);
-  } else if (colorspace == 'HSLuv') {
-    ColorsArray = ColorsArray.map(d => d3.hsluv(d));
-
-    if (fullScale == true) {
-      ColorsArray = ColorsArray.concat(d3.hsluv(NaN, NaN, 100), sortedColor, d3.hsluv(NaN, NaN, 0));
-    } else {
-      ColorsArray = ColorsArray.concat(sortedColor);
-    }
-
-    scale = d3.scaleLinear().range(ColorsArray).domain(domains).interpolate(d3.interpolateHsluv);
-  } else if (colorspace == 'RGB') {
-    if (fullScale == true) {
-      ColorsArray = ColorsArray.concat('#ffffff', sortedColor, '#000000');
-    } else {
-      ColorsArray = ColorsArray.concat(sortedColor);
-    }
-
-    ColorsArray = ColorsArray.map(d => d3.rgb(d));
-    scale = d3.scaleLinear().range(ColorsArray).domain(domains).interpolate(d3.interpolateRgb);
-  } else if (colorspace == 'HSV') {
-    if (fullScale == true) {
-      ColorsArray = ColorsArray.concat('#ffffff', sortedColor, '#000000');
-    } else {
-      ColorsArray = ColorsArray.concat(sortedColor);
-    }
-
-    ColorsArray = ColorsArray.map(d => d3.hsv(d));
-    scale = d3.scaleLinear().range(ColorsArray).domain(domains).interpolate(d3.interpolateHsv);
+  if (fullScale) {
+    ColorsArray = [space.white || '#fff', ...sortedColor, space.black || '#000'];
   } else {
-    throw new Error(`Colorspace ${colorspace} not supported`);
+    ColorsArray = sortedColor;
+  }
+  const stringColors = ColorsArray;
+  ColorsArray = ColorsArray.map(d => d3[space.name](d));
+  if (space.name == 'hcl') {
+    // special case for HCL if C is NaN we should treat it as 0
+    ColorsArray.forEach(c => c.c = isNaN(c.c) ? 0 : c.c);
+  }
+  if (space.name == 'jch') {
+    // JCh has some “random” hue for grey colors.
+    // Replacing it to NaN, so we can apply the same method of dealing with them.
+    for (let i = 0; i < stringColors.length; i++) {
+      const color = d3.hcl(stringColors[i]);
+      if (!color.c) {
+        ColorsArray[i].h = NaN;
+      }
+    }
+  }
+
+  if (smooth) {
+    scale = smoothScale(ColorsArray, domains, space);
+  } else {
+    scale = d3.scaleLinear()
+      .range(ColorsArray)
+      .domain(domains)
+      .interpolate(space.interpolator);
   }
 
   let Colors = d3.range(swatches).map(d => scale(d));
-  let colors = Colors.filter(el => el != null); // Return colors as hex values for interpolators.
 
+  let colors = Colors.filter(el => el != null);
+
+  // Return colors as hex values for interpolators.
   let colorsHex = [];
-
   for (let i = 0; i < colors.length; i++) {
     colorsHex.push(d3.rgb(colors[i]).formatHex());
   }
@@ -30029,25 +30326,21 @@ function createScale({
 
 function generateBaseScale({
   colorKeys,
-  colorspace = 'LAB'
+  colorspace = 'LAB',
+  smooth
 } = {}) {
   // create massive scale
   let swatches = 1000;
-  let scale = createScale({
-    swatches: swatches,
-    colorKeys: colorKeys,
-    colorspace: colorspace,
-    shift: 1
-  });
+  let scale = createScale({swatches: swatches, colorKeys: colorKeys, colorspace: colorspace, shift: 1, smooth: smooth});
   let newColors = scale.colorsHex;
-  let colorObj = newColors // Convert to HSLuv and keep track of original indices
-  .map((c, i) => {
-    return {
-      value: Number(cArray(c)[2].toFixed(0)),
-      index: i
-    };
-  });
-  let filteredArr = removeDuplicates(colorObj, "value").map(data => newColors[data.index]);
+
+  let colorObj = newColors
+    // Convert to HSLuv and keep track of original indices
+    .map((c, i) => { return { value: Math.round(cArray(c)[2]), index: i } });
+
+  let filteredArr = removeDuplicates(colorObj, "value")
+    .map(data => newColors[data.index]);
+
   return filteredArr;
 }
 
@@ -30055,158 +30348,252 @@ function generateContrastColors({
   colorKeys,
   base,
   ratios,
-  colorspace = 'LAB'
+  colorspace = 'LAB',
+  smooth = false,
+  output = 'HEX'
 } = {}) {
   if (!base) {
     throw new Error(`Base is undefined`);
   }
-
   if (!colorKeys) {
     throw new Error(`Color Keys are undefined`);
   }
-
-  for (let i = 0; i < colorKeys.length; i++) {
+  for (let i=0; i<colorKeys.length; i++) {
     if (colorKeys[i].length < 6) {
       throw new Error('Color Key must be greater than 6 and include hash # if hex.');
-    } else if (colorKeys[i].length == 6 && colorKeys[i].charAt(0) != 0) {
+    }
+    else if (colorKeys[i].length == 6 && colorKeys[i].charAt(0) != 0) {
       throw new Error('Color Key missing hash #');
     }
   }
-
   if (!ratios) {
     throw new Error(`Ratios are undefined`);
   }
+  const outputFormat = colorSpaces[output];
+  if (!outputFormat) {
+    throw new Error(`Colorspace “${output}” not supported`);
+  }
 
   let swatches = 3000;
-  let scaleData = createScale({
-    swatches: swatches,
-    colorKeys: colorKeys,
-    colorspace: colorspace,
-    shift: 1
-  });
-  let baseV = d3.hsluv(base).v / 100;
-  let Contrasts = d3.range(swatches).map(d => {
+
+  let scaleData = createScale({swatches: swatches, colorKeys: colorKeys, colorspace: colorspace, shift: 1, smooth: smooth});
+  let baseV = (d3.hsluv(base).v) / 100;
+
+  let Contrasts = d3.range(swatches).map((d) => {
     let rgbArray = [d3.rgb(scaleData.scale(d)).r, d3.rgb(scaleData.scale(d)).g, d3.rgb(scaleData.scale(d)).b];
     let baseRgbArray = [d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b];
     let ca = contrast(rgbArray, baseRgbArray, baseV).toFixed(2);
+
     return Number(ca);
   });
-  let contrasts = Contrasts.filter(el => el != null);
-  let newColors = [];
-  ratios = ratios.map(Number); // Return color matching target ratio, or closest number
 
-  for (let i = 0; i < ratios.length; i++) {
+  let contrasts = Contrasts.filter(el => el != null);
+
+  let newColors = [];
+  ratios = ratios.map(Number);
+
+  // Return color matching target ratio, or closest number
+  for (let i=0; i < ratios.length; i++){
     let r = binarySearch(contrasts, ratios[i], baseV);
-    newColors.push(d3.rgb(scaleData.colors[r]).hex());
+
+    // use fixColorValue function to convert each color to the specified
+    // output format. 
+    newColors.push(fixColorValue(scaleData.colors[r], output));
+    
   }
 
   return newColors;
 }
 
+// Helper function to change any NaN to a zero
+function filterNaN(x) {
+  if(isNaN(x)) {
+    return 0;
+  } else {
+    return x;
+  }
+}
+
+// Helper function for rounding color values to whole numbers
+function fixColorValue(color, format, object = false) {
+  let colorObj = colorSpaces[format].function(color);
+  let propArray = colorSpaces[format].channels;
+
+  let newColorObj = {
+    [propArray[0]]: filterNaN(colorObj[propArray[0]]),
+    [propArray[1]]: filterNaN(colorObj[propArray[1]]),
+    [propArray[2]]: filterNaN(colorObj[propArray[2]])
+  }
+
+  // HSLuv
+  if (format === "HSLuv") {
+    for (let i = 0; i < propArray.length; i++) {
+
+      let roundedPct = Math.round(newColorObj[propArray[i]]);
+      newColorObj[propArray[i]] = roundedPct;
+    }
+  }
+  // LAB, LCH, JAB, JCH
+  else if (format === "LAB" || format === "LCH" || format === "CAM02" || format === "CAM02p") {
+    for (let i = 0; i < propArray.length; i++) {
+      let roundedPct = Math.round(newColorObj[propArray[i]]);
+
+      if (propArray[i] === "h" && !object) {
+        roundedPct = roundedPct + "deg";
+      }
+      if (propArray[i] === "l" && !object || propArray[i] === "J" && !object) {
+        roundedPct = roundedPct + "%";
+      }
+
+      newColorObj[propArray[i]] = roundedPct;
+      
+    }
+  }
+  else {
+    for (let i = 0; i < propArray.length; i++) {
+      if (propArray[i] === "s" || propArray[i] === "l" || propArray[i] === "v") {
+        // leave as decimal format
+        let roundedPct = parseFloat(newColorObj[propArray[i]].toFixed(2));
+        if(object) {
+          newColorObj[propArray[i]] = roundedPct;
+        }
+        else {
+          newColorObj[propArray[i]] = Math.round(roundedPct * 100) + "%";
+        }
+      }
+      else {
+        let roundedPct = parseFloat(newColorObj[propArray[i]].toFixed());
+        if (propArray[i] === "h" && !object) {
+          roundedPct = roundedPct + "deg";
+        } 
+        newColorObj[propArray[i]] = roundedPct;
+      }
+    }
+  }
+
+  let stringName = colorSpaces[format].name;
+  let stringValue;
+
+  if (format === "HEX") {
+    stringValue = d3.rgb(color).formatHex();
+  } else {
+    let str0, srt1, str2;
+    if (format === "LCH") {
+      // Have to force opposite direction of array index for LCH
+      // because d3 defines the channel order as "h, c, l" but we
+      // want the output to be in the correct format
+      str0 = newColorObj[propArray[2]] + ", ";
+      str1 = newColorObj[propArray[1]] + ", ";
+      str2 = newColorObj[propArray[0]];
+    }
+    else {
+      str0 = newColorObj[propArray[0]] + ", ";
+      str1 = newColorObj[propArray[1]] + ", ";
+      str2 = newColorObj[propArray[2]];
+    }
+
+    stringValue = stringName + "(" + str0 + str1 + str2 + ")";
+  }
+
+  if (object) { 
+    // return colorObj;
+    return newColorObj;
+  } else {
+    return stringValue;
+  }
+}
+
 function luminance(r, g, b) {
-  let a = [r, g, b].map(v => {
+  let a = [r, g, b].map((v) => {
     v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    return v <= 0.03928
+        ? v / 12.92
+        : Math.pow( (v + 0.055) / 1.055, 2.4 );
   });
-  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  return (a[0] * 0.2126) + (a[1] * 0.7152) + (a[2] * 0.0722);
 }
 
 function contrast(color, base, baseV) {
   let colorLum = luminance(color[0], color[1], color[2]);
   let baseLum = luminance(base[0], base[1], base[2]);
+
   let cr1 = (colorLum + 0.05) / (baseLum + 0.05);
   let cr2 = (baseLum + 0.05) / (colorLum + 0.05);
 
   if (baseV < 0.5) {
     if (cr1 >= 1) {
       return cr1;
-    } else {
+    }
+    else {
       return cr2 * -1;
     } // Return as whole negative number
-
-  } else {
+  }
+  else {
     if (cr1 < 1) {
       return cr2;
-    } else {
+    }
+    else {
       return cr1 * -1;
     } // Return as whole negative number
-
   }
 }
 
 function minPositive(r) {
-  if (!r) {
-    throw new Error('Array undefined');
-  }
-
-  if (!Array.isArray(r)) {
-    throw new Error('Passed object is not an array');
-  }
-
+  if (!r) { throw new Error('Array undefined');}
+  if (!Array.isArray(r)) { throw new Error('Passed object is not an array');}
   let arr = [];
 
-  for (let i = 0; i < r.length; i++) {
-    if (r[i] >= 1) {
+  for(let i=0; i < r.length; i++) {
+    if(r[i] >= 1) {
       arr.push(r[i]);
     }
   }
-
   return Math.min(...arr);
 }
 
 function ratioName(r) {
-  if (!r) {
-    throw new Error('Ratios undefined');
-  }
-
-  r = r.sort(function (a, b) {
-    return a - b;
-  }); // sort ratio array in case unordered
+  if (!r) { throw new Error('Ratios undefined');}
+  r = r.sort(function(a, b){return a - b}); // sort ratio array in case unordered
 
   let min = minPositive(r);
   let minIndex = r.indexOf(min);
   let nArr = []; // names array
 
   let rNeg = r.slice(0, minIndex);
-  let rPos = r.slice(minIndex, r.length); // Name the negative values
+  let rPos = r.slice(minIndex, r.length);
 
-  for (let i = 0; i < rNeg.length; i++) {
-    let d = 1 / (rNeg.length + 1);
+  // Name the negative values
+  for (let i=0; i < rNeg.length; i++) {
+    let d = 1/(rNeg.length + 1);
     let m = d * 100;
     let nVal = m * (i + 1);
     nArr.push(Number(nVal.toFixed()));
-  } // Name the positive values
-
-
-  for (let i = 0; i < rPos.length; i++) {
-    nArr.push((i + 1) * 100);
   }
-
-  nArr.sort(function (a, b) {
-    return a - b;
-  }); // just for safe measure
+  // Name the positive values
+  for (let i=0; i < rPos.length; i++) {
+    nArr.push((i+1)*100);
+  }
+  nArr.sort(function(a, b){return a - b}); // just for safe measure
 
   return nArr;
 }
 
 function generateAdaptiveTheme({
-  colorScales,
-  baseScale,
-  brightness,
-  contrast = 1
+  colorScales, 
+  baseScale, 
+  brightness, 
+  contrast = 1,
+  output = 'HEX'
 }) {
   if (!baseScale) {
     throw new Error('baseScale is undefined');
   }
-
   let found = false;
-
-  for (let i = 0; i < colorScales.length; i++) {
+  for(let i = 0; i < colorScales.length; i++) {
     if (colorScales[i].name !== baseScale) {
       found = true;
     }
   }
-
   if (found = false) {
     throw new Error('baseScale must match the name of a colorScales object');
   }
@@ -30214,35 +30601,39 @@ function generateAdaptiveTheme({
   if (!colorScales) {
     throw new Error('colorScales are undefined');
   }
-
   if (!Array.isArray(colorScales)) {
     throw new Error('colorScales must be an array of objects');
   }
+  for (let i=0; i < colorScales.length; i ++) {
+    // if (colorScales[i].swatchNames) { // if the scale has custom swatch names
+    //   let ratioLength = colorScales[i].ratios.length;
+    //   let swatchNamesLength = colorScales[i].swatchNames.length;
+
+    //   if (ratioLength !== swatchNamesLength) {
+    //     throw new Error('`${colorScales[i].name}`ratios and swatchNames must be equal length')
+    //   }
+    // }
+  }
 
   if (brightness === undefined) {
-    return function (brightness, contrast) {
-      return generateAdaptiveTheme({
-        baseScale: baseScale,
-        colorScales: colorScales,
-        brightness: brightness,
-        contrast: contrast
-      });
-    };
-  } else {
+    return function(brightness, contrast) {
+      return generateAdaptiveTheme({baseScale: baseScale, colorScales: colorScales, brightness: brightness, contrast: contrast, output: output});
+    }
+  }
+  else {
     // Find color object matching base scale
-    let baseIndex = colorScales.findIndex(x => x.name === baseScale);
+    let baseIndex = colorScales.findIndex( x => x.name === baseScale );
     let baseKeys = colorScales[baseIndex].colorKeys;
-    let baseMode = colorScales[baseIndex].colorspace; // define params to pass as bscale
+    let baseMode = colorScales[baseIndex].colorspace;
+    let smooth = colorScales[baseIndex].smooth;
 
-    let bscale = generateBaseScale({
-      colorKeys: baseKeys,
-      colorspace: baseMode
-    }); // base parameter to create base scale (0-100)
-
+    // define params to pass as bscale
+    let bscale = generateBaseScale({colorKeys: baseKeys, colorspace: baseMode, smooth: smooth}); // base parameter to create base scale (0-100)
     let bval = bscale[brightness];
     let baseObj = {
       background: bval
     };
+
     let arr = [];
     arr.push(baseObj);
 
@@ -30250,90 +30641,161 @@ function generateAdaptiveTheme({
       if (!colorScales[i].name) {
         throw new Error('Color missing name');
       }
-
       let name = colorScales[i].name;
-      let ratios = colorScales[i].ratios;
+
+      let ratioInput = colorScales[i].ratios;
+      let ratios;
+      let swatchNames;
+      // assign ratios array whether input is array or object
+      if(Array.isArray(ratioInput)) {
+        ratios = ratioInput;
+      } else {
+        ratios = Object.values(ratioInput);
+        swatchNames = Object.keys(ratioInput);
+      }
+
+      let smooth = colorScales[i].smooth;
       let newArr = [];
       let colorObj = {
         name: name,
         values: newArr
       };
-      ratios = ratios.map(function (d) {
-        let r;
 
-        if (d > 1) {
-          r = (d - 1) * contrast + 1;
-        } else if (d < -1) {
-          r = (d + 1) * contrast - 1;
-        } else {
+      ratios = ratios.map(function(d) {
+        let r;
+        if(d > 1) {
+          r = ((d-1) * contrast) + 1;
+        }
+        else if(d < -1) {
+          r = ((d+1) * contrast) - 1;
+        }
+        else {
           r = 1;
         }
-
         return Number(r.toFixed(2));
       });
+
       let outputColors = generateContrastColors({
         colorKeys: colorScales[i].colorKeys,
         colorspace: colorScales[i].colorspace,
         ratios: ratios,
-        base: bval
+        base: bval,
+        smooth: smooth,
+        output: output
       });
 
-      for (let i = 0; i < outputColors.length; i++) {
-        let rVal = ratioName(ratios)[i];
-        let n = name.concat(rVal);
+      for (let i=0; i < outputColors.length; i++) {
+        let n;
+        if(!swatchNames) {
+          let rVal = ratioName(ratios)[i];
+          n = name.concat(rVal);
+        }
+        else {
+          n = swatchNames[i];
+        }
+
         let obj = {
           name: n,
           contrast: ratios[i],
           value: outputColors[i]
         };
-        newArr.push(obj);
+        newArr.push(obj)
       }
-
       arr.push(colorObj);
+      
     }
 
     return arr;
   }
-} // Binary search to find index of contrast ratio that is input
+}
+
+// Binary search to find index of contrast ratio that is input
 // Modified from https://medium.com/hackernoon/programming-with-js-binary-search-aaf86cef9cb3
-
-
 function binarySearch(list, value, baseLum) {
   // initial values for start, middle and end
-  let start = 0;
-  let stop = list.length - 1;
-  let middle = Math.floor((start + stop) / 2);
-  let minContrast = Math.min(...list);
-  let maxContrast = Math.max(...list); // While the middle is not what we're looking for and the list does not have a single item
+  let start = 0
+  let stop = list.length - 1
+  let middle = Math.floor((start + stop) / 2)
 
+  let minContrast = Math.min(...list);
+  let maxContrast = Math.max(...list);
+
+  // While the middle is not what we're looking for and the list does not have a single item
   while (list[middle] !== value && start < stop) {
     // Value greater than since array is ordered descending
-    if (baseLum > 0.5) {
-      // if base is light, ratios ordered ascending
+    if (baseLum > 0.5) {  // if base is light, ratios ordered ascending
       if (value < list[middle]) {
-        stop = middle - 1;
-      } else {
-        start = middle + 1;
+        stop = middle - 1
       }
-    } else {
-      // order descending
+      else {
+        start = middle + 1
+      }
+    }
+    else { // order descending
       if (value > list[middle]) {
-        stop = middle - 1;
-      } else {
-        start = middle + 1;
+        stop = middle - 1
       }
-    } // recalculate middle on every iteration
+      else {
+        start = middle + 1
+      }
+    }
+    // recalculate middle on every iteration
+    middle = Math.floor((start + stop) / 2)
+  }
 
+  // If no match, find closest item greater than value
+  let closest = list.reduce((prev, curr) => curr > value ? curr : prev);
 
-    middle = Math.floor((start + stop) / 2);
-  } // If no match, find closest item greater than value
-
-
-  let closest = list.reduce((prev, curr) => curr > value ? curr : prev); // if the current middle item is what we're looking for return it's index, else closest
-
-  return list[middle] == !value ? closest : middle; // how it was originally expressed
+  // if the current middle item is what we're looking for return it's index, else closest
+  return (list[middle] == !value) ? closest : middle // how it was originally expressed
 }
-},{"d3":"../../../node_modules/@adobe/leonardo-contrast-colors/node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"../../../node_modules/onecolor/one-color-all-debug.js":[function(require,module,exports) {
+
+module.exports = {
+  createScale,
+  luminance,
+  contrast,
+  binarySearch,
+  generateBaseScale,
+  generateContrastColors,
+  minPositive,
+  ratioName,
+  generateAdaptiveTheme,
+  fixColorValue
+};
+
+},{"./d3.js":"../../../node_modules/@adobe/leonardo-contrast-colors/d3.js","./curve.js":"../../../node_modules/@adobe/leonardo-contrast-colors/curve.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.generateAdaptiveTheme = exports.ratioName = exports.minPositive = exports.generateContrastColors = exports.generateBaseScale = exports.binarySearch = exports.contrast = exports.luminance = exports.createScale = void 0;
+
+var _index = _interopRequireDefault(require("./index.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const createScale = _index.default.createScale;
+exports.createScale = createScale;
+const luminance = _index.default.luminance;
+exports.luminance = luminance;
+const contrast = _index.default.contrast;
+exports.contrast = contrast;
+const binarySearch = _index.default.binarySearch;
+exports.binarySearch = binarySearch;
+const generateBaseScale = _index.default.generateBaseScale;
+exports.generateBaseScale = generateBaseScale;
+const generateContrastColors = _index.default.generateContrastColors;
+exports.generateContrastColors = generateContrastColors;
+const minPositive = _index.default.minPositive;
+exports.minPositive = minPositive;
+const ratioName = _index.default.ratioName;
+exports.ratioName = ratioName;
+const generateAdaptiveTheme = _index.default.generateAdaptiveTheme;
+exports.generateAdaptiveTheme = generateAdaptiveTheme;
+var _default = _index.default;
+exports.default = _default;
+},{"./index.js":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js"}],"../../../node_modules/onecolor/one-color-all-debug.js":[function(require,module,exports) {
 var define;
 /*jshint evil:true, onevar:false*/
 
@@ -34419,12 +34881,19 @@ window.bulkItemColorInput = function bulkItemColorInput(e) {
   var buttonId = itemId.concat('_addKeyColor');
   var keyInputs = document.getElementById(keyInputId);
   var bulkInputs = document.getElementById('bulkColors');
-  var bulkValues = bulkInputs.value.replace(/\r\n/g, "\n").replace(/[,\/]/g, "\n").replace(" ", "").replace(/['\/]/g, "").replace(/["\/]/g, "").split("\n"); // let isSwatch = document.getElementById('importAsSwatch').checked;
+  var bulkValues = bulkInputs.value.replace(/\r\n/g, "\n").replace(/[,\/]/g, "\n").replace(" ", "").replace(/['\/]/g, "").replace(/["\/]/g, "").replace(" ", "").split("\n");
+
+  for (var i = 0; i < bulkValues.length; i++) {
+    if (!bulkValues[i].startsWith('#')) {
+      bulkValues[i] = '#' + bulkValues[i];
+    }
+  } // let isSwatch = document.getElementById('importAsSwatch').checked;
+
 
   var bgInput = currentBackgroundColor; // add key colors for each input
 
-  for (var i = 0; i < bulkValues.length; i++) {
-    themeAddColor(d3.color(bulkValues[i]).formatHex(), itemId);
+  for (var _i4 = 0; _i4 < bulkValues.length; _i4++) {
+    themeAddColor(d3.color(bulkValues[_i4]).formatHex(), itemId);
   } // if (isSwatch) {
   //   // create ratio inputs for each contrast
   //   for (let i=0; i<bulkValues.length; i++) {
@@ -34516,47 +34985,47 @@ function toggleConfigs() {
       }
     }
   } else if (value == 'viewScaleConfig') {
-    for (var _i4 = 0; _i4 < configs.length; _i4++) {
-      if (configs[_i4].classList.contains('is-hidden')) {
-        configs[_i4].classList.remove('is-hidden');
+    for (var _i5 = 0; _i5 < configs.length; _i5++) {
+      if (configs[_i5].classList.contains('is-hidden')) {
+        configs[_i5].classList.remove('is-hidden');
       }
 
-      if (gradient[_i4].classList.contains('is-large')) {
-        gradient[_i4].classList.remove('is-large');
+      if (gradient[_i5].classList.contains('is-large')) {
+        gradient[_i5].classList.remove('is-large');
       }
 
-      if (gradient[_i4].classList.contains('is-hidden')) {
-        gradient[_i4].classList.remove('is-hidden');
+      if (gradient[_i5].classList.contains('is-hidden')) {
+        gradient[_i5].classList.remove('is-hidden');
       }
 
-      if (!swatches[_i4].classList.contains('is-hidden')) {
-        swatches[_i4].classList.add('is-hidden');
+      if (!swatches[_i5].classList.contains('is-hidden')) {
+        swatches[_i5].classList.add('is-hidden');
       }
 
-      if (swatches[_i4].classList.contains('is-large')) {
-        swatches[_i4].classList.remove('is-large');
+      if (swatches[_i5].classList.contains('is-large')) {
+        swatches[_i5].classList.remove('is-large');
       }
     }
   } else if (value == 'viewSwatch') {
-    for (var _i5 = 0; _i5 < configs.length; _i5++) {
-      if (!configs[_i5].classList.contains('is-hidden')) {
-        configs[_i5].classList.add('is-hidden');
+    for (var _i6 = 0; _i6 < configs.length; _i6++) {
+      if (!configs[_i6].classList.contains('is-hidden')) {
+        configs[_i6].classList.add('is-hidden');
       }
 
-      if (!gradient[_i5].classList.contains('is-large')) {
-        gradient[_i5].classList.add('is-large');
+      if (!gradient[_i6].classList.contains('is-large')) {
+        gradient[_i6].classList.add('is-large');
       }
 
-      if (!gradient[_i5].classList.contains('is-hidden')) {
-        gradient[_i5].classList.add('is-hidden');
+      if (!gradient[_i6].classList.contains('is-hidden')) {
+        gradient[_i6].classList.add('is-hidden');
       }
 
-      if (swatches[_i5].classList.contains('is-hidden')) {
-        swatches[_i5].classList.remove('is-hidden');
+      if (swatches[_i6].classList.contains('is-hidden')) {
+        swatches[_i6].classList.remove('is-hidden');
       }
 
-      if (!swatches[_i5].classList.contains('is-large')) {
-        swatches[_i5].classList.add('is-large');
+      if (!swatches[_i6].classList.contains('is-large')) {
+        swatches[_i6].classList.add('is-large');
       }
     }
   }
@@ -34706,5 +35175,5 @@ function getThemeData() {
     contrast: contrast
   };
 }
-},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/toast/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/illustratedmessage/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/colorinputs.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/charts.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/style.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/index.js","color-blind":"../../../node_modules/color-blind/lib/color-blind.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js"}]},{},["theme.js"], null)
+},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/toast/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@spectrum-css/illustratedmessage/dist/index-vars.css":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/colorinputs.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/charts.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","./scss/style.scss":"../../../node_modules/@spectrum-css/toast/dist/index-vars.css","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","color-blind":"../../../node_modules/color-blind/lib/color-blind.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js"}]},{},["theme.js"], null)
 //# sourceMappingURL=/theme.817f3fc2.js.map
