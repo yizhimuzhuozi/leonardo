@@ -31814,13 +31814,13 @@ function buildDemo(text, background) {
   var demo = document.getElementById('demoWrapper');
   var largeTxt = document.getElementById('largeText');
   var smallTxt = document.getElementById('smallText');
-  var button = document.getElementById('demoButton');
-  var icon = document.getElementById('demoIcon');
+  var button = document.getElementById('demoButton'); // let icon = document.getElementById('demoIcon');
+
   var buttonText = document.getElementById('demoButtonText');
   demo.style.backgroundColor = background;
   button.style.backgroundColor = background;
-  button.style.borderColor = text;
-  icon.style.color = text;
+  button.style.borderColor = text; // icon.style.color = text;
+
   buttonText.style.color = text;
   largeTxt.style.color = text;
   smallTxt.style.color = text;
