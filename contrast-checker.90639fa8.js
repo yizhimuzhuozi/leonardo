@@ -125,8 +125,6 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
 },{}],"../node_modules/@spectrum-css/page/dist/index-vars.css":[function(require,module,exports) {
 
-},{}],"../node_modules/@spectrum-css/typography/dist/index-vars.css":[function(require,module,exports) {
-
 },{}],"../node_modules/@spectrum-css/icon/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../node_modules/@spectrum-css/link/dist/index-vars.css":[function(require,module,exports) {
@@ -157,13 +155,13 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
 },{}],"../node_modules/@spectrum-css/tabs/dist/index-vars.css":[function(require,module,exports) {
 
-},{}],"../node_modules/@spectrum-css/illustratedmessage/dist/index-vars.css":[function(require,module,exports) {
+},{}],"../node_modules/@spectrum-css/typography/dist/index-vars.css":[function(require,module,exports) {
+
+},{}],"scss/style.scss":[function(require,module,exports) {
 
 },{}],"scss/colorinputs.scss":[function(require,module,exports) {
 
-},{}],"scss/charts.scss":[function(require,module,exports) {
-
-},{}],"scss/style.scss":[function(require,module,exports) {
+},{}],"scss/converter.scss":[function(require,module,exports) {
 
 },{}],"../node_modules/@adobe/focus-ring-polyfill/index.js":[function(require,module,exports) {
 /**
@@ -264,6 +262,99 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   doc.addEventListener('focus', onFocusHandler, true);
   doc.addEventListener('blur', onBlurHandler, true);
 })(typeof window === "undefined" ? undefined : document);
+
+},{}],"../node_modules/loadicons/index.js":[function(require,module,exports) {
+var define;
+/*
+Copyright 2018 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+
+// UMD pattern via umdjs
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD
+    define([], factory);
+  }
+  else if (typeof module === 'object' && module.exports) {
+    // CommonJS-like
+    module.exports = factory();
+  }
+  else {
+    // Browser
+    root.loadIcons = factory();
+  }
+}(typeof self !== 'undefined' ? self : this, function() {
+  function handleError(string) {
+    string = 'loadIcons: '+string;
+    var error = new Error(string);
+
+    console.error(error.toString());
+
+    if (typeof callback === 'function') {
+      callback(error);
+    }
+  }
+
+  function injectSVG(svgURL, callback) {
+    var error;
+    // 200 for web servers, 0 for CEP panels
+    if (this.status !== 200 && this.status !== 0) {
+      handleError('Failed to fetch icons, server returned ' + this.status);
+      return;
+    }
+
+    // Parse the SVG
+    var parser = new DOMParser();
+    try {
+      var doc = parser.parseFromString(this.responseText, 'image/svg+xml');
+      var svg = doc.firstChild;
+    }
+    catch (err) {
+      handleError('Error parsing SVG: ' + err);
+      return;
+    }
+
+    // Make sure a real SVG was returned
+    if (svg && svg.tagName === 'svg') {
+      // Hide the element
+      svg.style.display = 'none';
+
+      svg.setAttribute('data-url', svgURL);
+
+      // Insert it into the head
+      document.head.insertBefore(svg, null);
+
+      // Pass the SVG to the callback
+      if (typeof callback === 'function') {
+        callback(null, svg);
+      }
+    }
+    else {
+      handleError('Parsed SVG document contained something other than an SVG');
+    }
+  }
+
+  function loadIcons(svgURL, callback) {
+    // Request the SVG sprite
+    var req = new XMLHttpRequest();
+    req.open('GET', svgURL, true);
+    req.addEventListener('load', injectSVG.bind(req, svgURL, callback));
+    req.addEventListener('error', function(event) {
+      handleError('Request failed');
+    });
+    req.send();
+  }
+
+  return loadIcons;
+}));
 
 },{}],"../node_modules/d3/dist/package.js":[function(require,module,exports) {
 "use strict";
@@ -29995,7 +30086,423 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./src/hsv":"../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../node_modules/d3-hsv/src/interpolateHsv.js"}],"../node_modules/@adobe/leonardo-contrast-colors/d3.js":[function(require,module,exports) {
+},{"./src/hsv":"../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../node_modules/d3-hsv/src/interpolateHsv.js"}],"../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
+var define;
+var global = arguments[3];
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.d3 = global.d3 || {})));
+}(this, (function (exports) { 'use strict';
+
+function ccw(polygon) {
+
+    var _p = polygon.slice(0), sum = 0;
+
+    _p.push(_p[0]);
+
+    for (var i = 0; i <= polygon.length - 1; i++) {
+
+        var j  = i + 1;
+        var p1 = _p[i].rotated;
+        var p2 = _p[j].rotated;
+
+        sum += (p2.x - p1.x) * (p2.y + p1.y);
+    }
+    // if the area is positive
+    // the curve is counter-clockwise
+    // because of the flipped y-Axis in the browser
+    return sum > 0 ? true : false;
+}
+
+function centroid(polygon){
+    var _x = 0, _y = 0, _z = 0, _n = polygon.length;
+
+    for (var i = _n - 1; i >= 0; i--) {
+        _x += polygon[i].rotated.x;
+        _y += polygon[i].rotated.y;
+        _z += polygon[i].rotated.z;
+    }
+    return {
+        x: _x / _n,
+        y: _y / _n,
+        z: _z / _n,
+    };
+}
+
+function rotateRzRyRx(po, angles){
+
+    var rc = angles.rotateCenter;
+
+    po.x -= rc[0];
+    po.y -= rc[1];
+    po.z -= rc[2];
+
+    var rz = rotateZ(po, angles.z);
+    var ry = rotateY(rz, angles.y);
+    var rx = rotateX(ry, angles.x);
+
+    rx.x += rc[0];
+    rx.y += rc[1];
+    rx.z += rc[2];
+
+    return rx;
+}
+
+function rotateX(p, a){
+    var sa = Math.sin(a), ca = Math.cos(a);
+    return {
+        x: p.x,
+        y: p.y * ca - p.z * sa,
+        z: p.y * sa + p.z * ca
+    };
+}
+
+function rotateY(p, a){
+    var sa = Math.sin(a), ca = Math.cos(a);
+    return {
+        x: p.z * sa + p.x * ca,
+        y: p.y,
+        z: p.z * ca - p.x * sa
+    };
+}
+
+function rotateZ(p, a){
+    var sa = Math.sin(a), ca = Math.cos(a);
+    return {
+        x: p.x * ca - p.y * sa,
+        y: p.x * sa + p.y * ca,
+        z: p.z
+    };
+}
+
+function point(points, options, point, angles){
+
+    for (var i = points.length - 1; i >= 0; i--) {
+
+        var p       = points[i];
+
+        p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
+        p.centroid  = p.rotated;
+        p.projected = options.project(p.rotated, options);
+    }
+    return points;
+}
+
+function cube(cubes, options, point$$1, angles){
+    for (var i = cubes.length - 1; i >= 0; i--) {
+
+        var cube = cubes[i];
+
+        var vertices = point([
+            cube[0],
+            cube[1],
+            cube[2],
+            cube[3],
+            cube[4],
+            cube[5],
+            cube[6],
+            cube[7]
+        ], options, point$$1, angles);
+
+        var v1 = vertices[0];
+        var v2 = vertices[1];
+        var v3 = vertices[2];
+        var v4 = vertices[3];
+        var v5 = vertices[4];
+        var v6 = vertices[5];
+        var v7 = vertices[6];
+        var v8 = vertices[7];
+
+        var front  = [v1, v2, v3, v4];
+        var back   = [v8, v7, v6, v5];
+        var left   = [v5, v6, v2, v1];
+        var right  = [v4, v3, v7, v8];
+        var top    = [v5, v1, v4, v8];
+        var bottom = [v2, v6, v7, v3];
+
+        front.centroid  = centroid(front);
+        back.centroid   = centroid(back);
+        left.centroid   = centroid(left);
+        right.centroid  = centroid(right);
+        top.centroid    = centroid(top);
+        bottom.centroid = centroid(bottom);
+
+        front.ccw  = ccw(front);
+        back.ccw   = ccw(back);
+        left.ccw   = ccw(left);
+        right.ccw  = ccw(right);
+        top.ccw    = ccw(top);
+        bottom.ccw = ccw(bottom);
+
+        front.face  = 'front';
+        back.face   = 'back';
+        left.face   = 'left';
+        right.face  = 'right';
+        top.face    = 'top';
+        bottom.face = 'bottom';
+
+        var faces = [front, back, left, right, top, bottom];
+
+        cube.faces = faces;
+        cube.centroid = {x: (left.centroid.x + right.centroid.x)/2, y: (top.centroid.y + bottom.centroid.y)/2, z: (front.centroid.z + back.centroid.z/2)};
+    }
+    return cubes;
+}
+
+function gridPlane(grid, options, point$$1, angles){
+
+    var points = point(grid, options, point$$1, angles);
+    var cnt    = 0, planes = [];
+    var numPts = options.row;
+    var numRow = points.length/numPts;
+
+    for (var i = numRow - 1; i > 0; i--) {
+        for (var j = numPts - 1; j > 0; j--) {
+
+            var p1 = j + i * numPts, p4 = p1 - 1, p2 = p4 - numPts + 1, p3 = p2 - 1;
+            var pl = [points[p1], points[p2], points[p3], points[p4]];
+
+            pl.plane    = 'plane_' + cnt++;
+            pl.ccw      = ccw(pl);
+            pl.centroid = centroid(pl);
+            planes.push(pl);
+        }
+    }
+
+    return planes;
+}
+
+function lineStrip(lineStrip, options, point, angles){
+
+    for (var i = lineStrip.length - 1; i >= 0; i--) {
+
+        var l = lineStrip[i], m = l.length/2, t = parseInt(m);
+
+        for (var j = l.length - 1; j >= 0; j--) {
+            var p = l[j];
+            p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
+            p.projected = options.project(p.rotated, options);
+        }
+
+        l.centroid = t === m ? centroid([ l[m - 1], l[m] ]) : { x: l[t].rotated.x, y: l[t].rotated.y, z: l[t].rotated.z };
+    }
+    return lineStrip;
+}
+
+function line(lines, options, point, angles){
+
+    for (var i = lines.length - 1; i >= 0; i--) {
+
+        var line      = lines[i];
+
+        var p1        = line[0];
+        var p2        = line[1];
+
+        p1.rotated    = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
+        p2.rotated    = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
+
+        p1.projected  = options.project(p1.rotated, options);
+        p2.projected  = options.project(p2.rotated, options);
+
+        line.centroid = centroid(line);
+    }
+    return lines;
+}
+
+function plane(planes, options, point, angles){
+
+    for (var i = planes.length - 1; i >= 0; i--) {
+
+        var plane    = planes[i];
+
+        var p1       = plane[0];
+        var p2       = plane[1];
+        var p3       = plane[2];
+        var p4       = plane[3];
+
+        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
+        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
+        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
+        p4.rotated   = rotateRzRyRx({x : point.x(p4), y : point.y(p4), z : point.z(p4)}, angles);
+
+        p1.projected = options.project(p1.rotated, options);
+        p2.projected = options.project(p2.rotated, options);
+        p3.projected = options.project(p3.rotated, options);
+        p4.projected = options.project(p4.rotated, options);
+
+        plane.ccw      = ccw(plane);
+        plane.centroid = centroid(plane);
+    }
+    return planes;
+}
+
+function triangle(triangles, options, point, angles){
+
+    for (var i = triangles.length - 1; i >= 0; i--) {
+        var tri      = triangles[i];
+        var p1       = tri[0];
+        var p2       = tri[1];
+        var p3       = tri[2];
+
+        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
+        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
+        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
+
+        p1.projected = options.project(p1.rotated, options);
+        p2.projected = options.project(p2.rotated, options);
+        p3.projected = options.project(p3.rotated, options);
+
+        tri.ccw      = ccw(tri);
+        tri.centroid = centroid(tri);
+    }
+    return triangles;
+}
+
+function drawLineStrip(lineStrip){
+    var lastPoint = lineStrip[lineStrip.length - 1];
+    var path = 'M' + lastPoint.projected.x + ',' + lastPoint.projected.y;
+    for (var i = lineStrip.length - 2; i >= 0; i--) {
+        var p = lineStrip[i].projected;
+        path += 'L' + p.x + ',' + p.y;
+    }
+    return path;
+}
+
+function drawPlane(d){
+	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'L' + d[3].projected.x + ',' + d[3].projected.y + 'Z';
+}
+
+function drawTriangle(d){
+	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'Z';
+}
+
+function orthographic(d, options){
+    return {
+        x: options.origin[0] + options.scale * d.x,
+        y: options.origin[1] + options.scale * d.y
+    };
+}
+
+function x(p) {
+    return p[0];
+}
+
+function y(p) {
+    return p[1];
+}
+
+function z(p) {
+    return p[2];
+}
+
+/**
+* @author Stefan Nieke / http://niekes.com/
+*/
+
+var _3d = function() {
+
+    var origin          = [0, 0],
+        scale           = 1,
+        projection      = orthographic,
+        angleX          = 0,
+        angleY          = 0,
+        angleZ          = 0,
+        rotateCenter    = [0,0,0],
+        x$$1               = x,
+        y$$1               = y,
+        z$$1               = z,
+        row             = undefined,
+        shape           = 'POINT',
+        processData = {
+            'CUBE'       : cube,
+            'GRID'       : gridPlane,
+            'LINE'       : line,
+            'LINE_STRIP' : lineStrip,
+            'PLANE'      : plane,
+            'POINT'      : point,
+            'SURFACE'    : gridPlane,
+            'TRIANGLE'   : triangle,
+        },
+        draw = {
+            'CUBE'       : drawPlane,
+            'GRID'       : drawPlane,
+            'LINE_STRIP' : drawLineStrip,
+            'PLANE'      : drawPlane,
+            'SURFACE'    : drawPlane,
+            'TRIANGLE'   : drawTriangle,
+        };
+
+    function _3d(data){
+        return processData[shape](
+            data,
+            { scale: scale, origin: origin, project: projection, row: row },
+            { x: x$$1, y: y$$1, z: z$$1 },
+            { x: angleX, y: angleY, z: angleZ, rotateCenter: rotateCenter }
+        );
+    }
+
+    _3d.origin = function(_){
+        return arguments.length ? (origin = _, _3d) : origin;
+    };
+
+    _3d.scale = function(_){
+        return arguments.length ? (scale = _, _3d) : scale;
+    };
+
+    _3d.rotateX = function(_){
+        return arguments.length ? (angleX = _, _3d) : angleX;
+    };
+
+    _3d.rotateY = function(_){
+        return arguments.length ? (angleY = _, _3d) : angleY;
+    };
+
+    _3d.rotateZ = function(_){
+        return arguments.length ? (angleZ = _, _3d) : angleZ;
+    };
+
+    _3d.shape = function(_, r){
+        return arguments.length ? (shape = _, row = r, _3d) : shape;
+    };
+
+    _3d.rotateCenter = function(_){
+        return arguments.length ? (rotateCenter = _, _3d) : rotateCenter;
+    };
+
+    _3d.x = function(_){
+        return arguments.length ? (x$$1 = typeof _ === 'function' ? _ : +_, _3d) : x$$1;
+    };
+
+    _3d.y = function(_){
+        return arguments.length ? (y$$1 = typeof _ === 'function' ? _ : +_, _3d) : y$$1;
+    };
+
+    _3d.z = function(_){
+        return arguments.length ? (z$$1 = typeof _ === 'function' ? _ : +_, _3d) : z$$1;
+    };
+
+    _3d.sort = function(a, b){
+        var _a = a.centroid.z, _b = b.centroid.z;
+        return _a < _b ? -1 : _a > _b ? 1 : _a >= _b ? 0 : NaN;
+    };
+
+    _3d.draw = function(d){
+        if(!((shape === 'POINT') || (shape === 'LINE'))){
+            return draw[shape](d);
+        }
+    };
+
+    return _3d;
+};
+
+exports._3d = _3d;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+
+},{}],"../node_modules/@adobe/leonardo-contrast-colors/d3.js":[function(require,module,exports) {
 /*
 Copyright 2019 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -30966,2512 +31473,13 @@ const generateAdaptiveTheme = _index.default.generateAdaptiveTheme;
 exports.generateAdaptiveTheme = generateAdaptiveTheme;
 var _default = _index.default;
 exports.default = _default;
-},{"./index.js":"../node_modules/@adobe/leonardo-contrast-colors/index.js"}],"../node_modules/loadicons/index.js":[function(require,module,exports) {
-var define;
-/*
-Copyright 2018 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
-
-// UMD pattern via umdjs
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD
-    define([], factory);
-  }
-  else if (typeof module === 'object' && module.exports) {
-    // CommonJS-like
-    module.exports = factory();
-  }
-  else {
-    // Browser
-    root.loadIcons = factory();
-  }
-}(typeof self !== 'undefined' ? self : this, function() {
-  function handleError(string) {
-    string = 'loadIcons: '+string;
-    var error = new Error(string);
-
-    console.error(error.toString());
-
-    if (typeof callback === 'function') {
-      callback(error);
-    }
-  }
-
-  function injectSVG(svgURL, callback) {
-    var error;
-    // 200 for web servers, 0 for CEP panels
-    if (this.status !== 200 && this.status !== 0) {
-      handleError('Failed to fetch icons, server returned ' + this.status);
-      return;
-    }
-
-    // Parse the SVG
-    var parser = new DOMParser();
-    try {
-      var doc = parser.parseFromString(this.responseText, 'image/svg+xml');
-      var svg = doc.firstChild;
-    }
-    catch (err) {
-      handleError('Error parsing SVG: ' + err);
-      return;
-    }
-
-    // Make sure a real SVG was returned
-    if (svg && svg.tagName === 'svg') {
-      // Hide the element
-      svg.style.display = 'none';
-
-      svg.setAttribute('data-url', svgURL);
-
-      // Insert it into the head
-      document.head.insertBefore(svg, null);
-
-      // Pass the SVG to the callback
-      if (typeof callback === 'function') {
-        callback(null, svg);
-      }
-    }
-    else {
-      handleError('Parsed SVG document contained something other than an SVG');
-    }
-  }
-
-  function loadIcons(svgURL, callback) {
-    // Request the SVG sprite
-    var req = new XMLHttpRequest();
-    req.open('GET', svgURL, true);
-    req.addEventListener('load', injectSVG.bind(req, svgURL, callback));
-    req.addEventListener('error', function(event) {
-      handleError('Request failed');
-    });
-    req.send();
-  }
-
-  return loadIcons;
-}));
-
-},{}],"../node_modules/clipboard/dist/clipboard.js":[function(require,module,exports) {
-var define;
-/*!
- * clipboard.js v2.0.6
- * https://clipboardjs.com/
- * 
- * Licensed MIT © Zeno Rocha
- */
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["ClipboardJS"] = factory();
-	else
-		root["ClipboardJS"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports) {
-
-function select(element) {
-    var selectedText;
-
-    if (element.nodeName === 'SELECT') {
-        element.focus();
-
-        selectedText = element.value;
-    }
-    else if (element.nodeName === 'INPUT' || element.nodeName === 'TEXTAREA') {
-        var isReadOnly = element.hasAttribute('readonly');
-
-        if (!isReadOnly) {
-            element.setAttribute('readonly', '');
-        }
-
-        element.select();
-        element.setSelectionRange(0, element.value.length);
-
-        if (!isReadOnly) {
-            element.removeAttribute('readonly');
-        }
-
-        selectedText = element.value;
-    }
-    else {
-        if (element.hasAttribute('contenteditable')) {
-            element.focus();
-        }
-
-        var selection = window.getSelection();
-        var range = document.createRange();
-
-        range.selectNodeContents(element);
-        selection.removeAllRanges();
-        selection.addRange(range);
-
-        selectedText = selection.toString();
-    }
-
-    return selectedText;
-}
-
-module.exports = select;
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-function E () {
-  // Keep this empty so it's easier to inherit from
-  // (via https://github.com/lipsmack from https://github.com/scottcorgan/tiny-emitter/issues/3)
-}
-
-E.prototype = {
-  on: function (name, callback, ctx) {
-    var e = this.e || (this.e = {});
-
-    (e[name] || (e[name] = [])).push({
-      fn: callback,
-      ctx: ctx
-    });
-
-    return this;
-  },
-
-  once: function (name, callback, ctx) {
-    var self = this;
-    function listener () {
-      self.off(name, listener);
-      callback.apply(ctx, arguments);
-    };
-
-    listener._ = callback
-    return this.on(name, listener, ctx);
-  },
-
-  emit: function (name) {
-    var data = [].slice.call(arguments, 1);
-    var evtArr = ((this.e || (this.e = {}))[name] || []).slice();
-    var i = 0;
-    var len = evtArr.length;
-
-    for (i; i < len; i++) {
-      evtArr[i].fn.apply(evtArr[i].ctx, data);
-    }
-
-    return this;
-  },
-
-  off: function (name, callback) {
-    var e = this.e || (this.e = {});
-    var evts = e[name];
-    var liveEvents = [];
-
-    if (evts && callback) {
-      for (var i = 0, len = evts.length; i < len; i++) {
-        if (evts[i].fn !== callback && evts[i].fn._ !== callback)
-          liveEvents.push(evts[i]);
-      }
-    }
-
-    // Remove event from queue to prevent memory leak
-    // Suggested by https://github.com/lazd
-    // Ref: https://github.com/scottcorgan/tiny-emitter/commit/c6ebfaa9bc973b33d110a84a307742b7cf94c953#commitcomment-5024910
-
-    (liveEvents.length)
-      ? e[name] = liveEvents
-      : delete e[name];
-
-    return this;
-  }
-};
-
-module.exports = E;
-module.exports.TinyEmitter = E;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var is = __webpack_require__(3);
-var delegate = __webpack_require__(4);
-
-/**
- * Validates all params and calls the right
- * listener function based on its target type.
- *
- * @param {String|HTMLElement|HTMLCollection|NodeList} target
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listen(target, type, callback) {
-    if (!target && !type && !callback) {
-        throw new Error('Missing required arguments');
-    }
-
-    if (!is.string(type)) {
-        throw new TypeError('Second argument must be a String');
-    }
-
-    if (!is.fn(callback)) {
-        throw new TypeError('Third argument must be a Function');
-    }
-
-    if (is.node(target)) {
-        return listenNode(target, type, callback);
-    }
-    else if (is.nodeList(target)) {
-        return listenNodeList(target, type, callback);
-    }
-    else if (is.string(target)) {
-        return listenSelector(target, type, callback);
-    }
-    else {
-        throw new TypeError('First argument must be a String, HTMLElement, HTMLCollection, or NodeList');
-    }
-}
-
-/**
- * Adds an event listener to a HTML element
- * and returns a remove listener function.
- *
- * @param {HTMLElement} node
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listenNode(node, type, callback) {
-    node.addEventListener(type, callback);
-
-    return {
-        destroy: function() {
-            node.removeEventListener(type, callback);
-        }
-    }
-}
-
-/**
- * Add an event listener to a list of HTML elements
- * and returns a remove listener function.
- *
- * @param {NodeList|HTMLCollection} nodeList
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listenNodeList(nodeList, type, callback) {
-    Array.prototype.forEach.call(nodeList, function(node) {
-        node.addEventListener(type, callback);
-    });
-
-    return {
-        destroy: function() {
-            Array.prototype.forEach.call(nodeList, function(node) {
-                node.removeEventListener(type, callback);
-            });
-        }
-    }
-}
-
-/**
- * Add an event listener to a selector
- * and returns a remove listener function.
- *
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listenSelector(selector, type, callback) {
-    return delegate(document.body, selector, type, callback);
-}
-
-module.exports = listen;
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-/**
- * Check if argument is a HTML element.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.node = function(value) {
-    return value !== undefined
-        && value instanceof HTMLElement
-        && value.nodeType === 1;
-};
-
-/**
- * Check if argument is a list of HTML elements.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.nodeList = function(value) {
-    var type = Object.prototype.toString.call(value);
-
-    return value !== undefined
-        && (type === '[object NodeList]' || type === '[object HTMLCollection]')
-        && ('length' in value)
-        && (value.length === 0 || exports.node(value[0]));
-};
-
-/**
- * Check if argument is a string.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.string = function(value) {
-    return typeof value === 'string'
-        || value instanceof String;
-};
-
-/**
- * Check if argument is a function.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.fn = function(value) {
-    var type = Object.prototype.toString.call(value);
-
-    return type === '[object Function]';
-};
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var closest = __webpack_require__(5);
-
-/**
- * Delegates event to a selector.
- *
- * @param {Element} element
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @param {Boolean} useCapture
- * @return {Object}
- */
-function _delegate(element, selector, type, callback, useCapture) {
-    var listenerFn = listener.apply(this, arguments);
-
-    element.addEventListener(type, listenerFn, useCapture);
-
-    return {
-        destroy: function() {
-            element.removeEventListener(type, listenerFn, useCapture);
-        }
-    }
-}
-
-/**
- * Delegates event to a selector.
- *
- * @param {Element|String|Array} [elements]
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @param {Boolean} useCapture
- * @return {Object}
- */
-function delegate(elements, selector, type, callback, useCapture) {
-    // Handle the regular Element usage
-    if (typeof elements.addEventListener === 'function') {
-        return _delegate.apply(null, arguments);
-    }
-
-    // Handle Element-less usage, it defaults to global delegation
-    if (typeof type === 'function') {
-        // Use `document` as the first parameter, then apply arguments
-        // This is a short way to .unshift `arguments` without running into deoptimizations
-        return _delegate.bind(null, document).apply(null, arguments);
-    }
-
-    // Handle Selector-based usage
-    if (typeof elements === 'string') {
-        elements = document.querySelectorAll(elements);
-    }
-
-    // Handle Array-like based usage
-    return Array.prototype.map.call(elements, function (element) {
-        return _delegate(element, selector, type, callback, useCapture);
-    });
-}
-
-/**
- * Finds closest match and invokes callback.
- *
- * @param {Element} element
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @return {Function}
- */
-function listener(element, selector, type, callback) {
-    return function(e) {
-        e.delegateTarget = closest(e.target, selector);
-
-        if (e.delegateTarget) {
-            callback.call(element, e);
-        }
-    }
-}
-
-module.exports = delegate;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-var DOCUMENT_NODE_TYPE = 9;
-
-/**
- * A polyfill for Element.matches()
- */
-if (typeof Element !== 'undefined' && !Element.prototype.matches) {
-    var proto = Element.prototype;
-
-    proto.matches = proto.matchesSelector ||
-                    proto.mozMatchesSelector ||
-                    proto.msMatchesSelector ||
-                    proto.oMatchesSelector ||
-                    proto.webkitMatchesSelector;
-}
-
-/**
- * Finds the closest parent that matches a selector.
- *
- * @param {Element} element
- * @param {String} selector
- * @return {Function}
- */
-function closest (element, selector) {
-    while (element && element.nodeType !== DOCUMENT_NODE_TYPE) {
-        if (typeof element.matches === 'function' &&
-            element.matches(selector)) {
-          return element;
-        }
-        element = element.parentNode;
-    }
-}
-
-module.exports = closest;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
+},{"./index.js":"../node_modules/@adobe/leonardo-contrast-colors/index.js"}],"contrast-checker.js":[function(require,module,exports) {
 "use strict";
-__webpack_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: ./node_modules/select/src/select.js
-var src_select = __webpack_require__(0);
-var select_default = /*#__PURE__*/__webpack_require__.n(src_select);
-
-// CONCATENATED MODULE: ./src/clipboard-action.js
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-
-
-/**
- * Inner class which performs selection from either `text` or `target`
- * properties and then executes copy or cut operations.
- */
-
-var clipboard_action_ClipboardAction = function () {
-    /**
-     * @param {Object} options
-     */
-    function ClipboardAction(options) {
-        _classCallCheck(this, ClipboardAction);
-
-        this.resolveOptions(options);
-        this.initSelection();
-    }
-
-    /**
-     * Defines base properties passed from constructor.
-     * @param {Object} options
-     */
-
-
-    _createClass(ClipboardAction, [{
-        key: 'resolveOptions',
-        value: function resolveOptions() {
-            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            this.action = options.action;
-            this.container = options.container;
-            this.emitter = options.emitter;
-            this.target = options.target;
-            this.text = options.text;
-            this.trigger = options.trigger;
-
-            this.selectedText = '';
-        }
-
-        /**
-         * Decides which selection strategy is going to be applied based
-         * on the existence of `text` and `target` properties.
-         */
-
-    }, {
-        key: 'initSelection',
-        value: function initSelection() {
-            if (this.text) {
-                this.selectFake();
-            } else if (this.target) {
-                this.selectTarget();
-            }
-        }
-
-        /**
-         * Creates a fake textarea element, sets its value from `text` property,
-         * and makes a selection on it.
-         */
-
-    }, {
-        key: 'selectFake',
-        value: function selectFake() {
-            var _this = this;
-
-            var isRTL = document.documentElement.getAttribute('dir') == 'rtl';
-
-            this.removeFake();
-
-            this.fakeHandlerCallback = function () {
-                return _this.removeFake();
-            };
-            this.fakeHandler = this.container.addEventListener('click', this.fakeHandlerCallback) || true;
-
-            this.fakeElem = document.createElement('textarea');
-            // Prevent zooming on iOS
-            this.fakeElem.style.fontSize = '12pt';
-            // Reset box model
-            this.fakeElem.style.border = '0';
-            this.fakeElem.style.padding = '0';
-            this.fakeElem.style.margin = '0';
-            // Move element out of screen horizontally
-            this.fakeElem.style.position = 'absolute';
-            this.fakeElem.style[isRTL ? 'right' : 'left'] = '-9999px';
-            // Move element to the same position vertically
-            var yPosition = window.pageYOffset || document.documentElement.scrollTop;
-            this.fakeElem.style.top = yPosition + 'px';
-
-            this.fakeElem.setAttribute('readonly', '');
-            this.fakeElem.value = this.text;
-
-            this.container.appendChild(this.fakeElem);
-
-            this.selectedText = select_default()(this.fakeElem);
-            this.copyText();
-        }
-
-        /**
-         * Only removes the fake element after another click event, that way
-         * a user can hit `Ctrl+C` to copy because selection still exists.
-         */
-
-    }, {
-        key: 'removeFake',
-        value: function removeFake() {
-            if (this.fakeHandler) {
-                this.container.removeEventListener('click', this.fakeHandlerCallback);
-                this.fakeHandler = null;
-                this.fakeHandlerCallback = null;
-            }
-
-            if (this.fakeElem) {
-                this.container.removeChild(this.fakeElem);
-                this.fakeElem = null;
-            }
-        }
-
-        /**
-         * Selects the content from element passed on `target` property.
-         */
-
-    }, {
-        key: 'selectTarget',
-        value: function selectTarget() {
-            this.selectedText = select_default()(this.target);
-            this.copyText();
-        }
-
-        /**
-         * Executes the copy operation based on the current selection.
-         */
-
-    }, {
-        key: 'copyText',
-        value: function copyText() {
-            var succeeded = void 0;
-
-            try {
-                succeeded = document.execCommand(this.action);
-            } catch (err) {
-                succeeded = false;
-            }
-
-            this.handleResult(succeeded);
-        }
-
-        /**
-         * Fires an event based on the copy operation result.
-         * @param {Boolean} succeeded
-         */
-
-    }, {
-        key: 'handleResult',
-        value: function handleResult(succeeded) {
-            this.emitter.emit(succeeded ? 'success' : 'error', {
-                action: this.action,
-                text: this.selectedText,
-                trigger: this.trigger,
-                clearSelection: this.clearSelection.bind(this)
-            });
-        }
-
-        /**
-         * Moves focus away from `target` and back to the trigger, removes current selection.
-         */
-
-    }, {
-        key: 'clearSelection',
-        value: function clearSelection() {
-            if (this.trigger) {
-                this.trigger.focus();
-            }
-            document.activeElement.blur();
-            window.getSelection().removeAllRanges();
-        }
-
-        /**
-         * Sets the `action` to be performed which can be either 'copy' or 'cut'.
-         * @param {String} action
-         */
-
-    }, {
-        key: 'destroy',
-
-
-        /**
-         * Destroy lifecycle.
-         */
-        value: function destroy() {
-            this.removeFake();
-        }
-    }, {
-        key: 'action',
-        set: function set() {
-            var action = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'copy';
-
-            this._action = action;
-
-            if (this._action !== 'copy' && this._action !== 'cut') {
-                throw new Error('Invalid "action" value, use either "copy" or "cut"');
-            }
-        }
-
-        /**
-         * Gets the `action` property.
-         * @return {String}
-         */
-        ,
-        get: function get() {
-            return this._action;
-        }
-
-        /**
-         * Sets the `target` property using an element
-         * that will be have its content copied.
-         * @param {Element} target
-         */
-
-    }, {
-        key: 'target',
-        set: function set(target) {
-            if (target !== undefined) {
-                if (target && (typeof target === 'undefined' ? 'undefined' : _typeof(target)) === 'object' && target.nodeType === 1) {
-                    if (this.action === 'copy' && target.hasAttribute('disabled')) {
-                        throw new Error('Invalid "target" attribute. Please use "readonly" instead of "disabled" attribute');
-                    }
-
-                    if (this.action === 'cut' && (target.hasAttribute('readonly') || target.hasAttribute('disabled'))) {
-                        throw new Error('Invalid "target" attribute. You can\'t cut text from elements with "readonly" or "disabled" attributes');
-                    }
-
-                    this._target = target;
-                } else {
-                    throw new Error('Invalid "target" value, use a valid Element');
-                }
-            }
-        }
-
-        /**
-         * Gets the `target` property.
-         * @return {String|HTMLElement}
-         */
-        ,
-        get: function get() {
-            return this._target;
-        }
-    }]);
-
-    return ClipboardAction;
-}();
-
-/* harmony default export */ var clipboard_action = (clipboard_action_ClipboardAction);
-// EXTERNAL MODULE: ./node_modules/tiny-emitter/index.js
-var tiny_emitter = __webpack_require__(1);
-var tiny_emitter_default = /*#__PURE__*/__webpack_require__.n(tiny_emitter);
-
-// EXTERNAL MODULE: ./node_modules/good-listener/src/listen.js
-var listen = __webpack_require__(2);
-var listen_default = /*#__PURE__*/__webpack_require__.n(listen);
-
-// CONCATENATED MODULE: ./src/clipboard.js
-var clipboard_typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var clipboard_createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function clipboard_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-
-
-
-
-/**
- * Base class which takes one or more elements, adds event listeners to them,
- * and instantiates a new `ClipboardAction` on each click.
- */
-
-var clipboard_Clipboard = function (_Emitter) {
-    _inherits(Clipboard, _Emitter);
-
-    /**
-     * @param {String|HTMLElement|HTMLCollection|NodeList} trigger
-     * @param {Object} options
-     */
-    function Clipboard(trigger, options) {
-        clipboard_classCallCheck(this, Clipboard);
-
-        var _this = _possibleConstructorReturn(this, (Clipboard.__proto__ || Object.getPrototypeOf(Clipboard)).call(this));
-
-        _this.resolveOptions(options);
-        _this.listenClick(trigger);
-        return _this;
-    }
-
-    /**
-     * Defines if attributes would be resolved using internal setter functions
-     * or custom functions that were passed in the constructor.
-     * @param {Object} options
-     */
-
-
-    clipboard_createClass(Clipboard, [{
-        key: 'resolveOptions',
-        value: function resolveOptions() {
-            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-            this.action = typeof options.action === 'function' ? options.action : this.defaultAction;
-            this.target = typeof options.target === 'function' ? options.target : this.defaultTarget;
-            this.text = typeof options.text === 'function' ? options.text : this.defaultText;
-            this.container = clipboard_typeof(options.container) === 'object' ? options.container : document.body;
-        }
-
-        /**
-         * Adds a click event listener to the passed trigger.
-         * @param {String|HTMLElement|HTMLCollection|NodeList} trigger
-         */
-
-    }, {
-        key: 'listenClick',
-        value: function listenClick(trigger) {
-            var _this2 = this;
-
-            this.listener = listen_default()(trigger, 'click', function (e) {
-                return _this2.onClick(e);
-            });
-        }
-
-        /**
-         * Defines a new `ClipboardAction` on each click event.
-         * @param {Event} e
-         */
-
-    }, {
-        key: 'onClick',
-        value: function onClick(e) {
-            var trigger = e.delegateTarget || e.currentTarget;
-
-            if (this.clipboardAction) {
-                this.clipboardAction = null;
-            }
-
-            this.clipboardAction = new clipboard_action({
-                action: this.action(trigger),
-                target: this.target(trigger),
-                text: this.text(trigger),
-                container: this.container,
-                trigger: trigger,
-                emitter: this
-            });
-        }
-
-        /**
-         * Default `action` lookup function.
-         * @param {Element} trigger
-         */
-
-    }, {
-        key: 'defaultAction',
-        value: function defaultAction(trigger) {
-            return getAttributeValue('action', trigger);
-        }
-
-        /**
-         * Default `target` lookup function.
-         * @param {Element} trigger
-         */
-
-    }, {
-        key: 'defaultTarget',
-        value: function defaultTarget(trigger) {
-            var selector = getAttributeValue('target', trigger);
-
-            if (selector) {
-                return document.querySelector(selector);
-            }
-        }
-
-        /**
-         * Returns the support of the given action, or all actions if no action is
-         * given.
-         * @param {String} [action]
-         */
-
-    }, {
-        key: 'defaultText',
-
-
-        /**
-         * Default `text` lookup function.
-         * @param {Element} trigger
-         */
-        value: function defaultText(trigger) {
-            return getAttributeValue('text', trigger);
-        }
-
-        /**
-         * Destroy lifecycle.
-         */
-
-    }, {
-        key: 'destroy',
-        value: function destroy() {
-            this.listener.destroy();
-
-            if (this.clipboardAction) {
-                this.clipboardAction.destroy();
-                this.clipboardAction = null;
-            }
-        }
-    }], [{
-        key: 'isSupported',
-        value: function isSupported() {
-            var action = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ['copy', 'cut'];
-
-            var actions = typeof action === 'string' ? [action] : action;
-            var support = !!document.queryCommandSupported;
-
-            actions.forEach(function (action) {
-                support = support && !!document.queryCommandSupported(action);
-            });
-
-            return support;
-        }
-    }]);
-
-    return Clipboard;
-}(tiny_emitter_default.a);
-
-/**
- * Helper function to retrieve attribute value.
- * @param {String} suffix
- * @param {Element} element
- */
-
-
-function getAttributeValue(suffix, element) {
-    var attribute = 'data-clipboard-' + suffix;
-
-    if (!element.hasAttribute(attribute)) {
-        return;
-    }
-
-    return element.getAttribute(attribute);
-}
-
-/* harmony default export */ var clipboard = __webpack_exports__["default"] = (clipboard_Clipboard);
-
-/***/ })
-/******/ ])["default"];
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
-},{}],"../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
-var define;
-var global = arguments[3];
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.d3 = global.d3 || {})));
-}(this, (function (exports) { 'use strict';
-
-function ccw(polygon) {
-
-    var _p = polygon.slice(0), sum = 0;
-
-    _p.push(_p[0]);
-
-    for (var i = 0; i <= polygon.length - 1; i++) {
-
-        var j  = i + 1;
-        var p1 = _p[i].rotated;
-        var p2 = _p[j].rotated;
-
-        sum += (p2.x - p1.x) * (p2.y + p1.y);
-    }
-    // if the area is positive
-    // the curve is counter-clockwise
-    // because of the flipped y-Axis in the browser
-    return sum > 0 ? true : false;
-}
-
-function centroid(polygon){
-    var _x = 0, _y = 0, _z = 0, _n = polygon.length;
-
-    for (var i = _n - 1; i >= 0; i--) {
-        _x += polygon[i].rotated.x;
-        _y += polygon[i].rotated.y;
-        _z += polygon[i].rotated.z;
-    }
-    return {
-        x: _x / _n,
-        y: _y / _n,
-        z: _z / _n,
-    };
-}
-
-function rotateRzRyRx(po, angles){
-
-    var rc = angles.rotateCenter;
-
-    po.x -= rc[0];
-    po.y -= rc[1];
-    po.z -= rc[2];
-
-    var rz = rotateZ(po, angles.z);
-    var ry = rotateY(rz, angles.y);
-    var rx = rotateX(ry, angles.x);
-
-    rx.x += rc[0];
-    rx.y += rc[1];
-    rx.z += rc[2];
-
-    return rx;
-}
-
-function rotateX(p, a){
-    var sa = Math.sin(a), ca = Math.cos(a);
-    return {
-        x: p.x,
-        y: p.y * ca - p.z * sa,
-        z: p.y * sa + p.z * ca
-    };
-}
-
-function rotateY(p, a){
-    var sa = Math.sin(a), ca = Math.cos(a);
-    return {
-        x: p.z * sa + p.x * ca,
-        y: p.y,
-        z: p.z * ca - p.x * sa
-    };
-}
-
-function rotateZ(p, a){
-    var sa = Math.sin(a), ca = Math.cos(a);
-    return {
-        x: p.x * ca - p.y * sa,
-        y: p.x * sa + p.y * ca,
-        z: p.z
-    };
-}
-
-function point(points, options, point, angles){
-
-    for (var i = points.length - 1; i >= 0; i--) {
-
-        var p       = points[i];
-
-        p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
-        p.centroid  = p.rotated;
-        p.projected = options.project(p.rotated, options);
-    }
-    return points;
-}
-
-function cube(cubes, options, point$$1, angles){
-    for (var i = cubes.length - 1; i >= 0; i--) {
-
-        var cube = cubes[i];
-
-        var vertices = point([
-            cube[0],
-            cube[1],
-            cube[2],
-            cube[3],
-            cube[4],
-            cube[5],
-            cube[6],
-            cube[7]
-        ], options, point$$1, angles);
-
-        var v1 = vertices[0];
-        var v2 = vertices[1];
-        var v3 = vertices[2];
-        var v4 = vertices[3];
-        var v5 = vertices[4];
-        var v6 = vertices[5];
-        var v7 = vertices[6];
-        var v8 = vertices[7];
-
-        var front  = [v1, v2, v3, v4];
-        var back   = [v8, v7, v6, v5];
-        var left   = [v5, v6, v2, v1];
-        var right  = [v4, v3, v7, v8];
-        var top    = [v5, v1, v4, v8];
-        var bottom = [v2, v6, v7, v3];
-
-        front.centroid  = centroid(front);
-        back.centroid   = centroid(back);
-        left.centroid   = centroid(left);
-        right.centroid  = centroid(right);
-        top.centroid    = centroid(top);
-        bottom.centroid = centroid(bottom);
-
-        front.ccw  = ccw(front);
-        back.ccw   = ccw(back);
-        left.ccw   = ccw(left);
-        right.ccw  = ccw(right);
-        top.ccw    = ccw(top);
-        bottom.ccw = ccw(bottom);
-
-        front.face  = 'front';
-        back.face   = 'back';
-        left.face   = 'left';
-        right.face  = 'right';
-        top.face    = 'top';
-        bottom.face = 'bottom';
-
-        var faces = [front, back, left, right, top, bottom];
-
-        cube.faces = faces;
-        cube.centroid = {x: (left.centroid.x + right.centroid.x)/2, y: (top.centroid.y + bottom.centroid.y)/2, z: (front.centroid.z + back.centroid.z/2)};
-    }
-    return cubes;
-}
-
-function gridPlane(grid, options, point$$1, angles){
-
-    var points = point(grid, options, point$$1, angles);
-    var cnt    = 0, planes = [];
-    var numPts = options.row;
-    var numRow = points.length/numPts;
-
-    for (var i = numRow - 1; i > 0; i--) {
-        for (var j = numPts - 1; j > 0; j--) {
-
-            var p1 = j + i * numPts, p4 = p1 - 1, p2 = p4 - numPts + 1, p3 = p2 - 1;
-            var pl = [points[p1], points[p2], points[p3], points[p4]];
-
-            pl.plane    = 'plane_' + cnt++;
-            pl.ccw      = ccw(pl);
-            pl.centroid = centroid(pl);
-            planes.push(pl);
-        }
-    }
-
-    return planes;
-}
-
-function lineStrip(lineStrip, options, point, angles){
-
-    for (var i = lineStrip.length - 1; i >= 0; i--) {
-
-        var l = lineStrip[i], m = l.length/2, t = parseInt(m);
-
-        for (var j = l.length - 1; j >= 0; j--) {
-            var p = l[j];
-            p.rotated   = rotateRzRyRx({x : point.x(p), y : point.y(p), z : point.z(p)}, angles);
-            p.projected = options.project(p.rotated, options);
-        }
-
-        l.centroid = t === m ? centroid([ l[m - 1], l[m] ]) : { x: l[t].rotated.x, y: l[t].rotated.y, z: l[t].rotated.z };
-    }
-    return lineStrip;
-}
-
-function line(lines, options, point, angles){
-
-    for (var i = lines.length - 1; i >= 0; i--) {
-
-        var line      = lines[i];
-
-        var p1        = line[0];
-        var p2        = line[1];
-
-        p1.rotated    = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
-        p2.rotated    = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
-
-        p1.projected  = options.project(p1.rotated, options);
-        p2.projected  = options.project(p2.rotated, options);
-
-        line.centroid = centroid(line);
-    }
-    return lines;
-}
-
-function plane(planes, options, point, angles){
-
-    for (var i = planes.length - 1; i >= 0; i--) {
-
-        var plane    = planes[i];
-
-        var p1       = plane[0];
-        var p2       = plane[1];
-        var p3       = plane[2];
-        var p4       = plane[3];
-
-        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
-        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
-        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
-        p4.rotated   = rotateRzRyRx({x : point.x(p4), y : point.y(p4), z : point.z(p4)}, angles);
-
-        p1.projected = options.project(p1.rotated, options);
-        p2.projected = options.project(p2.rotated, options);
-        p3.projected = options.project(p3.rotated, options);
-        p4.projected = options.project(p4.rotated, options);
-
-        plane.ccw      = ccw(plane);
-        plane.centroid = centroid(plane);
-    }
-    return planes;
-}
-
-function triangle(triangles, options, point, angles){
-
-    for (var i = triangles.length - 1; i >= 0; i--) {
-        var tri      = triangles[i];
-        var p1       = tri[0];
-        var p2       = tri[1];
-        var p3       = tri[2];
-
-        p1.rotated   = rotateRzRyRx({x : point.x(p1), y : point.y(p1), z : point.z(p1)}, angles);
-        p2.rotated   = rotateRzRyRx({x : point.x(p2), y : point.y(p2), z : point.z(p2)}, angles);
-        p3.rotated   = rotateRzRyRx({x : point.x(p3), y : point.y(p3), z : point.z(p3)}, angles);
-
-        p1.projected = options.project(p1.rotated, options);
-        p2.projected = options.project(p2.rotated, options);
-        p3.projected = options.project(p3.rotated, options);
-
-        tri.ccw      = ccw(tri);
-        tri.centroid = centroid(tri);
-    }
-    return triangles;
-}
-
-function drawLineStrip(lineStrip){
-    var lastPoint = lineStrip[lineStrip.length - 1];
-    var path = 'M' + lastPoint.projected.x + ',' + lastPoint.projected.y;
-    for (var i = lineStrip.length - 2; i >= 0; i--) {
-        var p = lineStrip[i].projected;
-        path += 'L' + p.x + ',' + p.y;
-    }
-    return path;
-}
-
-function drawPlane(d){
-	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'L' + d[3].projected.x + ',' + d[3].projected.y + 'Z';
-}
-
-function drawTriangle(d){
-	return 'M' + d[0].projected.x + ',' + d[0].projected.y + 'L' + d[1].projected.x + ',' + d[1].projected.y + 'L' + d[2].projected.x + ',' + d[2].projected.y + 'Z';
-}
-
-function orthographic(d, options){
-    return {
-        x: options.origin[0] + options.scale * d.x,
-        y: options.origin[1] + options.scale * d.y
-    };
-}
-
-function x(p) {
-    return p[0];
-}
-
-function y(p) {
-    return p[1];
-}
-
-function z(p) {
-    return p[2];
-}
-
-/**
-* @author Stefan Nieke / http://niekes.com/
-*/
-
-var _3d = function() {
-
-    var origin          = [0, 0],
-        scale           = 1,
-        projection      = orthographic,
-        angleX          = 0,
-        angleY          = 0,
-        angleZ          = 0,
-        rotateCenter    = [0,0,0],
-        x$$1               = x,
-        y$$1               = y,
-        z$$1               = z,
-        row             = undefined,
-        shape           = 'POINT',
-        processData = {
-            'CUBE'       : cube,
-            'GRID'       : gridPlane,
-            'LINE'       : line,
-            'LINE_STRIP' : lineStrip,
-            'PLANE'      : plane,
-            'POINT'      : point,
-            'SURFACE'    : gridPlane,
-            'TRIANGLE'   : triangle,
-        },
-        draw = {
-            'CUBE'       : drawPlane,
-            'GRID'       : drawPlane,
-            'LINE_STRIP' : drawLineStrip,
-            'PLANE'      : drawPlane,
-            'SURFACE'    : drawPlane,
-            'TRIANGLE'   : drawTriangle,
-        };
-
-    function _3d(data){
-        return processData[shape](
-            data,
-            { scale: scale, origin: origin, project: projection, row: row },
-            { x: x$$1, y: y$$1, z: z$$1 },
-            { x: angleX, y: angleY, z: angleZ, rotateCenter: rotateCenter }
-        );
-    }
-
-    _3d.origin = function(_){
-        return arguments.length ? (origin = _, _3d) : origin;
-    };
-
-    _3d.scale = function(_){
-        return arguments.length ? (scale = _, _3d) : scale;
-    };
-
-    _3d.rotateX = function(_){
-        return arguments.length ? (angleX = _, _3d) : angleX;
-    };
-
-    _3d.rotateY = function(_){
-        return arguments.length ? (angleY = _, _3d) : angleY;
-    };
-
-    _3d.rotateZ = function(_){
-        return arguments.length ? (angleZ = _, _3d) : angleZ;
-    };
-
-    _3d.shape = function(_, r){
-        return arguments.length ? (shape = _, row = r, _3d) : shape;
-    };
-
-    _3d.rotateCenter = function(_){
-        return arguments.length ? (rotateCenter = _, _3d) : rotateCenter;
-    };
-
-    _3d.x = function(_){
-        return arguments.length ? (x$$1 = typeof _ === 'function' ? _ : +_, _3d) : x$$1;
-    };
-
-    _3d.y = function(_){
-        return arguments.length ? (y$$1 = typeof _ === 'function' ? _ : +_, _3d) : y$$1;
-    };
-
-    _3d.z = function(_){
-        return arguments.length ? (z$$1 = typeof _ === 'function' ? _ : +_, _3d) : z$$1;
-    };
-
-    _3d.sort = function(a, b){
-        var _a = a.centroid.z, _b = b.centroid.z;
-        return _a < _b ? -1 : _a > _b ? 1 : _a >= _b ? 0 : NaN;
-    };
-
-    _3d.draw = function(d){
-        if(!((shape === 'POINT') || (shape === 'LINE'))){
-            return draw[shape](d);
-        }
-    };
-
-    return _3d;
-};
-
-exports._3d = _3d;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
-},{}],"charts.js":[function(require,module,exports) {
-"use strict";
-
-var d3 = _interopRequireWildcard(require("d3"));
-
-var d33d = _interopRequireWildcard(require("d3-3d"));
-
-var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
-Object.assign(d3, d33d);
-var chart3dColorspace = document.getElementById('chart3dColorspace');
-var dest = document.querySelector('.chart3D');
-/*
-Create 2d and 3d chart heights and widths based on known
-paddings and panel dimensions, based on viewport height/width.
-*/
-
-function createChartWidth() {
-  var leftPanel = 304;
-  var rightPanel = 240;
-  var paddings = 100;
-  var offset = leftPanel + rightPanel + paddings;
-  var viewportWidth = window.innerWidth;
-
-  if ((viewportWidth - offset) / 2 > 300) {
-    return (viewportWidth - offset) / 2;
-  } else {
-    return 300;
-  }
-}
-
-function createChartHeight() {
-  var headerHeight = 58;
-  var tabHeight = 48;
-  var paddings = 164;
-  var offset = headerHeight + tabHeight + paddings;
-  var viewportHeight = window.innerHeight;
-  var height = (viewportHeight - offset) / 3;
-
-  if (height < 160) {
-    return 160;
-  } else {
-    return height;
-  }
-}
-
-function create3dChartWidth() {
-  var leftPanel = 304;
-  var rightPanel = 240;
-  var paddings = 72;
-  var offset = leftPanel + rightPanel + paddings;
-  var viewportWidth = window.innerWidth;
-  return viewportWidth - offset;
-}
-
-function create3dChartHeight() {
-  var headerHeight = 58;
-  var tabHeight = 48;
-  var paddings = 164 / 2;
-  var feedbackText = 100;
-  var offset = headerHeight + tabHeight + paddings + feedbackText;
-  var viewportHeight = window.innerHeight;
-  return viewportHeight - offset;
-}
-
-var chartWidth = create3dChartWidth();
-var chartHeight = create3dChartHeight();
-var modelScale;
-var yOrigin;
-var viewportHeight = window.innerHeight;
-
-if (viewportHeight < 640) {
-  modelScale = 20;
-  yOrigin = chartHeight;
-} else if (viewportHeight >= 640 && viewportHeight < 800) {
-  modelScale = 30;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 800 && viewportHeight < 900) {
-  modelScale = 40;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 900) {
-  modelScale = 50;
-  yOrigin = chartHeight / 1.25;
-}
-
-var origin = [chartWidth / 1.85, chartHeight / 1.25],
-    j = 10,
-    scale = modelScale,
-    scatter = [],
-    yLine = [],
-    xGrid = [],
-    colorPlot = [],
-    beta = 0,
-    alpha = 0,
-    key = function key(d) {
-  return d.id;
-},
-    startAngle = Math.PI / 10;
-
-dest.style.width = chartWidth;
-dest.style.height = chartHeight;
-var svg = d3.select(dest).call(d3.drag().on('drag', dragged).on('start', dragStart).on('end', dragEnd)).append('g');
-var mx, my, mouseX, mouseY;
-
-var grid3d = d3._3d().shape('GRID', 20).origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
-
-var point3d = d3._3d().x(function (d) {
-  return d.x;
-}).y(function (d) {
-  return d.y;
-}).z(function (d) {
-  return d.z;
-}).origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
-
-var yScale3d = d3._3d().shape('LINE_STRIP').origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
-
-function processData(data, tt) {
-  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
-  var chartColors = getChartColors(colorInterpSpace);
-  var color = d3.scaleOrdinal(chartColors);
-  /* ----------- GRID ----------- */
-
-  var xGrid = svg.selectAll('path.grid').data(data[0], key);
-  xGrid.enter().append('path').attr('class', '_3d grid').merge(xGrid).attr('d', grid3d.draw);
-  xGrid.exit().remove();
-  /* ----------- POINTS ----------- */
-
-  var points = svg.selectAll('circle').data(data[1], key);
-  points.enter().append('circle').attr('class', '_3d').attr('opacity', 0).attr('cx', posPointX).attr('cy', posPointY).merge(points).transition().duration(tt).attr('r', 5) // .attr('stroke', function(d){ return d3.color(color(d.id)).darker(3); })
-  .attr('fill', function (d) {
-    return color(d.id);
-  }).attr('opacity', 1).attr('cx', posPointX).attr('cy', posPointY);
-  points.exit().remove();
-  /* ----------- y-Scale ----------- */
-
-  var yScale = svg.selectAll('path.yScale').data(data[2]);
-  yScale.enter().append('path').attr('class', '_3d yScale').merge(yScale).attr('stroke', '#6e6e6e').attr('stroke-width', .5).attr('d', yScale3d.draw);
-  yScale.exit().remove();
-  /* ----------- y-Scale Text ----------- */
-
-  var yText = svg.selectAll('text.yText').data(data[2][0]);
-  yText.enter().append('text').attr('class', '_3d yText').attr('dx', '.3em').merge(yText).each(function (d) {
-    d.centroid = {
-      x: d.rotated.x,
-      y: d.rotated.y,
-      z: d.rotated.z
-    };
-  }).attr('x', function (d) {
-    return d.projected.x;
-  }).attr('y', function (d) {
-    return d.projected.y;
-  }) // .text(function(d){ return d[1]*10 <= 0 ? d[1]*-10 : ''; });
-  // .text(function(d) {return d;});
-  .text('-');
-  yText.exit().remove();
-  d3.selectAll('._3d').sort(d3._3d().sort);
-}
-
-function posPointX(d) {
-  return d.projected.x;
-}
-
-function posPointY(d) {
-  return d.projected.y;
-}
-
-var pi = Math.PI;
-
-function init3dChart() {
-  var cnt = 0;
-  xGrid = [], scatter = [], yLine = [], colorPlot = []; // Taking J from origin argument...
-  // z = -10; z < 10; z++ is what it's saying.
-
-  for (var z = -j; z < j; z++) {
-    for (var x = -j; x < j; x++) {
-      xGrid.push([x, 1, z]); // This is where the point data is gathered:
-
-      scatter.push({
-        x: x,
-        y: d3.randomUniform(0, -10)(),
-        z: z,
-        id: 'point_' + cnt++
-      }); // dividing LAB data by 10 to fit current grid. Negative y let since chart is in negative space?
-      // colorPlot.push({x: LABArrayA[j]/10, y: LABArrayL[j]/10 * -1, z: LABArrayB[j]/10, id: 'point_' + cnt++});
-    }
-  }
-
-  var spaceOpt = document.getElementById('chart3dColorspace').value;
-  var pi = Math.PI;
-
-  if (spaceOpt == 'CAM02') {
-    for (var i = 0; i < CAMArrayA.length; i++) {
-      colorPlot.push({
-        x: CAMArrayA[i] / 10,
-        y: CAMArrayJ[i] / 10 * -1,
-        z: CAMArrayB[i] / 10,
-        id: 'point_' + cnt++
-      });
-    }
-  }
-
-  if (spaceOpt == 'LCH') {
-    for (var _i = 0; _i < LCHArrayC.length; _i++) {
-      var angle = LCHArrayH[_i] * (pi / 180);
-      var r = LCHArrayC[_i]; // Polar:
-
-      colorPlot.push({
-        x: r * Math.cos(angle) / 13,
-        y: LCHArrayL[_i] / 13 * -1,
-        z: r * Math.sin(angle) / 13,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: LCHArrayH[i]/(Math.PI * 10), y: LCHArrayL[i]/10 * -1, z: LCHArrayC[i]/10, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'LAB') {
-    for (var _i2 = 0; _i2 < LABArrayA.length; _i2++) {
-      colorPlot.push({
-        x: LABArrayA[_i2] / 13,
-        y: LABArrayL[_i2] / 13 * -1,
-        z: LABArrayB[_i2] / 13,
-        id: 'point_' + cnt++
-      });
-    }
-  }
-
-  if (spaceOpt == 'HSL') {
-    for (var _i3 = 0; _i3 < HSLArrayL.length; _i3++) {
-      var _angle = HSLArrayH[_i3] * (pi / 180);
-
-      var _r = HSLArrayS[_i3]; // Polar:
-
-      colorPlot.push({
-        x: _r * Math.cos(_angle) * 8,
-        y: HSLArrayL[_i3] * 8 * -1,
-        z: _r * Math.sin(_angle) * 8,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSLArrayH[i]/(10*pi) - 7, y: HSLArrayL[i]*10 * -1, z: HSLArrayS[i]*10 - 7, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'HSLuv') {
-    for (var _i4 = 0; _i4 < HSLuvArrayL.length; _i4++) {
-      var _angle2 = HSLuvArrayL[_i4] * (pi / 180);
-
-      var _r2 = HSLuvArrayU[_i4]; // Polar:
-
-      colorPlot.push({
-        x: _r2 * Math.cos(_angle2) / 12,
-        y: HSLuvArrayV[_i4] / 10 * -1,
-        z: _r2 * Math.sin(_angle2) / 12,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSLuvArrayL[i]/(10*pi) - 7, y: HSLuvArrayV[i]/10 * -1, z: HSLuvArrayU[i]/10 -10, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'HSV') {
-    for (var _i5 = 0; _i5 < HSVArrayL.length; _i5++) {
-      var _angle3 = HSVArrayH[_i5] * (pi / 180);
-
-      var _r3 = HSVArrayS[_i5]; // Polar:
-
-      colorPlot.push({
-        x: _r3 * Math.cos(_angle3) * 8,
-        y: HSVArrayL[_i5] * 8 * -1,
-        z: _r3 * Math.sin(_angle3) * 8 - 1.5,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSVArrayH[i]/(10*pi) - 7, y: HSVArrayL[i]*10 * -1, z: HSVArrayS[i]*10 -7, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'RGB') {
-    for (var _i6 = 0; _i6 < RGBArrayR.length; _i6++) {
-      colorPlot.push({
-        x: RGBArrayR[_i6] / 30 - 5,
-        y: RGBArrayG[_i6] / 30 * -1,
-        z: RGBArrayB[_i6] / 30 - 5,
-        id: 'point_' + cnt++
-      });
-    }
-  }
-
-  d3.range(-1, 11, 1).forEach(function (d) {
-    return yLine.push([-j, -d, -j]);
-  });
-  var data = [grid3d(xGrid), point3d(colorPlot), yScale3d([yLine])];
-  processData(data, 500); // 500 is the duration
-}
-
-function dragStart() {
-  mx = d3.event.x;
-  my = d3.event.y;
-}
-
-function dragged() {
-  mouseX = mouseX || 0;
-  mouseY = mouseY || 0;
-  beta = (d3.event.x - mx + mouseX) * Math.PI / 600;
-  alpha = (d3.event.y - my + mouseY) * Math.PI / 600 * -1;
-  var data = [grid3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(xGrid), point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(colorPlot), yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine])];
-  processData(data, 0);
-}
-
-function dragEnd() {
-  mouseX = d3.event.x - mx + mouseX;
-  mouseY = d3.event.y - my + mouseY;
-} // d3.selectAll('button').on('click', init3dChart);
-
-
-function createChartHeader(x, dest) {
-  var container = document.getElementById(dest);
-  var subhead = document.createElement('h6');
-  subhead.className = 'spectrum-Subheading';
-  subhead.innerText = x;
-  container.appendChild(subhead);
-} // Make 2d color charts
-
-
-function createChart(data, yLabel, xLabel, dest, yMin, yMax) {
-  var xy_chart = d3_xy_chart().width(createChartWidth()).height(createChartHeight()).xlabel(xLabel).ylabel(yLabel);
-  var svg = d3.select(dest).append("svg").datum(data).call(xy_chart);
-
-  function d3_xy_chart() {
-    var width = createChartWidth(),
-        height = createChartHeight(),
-        xlabel = "X Axis Label",
-        ylabel = "Y Axis Label";
-
-    function chart(selection) {
-      selection.each(function (datasets) {
-        // If no min/max defined, base on min/max from data
-        if (yMin == undefined) {
-          yMin = d3.min(datasets, function (d) {
-            return d3.min(d.y);
-          });
-        }
-
-        if (yMax == undefined) {
-          yMax = d3.max(datasets, function (d) {
-            return d3.max(d.y);
-          });
-        } //
-        // Create the plot.
-        //
-
-
-        var margin = {
-          top: 8,
-          right: 8,
-          bottom: 20,
-          left: 32
-        };
-        var innerwidth = width - margin.left - margin.right;
-        var innerheight = height - margin.top - margin.bottom;
-        var x_scale = d3.scaleLinear().range([0, innerwidth]).domain([d3.min(datasets, function (d) {
-          return d3.min(d.x);
-        }), d3.max(datasets, function (d) {
-          return d3.max(d.x);
-        })]);
-        var y_scale = d3.scaleLinear().range([innerheight, 0]).domain([yMin, yMax]); // d3.min(datasets, function(d) { return d3.min(d.y); }),
-        // d3.max(datasets, function(d) { return d3.max(d.y); }) ]) ;
-
-        var color_scale = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(datasets.length));
-        var x_axis = d3.axisBottom(x_scale);
-        var y_axis = d3.axisLeft(y_scale);
-        var x_grid = d3.axisBottom(x_scale).tickSize(-innerheight).tickFormat("");
-        var y_grid = d3.axisLeft(y_scale).tickSize(-innerwidth).tickFormat("");
-        var draw_line = d3.line().curve(d3.curveLinear).x(function (d) {
-          return x_scale(d[0]);
-        }).y(function (d) {
-          return y_scale(d[1]);
-        });
-        var svg = d3.select(this).attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        svg.append("g").attr("class", "x grid").attr("transform", "translate(0," + innerheight + ")").call(x_grid);
-        svg.append("g").attr("class", "y grid").call(y_grid);
-        svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + innerheight + ")").call(x_axis).append("text").attr("dy", "-.71em").attr("x", innerwidth).style("text-anchor", "end").text(xlabel);
-        svg.append("g").attr("class", "y axis").call(y_axis).append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", "0.71em").style("text-anchor", "end").text(ylabel);
-        var data_lines = svg.selectAll(".d3_xy_chart_line").data(datasets.map(function (d) {
-          return d3.zip(d.x, d.y);
-        })).enter().append("g").attr("class", "d3_xy_chart_line");
-        data_lines.append("path").attr("class", "line").attr("d", function (d) {
-          return draw_line(d);
-        }).attr("stroke", function (_, i) {
-          return color_scale(i);
-        });
-        data_lines.append("text").datum(function (d, i) {
-          return {
-            name: datasets[i].label,
-            final: d[d.length - 1]
-          };
-        }).attr("transform", function (d) {
-          return "translate(" + x_scale(d.final[0]) + "," + y_scale(d.final[1]) + ")";
-        }).attr("x", 3).attr("dy", ".35em").attr("fill", function (_, i) {
-          return color_scale(i);
-        }).text(function (d) {
-          return d.name;
-        });
-      });
-    }
-
-    chart.width = function (value) {
-      if (!arguments.length) return width;
-      width = value;
-      return chart;
-    };
-
-    chart.height = function (value) {
-      if (!arguments.length) return height;
-      height = value;
-      return chart;
-    };
-
-    chart.xlabel = function (value) {
-      if (!arguments.length) return xlabel;
-      xlabel = value;
-      return chart;
-    };
-
-    chart.ylabel = function (value) {
-      if (!arguments.length) return ylabel;
-      ylabel = value;
-      return chart;
-    };
-
-    return chart;
-  }
-}
-
-function toggleGraphs() {
-  var panel = document.getElementById('colorMetrics');
-  var toggle = document.getElementById('toggleMetrics');
-  panel.classList.toggle('visible');
-  toggle.classList.toggle('is-selected');
-}
-
-function createAllCharts(mode) {
-  mode = document.getElementById('chart2dColorspace').value;
-  var chart3 = document.getElementById('chart3Wrapper');
-
-  if (mode == "LCH") {
-    createChartHeader('Chroma / Lightness', 'chart1');
-    createChart(lchDataC, 'Chroma', 'Lightness', "#chart1", 0, 100);
-    createChartHeader('Hue / Lightness', 'chart2');
-    createChart(lchDataH, 'Hue', 'Lightness', "#chart2", 0, 360);
-    createChartHeader('Chroma / Hue', 'chart3');
-    createChart(lchDataCH, 'Chroma', 'Hue', "#chart3", 0, 100);
-  }
-
-  if (mode == "LAB") {
-    createChartHeader('Green Red / Lightness', 'chart1');
-    createChart(labDataA, 'Green - Red', 'Lightness', "#chart1");
-    createChartHeader('Blue Yellow / Lightness', 'chart2');
-    createChart(labDataB, 'Blue - Yellow', 'Lightness', "#chart2");
-    createChartHeader('Green Red / Blue Yellow', 'chart3');
-    createChart(labDataAB, 'Green - Red', 'Blue - Yellow', "#chart3");
-  }
-
-  if (mode == "CAM02") {
-    createChartHeader('Green Red / Lightness', 'chart1');
-    createChart(camDataA, 'Green - Red', 'Lightness', "#chart1");
-    createChartHeader('Blue Yellow / Lightness', 'chart2');
-    createChart(camDataB, 'Blue - Yellow', 'Lightness', "#chart2");
-    createChartHeader('Green Red / Blue Yellow', 'chart3');
-    createChart(camDataAB, 'Green - Red', 'Blue - Yellow', "#chart3");
-  }
-
-  if (mode == "HSL") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hslDataH, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hslDataS, 'Saturation', 'Lightness', "#chart2", 0, 1);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hslDataHS, 'Saturation', 'Hue', "#chart3", 0, 1);
-  }
-
-  if (mode == "HSLuv") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hsluvDataL, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hsluvDataU, 'Saturation', 'Lightness', "#chart2", 0, 100);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hsluvDataLU, 'Saturation', 'Hue', "#chart3", 0, 100);
-  }
-
-  if (mode == "HSV") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hsvDataH, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hsvDataS, 'Saturation', 'Lightness', "#chart2", 0, 1);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hsvDataHS, 'Saturation', 'Hue', "#chart3", 0, 1);
-  }
-
-  if (mode == "RGB") {
-    createChartHeader('Red / Green', 'chart1');
-    createChart(rgbDataR, 'Red', 'Green', "#chart1", 0, 255);
-    createChartHeader('Green / Blue', 'chart2');
-    createChart(rgbDataG, 'Green', 'Blue', "#chart2", 0, 255);
-    createChartHeader('Blue / Red', 'chart3');
-    createChart(rgbDataB, 'Blue', 'Red', "#chart3", 0, 255);
-  }
-
-  createChartHeader('Contrast Ratios', 'contrastChart');
-  createChart(window.contrastData, 'Contrast', 'Swatches', "#contrastChart");
-  init3dChart();
-}
-
-var chartColors = [];
-
-function getChartColors(mode) {
-  var shift = document.getElementById('shiftInput').value;
-  var chartColors = []; // GENERATE PROPER SCALE OF COLORS FOR 3d CHART:
-
-  var chartRGB = contrastColors.createScale({
-    swatches: 340,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-
-  for (var i = 0; i < chartRGB.colorsHex.length; i++) {
-    chartColors.push(chartRGB.colorsHex[i]);
-  }
-
-  return chartColors;
-}
-
-function showCharts(mode, interpolation) {
-  document.getElementById('chart1').innerHTML = ' ';
-  document.getElementById('chart2').innerHTML = ' ';
-  document.getElementById('chart3').innerHTML = ' ';
-  document.getElementById('contrastChart').innerHTML = ' ';
-  chartColors = getChartColors(interpolation);
-  createAllCharts(mode);
-}
-
-;
-exports.init3dChart = init3dChart; // exports.update3dChart = update3dChart;
-// exports.updateCharts = updateCharts;
-
-exports.showCharts = showCharts; // window.update3dChart = update3dChart;
-// window.updateCharts = updateCharts;
-},{"d3":"../node_modules/d3/index.js","d3-3d":"../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs"}],"data.js":[function(require,module,exports) {
-"use strict";
-
-var d3 = _interopRequireWildcard(require("d3"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
-// Create data based on colorspace
-function createData(colors) {
-  var CAM_J = [];
-  var CAM_A = [];
-  var CAM_B = [];
-  var LAB_L = [];
-  var LAB_A = [];
-  var LAB_B = [];
-  var LCH_L = [];
-  var LCH_C = [];
-  var LCH_H = [];
-  var HSL_H = [];
-  var HSL_S = [];
-  var HSL_L = [];
-  var HSV_H = [];
-  var HSV_S = [];
-  var HSV_V = [];
-  var HSLuv_L = [];
-  var HSLuv_U = [];
-  var HSLuv_V = [];
-  var RGB_R = [];
-  var RGB_G = [];
-  var RGB_B = [];
-
-  for (var i = 4; i < colors.length; i++) {
-    // Clip array to eliminate NaN values
-    CAM_J.push(d3.jab(colors[i]).J);
-    CAM_A.push(d3.jab(colors[i]).a);
-    CAM_B.push(d3.jab(colors[i]).b);
-    LAB_L.push(d3.lab(colors[i]).l);
-    LAB_A.push(d3.lab(colors[i]).a);
-    LAB_B.push(d3.lab(colors[i]).b);
-    LCH_L.push(d3.hcl(colors[i]).l);
-    LCH_C.push(d3.hcl(colors[i]).c);
-    LCH_H.push(d3.hcl(colors[i]).h);
-    RGB_R.push(d3.rgb(colors[i]).r);
-    RGB_G.push(d3.rgb(colors[i]).g);
-    RGB_B.push(d3.rgb(colors[i]).b);
-    HSL_H.push(d3.hsl(colors[i]).h);
-    HSL_S.push(d3.hsl(colors[i]).s);
-    HSL_L.push(d3.hsl(colors[i]).l);
-    HSV_H.push(d3.hsv(colors[i]).h);
-    HSV_S.push(d3.hsv(colors[i]).s);
-    HSV_V.push(d3.hsv(colors[i]).v);
-    HSLuv_L.push(d3.hsluv(colors[i]).l);
-    HSLuv_U.push(d3.hsluv(colors[i]).u);
-    HSLuv_V.push(d3.hsluv(colors[i]).v);
-  } // Filter out "NaN" values from these arrays
-
-
-  CAM_J = CAM_J.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  CAM_A = CAM_A.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  CAM_B = CAM_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_L = LAB_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_A = LAB_A.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_B = LAB_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_L = LCH_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_C = LCH_C.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_H = LCH_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_R = RGB_R.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_G = RGB_G.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_B = RGB_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_H = HSL_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_S = HSL_S.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_L = HSL_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_H = HSV_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_S = HSV_S.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_V = HSV_V.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_L = HSLuv_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_U = HSLuv_U.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_V = HSLuv_V.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  window.CAMArrayJ = [];
-  window.CAMArrayA = [];
-  window.CAMArrayB = [];
-  window.LABArrayL = [];
-  window.LABArrayA = [];
-  window.LABArrayB = [];
-  window.LCHArrayL = [];
-  window.LCHArrayC = [];
-  window.LCHArrayH = [];
-  window.RGBArrayR = [];
-  window.RGBArrayG = [];
-  window.RGBArrayB = [];
-  window.HSLArrayH = [];
-  window.HSLArrayS = [];
-  window.HSLArrayL = [];
-  window.HSVArrayH = [];
-  window.HSVArrayS = [];
-  window.HSVArrayL = [];
-  window.HSLuvArrayL = [];
-  window.HSLuvArrayU = [];
-  window.HSLuvArrayV = [];
-  window.CAMArrayJmin = [];
-  window.CAMArrayAmin = [];
-  window.CAMArrayBmin = [];
-  window.LABArrayLmin = [];
-  window.LABArrayAmin = [];
-  window.LABArrayBmin = [];
-  window.LCHArrayLmin = [];
-  window.LCHArrayCmin = [];
-  window.LCHArrayHmin = [];
-  window.RGBArrayRmin = [];
-  window.RGBArrayGmin = [];
-  window.RGBArrayBmin = [];
-  window.HSLArrayHmin = [];
-  window.HSLArraySmin = [];
-  window.HSLArrayLmin = [];
-  window.HSVArrayHmin = [];
-  window.HSVArraySmin = [];
-  window.HSVArrayLmin = [];
-  window.HSLuvArrayLmin = [];
-  window.HSLuvArrayUmin = [];
-  window.HSLuvArrayVmin = []; // Shorten the numbers in the array for chart purposes
-
-  var maxVal = 300;
-  var delta = Math.floor(CAM_J.length / maxVal);
-
-  for (var _i = 0; _i < CAM_J.length; _i = _i + delta) {
-    CAMArrayJ.push(CAM_J[_i]);
-  }
-
-  for (var _i2 = 0; _i2 < CAM_A.length; _i2 = _i2 + delta) {
-    CAMArrayA.push(CAM_A[_i2]);
-  }
-
-  for (var _i3 = 0; _i3 < CAM_B.length; _i3 = _i3 + delta) {
-    CAMArrayB.push(CAM_B[_i3]);
-  }
-
-  for (var _i4 = 0; _i4 < LAB_L.length; _i4 = _i4 + delta) {
-    LABArrayL.push(LAB_L[_i4]);
-  }
-
-  for (var _i5 = 0; _i5 < LAB_A.length; _i5 = _i5 + delta) {
-    LABArrayA.push(LAB_A[_i5]);
-  }
-
-  for (var _i6 = 0; _i6 < LAB_B.length; _i6 = _i6 + delta) {
-    LABArrayB.push(LAB_B[_i6]);
-  }
-
-  for (var _i7 = 0; _i7 < LCH_L.length; _i7 = _i7 + delta) {
-    LCHArrayL.push(LCH_L[_i7]);
-  }
-
-  for (var _i8 = 0; _i8 < LCH_C.length; _i8 = _i8 + delta) {
-    LCHArrayC.push(LCH_C[_i8]);
-  }
-
-  for (var _i9 = 0; _i9 < LCH_H.length; _i9 = _i9 + delta) {
-    LCHArrayH.push(LCH_H[_i9]);
-  }
-
-  for (var _i10 = 0; _i10 < RGB_R.length; _i10 = _i10 + delta) {
-    RGBArrayR.push(RGB_R[_i10]);
-  }
-
-  for (var _i11 = 0; _i11 < RGB_G.length; _i11 = _i11 + delta) {
-    RGBArrayG.push(RGB_G[_i11]);
-  }
-
-  for (var _i12 = 0; _i12 < RGB_B.length; _i12 = _i12 + delta) {
-    RGBArrayB.push(RGB_B[_i12]);
-  }
-
-  for (var _i13 = 0; _i13 < HSL_H.length; _i13 = _i13 + delta) {
-    HSLArrayH.push(HSL_H[_i13]);
-  }
-
-  for (var _i14 = 0; _i14 < HSL_S.length; _i14 = _i14 + delta) {
-    HSLArrayS.push(HSL_S[_i14]);
-  }
-
-  for (var _i15 = 0; _i15 < HSL_L.length; _i15 = _i15 + delta) {
-    HSLArrayL.push(HSL_L[_i15]);
-  }
-
-  for (var _i16 = 0; _i16 < HSV_H.length; _i16 = _i16 + delta) {
-    HSVArrayH.push(HSV_H[_i16]);
-  }
-
-  for (var _i17 = 0; _i17 < HSV_S.length; _i17 = _i17 + delta) {
-    HSVArrayS.push(HSV_S[_i17]);
-  }
-
-  for (var _i18 = 0; _i18 < HSV_V.length; _i18 = _i18 + delta) {
-    HSVArrayL.push(HSV_V[_i18]);
-  }
-
-  for (var _i19 = 0; _i19 < HSLuv_L.length; _i19 = _i19 + delta) {
-    HSLuvArrayL.push(HSLuv_L[_i19]);
-  }
-
-  for (var _i20 = 0; _i20 < HSLuv_U.length; _i20 = _i20 + delta) {
-    HSLuvArrayU.push(HSLuv_U[_i20]);
-  }
-
-  for (var _i21 = 0; _i21 < HSLuv_V.length; _i21 = _i21 + delta) {
-    HSLuvArrayV.push(HSLuv_V[_i21]);
-  } // Minimized data set
-
-
-  var maxValmin = 25;
-  var deltamin = Math.floor(CAM_J.length / maxValmin);
-
-  for (var _i22 = 0; _i22 < CAM_J.length; _i22 = _i22 + deltamin) {
-    CAMArrayJmin.push(CAM_J[_i22]);
-  }
-
-  for (var _i23 = 0; _i23 < CAM_A.length; _i23 = _i23 + deltamin) {
-    CAMArrayAmin.push(CAM_A[_i23]);
-  }
-
-  for (var _i24 = 0; _i24 < CAM_B.length; _i24 = _i24 + deltamin) {
-    CAMArrayBmin.push(CAM_B[_i24]);
-  }
-
-  for (var _i25 = 0; _i25 < LAB_L.length; _i25 = _i25 + deltamin) {
-    LABArrayLmin.push(LAB_L[_i25]);
-  }
-
-  for (var _i26 = 0; _i26 < LAB_A.length; _i26 = _i26 + deltamin) {
-    LABArrayAmin.push(LAB_A[_i26]);
-  }
-
-  for (var _i27 = 0; _i27 < LAB_B.length; _i27 = _i27 + deltamin) {
-    LABArrayBmin.push(LAB_B[_i27]);
-  }
-
-  for (var _i28 = 0; _i28 < LCH_L.length; _i28 = _i28 + deltamin) {
-    LCHArrayLmin.push(LCH_L[_i28]);
-  }
-
-  for (var _i29 = 0; _i29 < LCH_C.length; _i29 = _i29 + deltamin) {
-    LCHArrayCmin.push(LCH_C[_i29]);
-  }
-
-  for (var _i30 = 0; _i30 < LCH_H.length; _i30 = _i30 + deltamin) {
-    LCHArrayHmin.push(LCH_H[_i30]);
-  }
-
-  for (var _i31 = 0; _i31 < RGB_R.length; _i31 = _i31 + deltamin) {
-    RGBArrayRmin.push(RGB_R[_i31]);
-  }
-
-  for (var _i32 = 0; _i32 < RGB_G.length; _i32 = _i32 + deltamin) {
-    RGBArrayGmin.push(RGB_G[_i32]);
-  }
-
-  for (var _i33 = 0; _i33 < RGB_B.length; _i33 = _i33 + deltamin) {
-    RGBArrayBmin.push(RGB_B[_i33]);
-  }
-
-  for (var _i34 = 0; _i34 < HSL_H.length; _i34 = _i34 + deltamin) {
-    HSLArrayHmin.push(HSL_H[_i34]);
-  }
-
-  for (var _i35 = 0; _i35 < HSL_S.length; _i35 = _i35 + deltamin) {
-    HSLArraySmin.push(HSL_S[_i35]);
-  }
-
-  for (var _i36 = 0; _i36 < HSL_L.length; _i36 = _i36 + deltamin) {
-    HSLArrayLmin.push(HSL_L[_i36]);
-  }
-
-  for (var _i37 = 0; _i37 < HSV_H.length; _i37 = _i37 + deltamin) {
-    HSVArrayHmin.push(HSV_H[_i37]);
-  }
-
-  for (var _i38 = 0; _i38 < HSV_S.length; _i38 = _i38 + deltamin) {
-    HSVArraySmin.push(HSV_S[_i38]);
-  }
-
-  for (var _i39 = 0; _i39 < HSV_V.length; _i39 = _i39 + deltamin) {
-    HSVArrayLmin.push(HSV_V[_i39]);
-  }
-
-  for (var _i40 = 0; _i40 < HSLuv_L.length; _i40 = _i40 + deltamin) {
-    HSLuvArrayLmin.push(HSLuv_L[_i40]);
-  }
-
-  for (var _i41 = 0; _i41 < HSLuv_U.length; _i41 = _i41 + deltamin) {
-    HSLuvArrayUmin.push(HSLuv_U[_i41]);
-  }
-
-  for (var _i42 = 0; _i42 < HSLuv_V.length; _i42 = _i42 + deltamin) {
-    HSLuvArrayVmin.push(HSLuv_V[_i42]);
-  }
-
-  var fillRange = function fillRange(start, end) {
-    return Array(end - start + 1).fill().map(function (item, index) {
-      return start + index;
-    });
-  };
-
-  var dataX = fillRange(0, CAMArrayJ.length - 1);
-  var dataXcyl = fillRange(0, LCHArrayL.length - 1);
-  var dataXcontrast = fillRange(0, ratioInputs.length - 1);
-  window.labFullData = [{
-    x: LABArrayL,
-    y: LABArrayA,
-    z: LABArrayB
-  }];
-  window.camDataA = [{
-    x: CAMArrayJmin,
-    y: CAMArrayAmin
-  }];
-  window.camDataB = [{
-    x: CAMArrayJmin,
-    y: CAMArrayBmin
-  }];
-  window.camDataAB = [{
-    x: CAMArrayAmin,
-    y: CAMArrayBmin
-  }];
-  window.labDataA = [{
-    x: LABArrayLmin,
-    y: LABArrayAmin
-  }];
-  window.labDataB = [{
-    x: LABArrayLmin,
-    y: LABArrayBmin
-  }];
-  window.labDataAB = [{
-    x: LABArrayAmin,
-    y: LABArrayBmin
-  }];
-  window.lchDataC = [{
-    x: LCHArrayLmin,
-    y: LCHArrayCmin
-  }];
-  window.lchDataH = [{
-    x: LCHArrayLmin,
-    y: LCHArrayHmin
-  }];
-  window.lchDataCH = [{
-    x: LCHArrayHmin,
-    y: LCHArrayCmin
-  }];
-  window.rgbDataR = [{
-    x: RGBArrayRmin,
-    y: RGBArrayGmin
-  }];
-  window.rgbDataG = [{
-    x: RGBArrayGmin,
-    y: RGBArrayBmin
-  }];
-  window.rgbDataB = [{
-    x: RGBArrayBmin,
-    y: RGBArrayRmin
-  }];
-  window.hslDataH = [{
-    x: HSLArrayLmin,
-    y: HSLArrayHmin
-  }];
-  window.hslDataS = [{
-    x: HSLArrayLmin,
-    y: HSLArraySmin
-  }];
-  window.hslDataHS = [{
-    x: HSLArrayHmin,
-    y: HSLArraySmin
-  }];
-  window.hsvDataH = [{
-    x: HSVArrayLmin,
-    y: HSVArrayHmin
-  }];
-  window.hsvDataS = [{
-    x: HSVArrayLmin,
-    y: HSVArraySmin
-  }];
-  window.hsvDataHS = [{
-    x: HSVArrayHmin,
-    y: HSVArraySmin
-  }];
-  window.hsluvDataL = [{
-    x: HSLuvArrayVmin,
-    y: HSLuvArrayLmin
-  }];
-  window.hsluvDataU = [{
-    x: HSLuvArrayVmin,
-    y: HSLuvArrayUmin
-  }];
-  window.hsluvDataLU = [{
-    x: HSLuvArrayLmin,
-    y: HSLuvArrayUmin
-  }];
-  window.contrastData = [{
-    x: dataXcontrast,
-    y: ratioInputs.map(function (d) {
-      return parseFloat(d);
-    }) // convert to number
-
-  }];
-}
-
-exports.createData = createData;
-},{"d3":"../node_modules/d3/index.js"}],"index.js":[function(require,module,exports) {
-"use strict";
+exports.returnContrast = returnContrast;
 
 require("@spectrum-css/vars/dist/spectrum-global.css");
 
@@ -33480,8 +31488,6 @@ require("@spectrum-css/vars/dist/spectrum-medium.css");
 require("@spectrum-css/vars/dist/spectrum-light.css");
 
 require("@spectrum-css/page/dist/index-vars.css");
-
-require("@spectrum-css/typography/dist/index-vars.css");
 
 require("@spectrum-css/icon/dist/index-vars.css");
 
@@ -33513,21 +31519,17 @@ require("@spectrum-css/slider/dist/index-vars.css");
 
 require("@spectrum-css/tabs/dist/index-vars.css");
 
-require("@spectrum-css/illustratedmessage/dist/index-vars.css");
-
-require("./scss/colorinputs.scss");
-
-require("./scss/charts.scss");
+require("@spectrum-css/typography/dist/index-vars.css");
 
 require("./scss/style.scss");
 
+require("./scss/colorinputs.scss");
+
+require("./scss/converter.scss");
+
 require("@adobe/focus-ring-polyfill");
 
-var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
-
 var _loadicons = _interopRequireDefault(require("loadicons"));
-
-var _clipboard = _interopRequireDefault(require("clipboard"));
 
 var d3 = _interopRequireWildcard(require("d3"));
 
@@ -33539,877 +31541,303 @@ var d3hsv = _interopRequireWildcard(require("d3-hsv"));
 
 var d33d = _interopRequireWildcard(require("d3-3d"));
 
-var charts = _interopRequireWildcard(require("./charts.js"));
-
-var chartData = _interopRequireWildcard(require("./data.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
-// expose functions so they can be ran in the console
-window.createScale = contrastColors.createScale;
-window.luminance = contrastColors.luminance;
-window.contrast = contrastColors.contrast;
-window.generateContrastColors = contrastColors.generateContrastColors;
-window.contrastColors = contrastColors;
-window.generateBaseScale = contrastColors.generateBaseScale;
-window.generateAdaptiveTheme = contrastColors.generateAdaptiveTheme;
-window.minPositive = contrastColors.minPositive;
-window.ratioName = contrastColors.ratioName;
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
 (0, _loadicons.default)('./spectrum-css-icons.svg');
 (0, _loadicons.default)('./spectrum-icons.svg');
-new _clipboard.default('.copyButton');
-new _clipboard.default('.colorOutputBlock');
 Object.assign(d3, d3cam02, d3hsluv, d3hsv, d33d);
-var bgFieldInput = document.getElementById('bgField');
-var background = bgFieldInput.value; // var colorBlock = document.getElementById('color');
+// expose functions so they can be ran in the console
+window.luminance = contrastColors.luminance;
+window.contrast = contrastColors.contrast;
+window.contrastColors = contrastColors;
+var inputForeground = document.getElementById('foregroundInput');
+var inputBackground = document.getElementById('backgroundInput');
+var output = document.getElementById('output'); // let type = document.getElementById('type');
 
-var demoHeading = document.getElementById('demoHeading');
-var demoWrapper = document.getElementById('demoWrapper');
-var userColorBlock = document.getElementById('userColor');
-var userBgBlock = document.getElementById('userBg');
-var ratioInput = document.getElementById('ratio');
-var colorOutputField = document.getElementById('colorOutput');
-var colorspace = document.getElementById('mode');
-var ratioFields = document.getElementsByClassName('ratio-Field');
-window.ratioInputs = [];
-var newColors;
-var pathName;
-window.colorArgs = null;
-bgFieldInput.onchange = throttle(colorInput, 50);
+var colorInputForeground = document.getElementById('foregroundColorInput');
+var colorInputBackground = document.getElementById('backgroundColorInput');
 
-function debounce(func, wait, immediate) {
-  var timerId = null;
-  return function debounced() {
-    var context = this;
-    var args = arguments;
-    clearTimeout(timerId);
-
-    if (immediate && !timerId) {
-      func.apply(context, args);
-    }
-
-    timerId = setTimeout(function () {
-      timerId = null;
-      if (!immediate) func.apply(context, args);
-    }, wait);
-  };
+function setup() {
+  inputForeground.defaultValue = 'rgb(0, 0, 0)';
+  inputBackground.defaultValue = 'rgb(255, 255, 255)';
 }
 
-function throttle(func, wait) {
-  var timerId, lastRan;
-  return function throttled() {
-    var context = this;
-    var args = arguments;
+function convert(c) {
+  var typeId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'RGB';
+  var A, B, C;
 
-    if (!lastRan) {
-      func.apply(context, args);
-      lastRan = Date.now();
-    } else {
-      clearTimeout(timerId);
-      timerId = setTimeout(function () {
-        if (Date.now() - lastRan >= wait) {
-          func.apply(context, args);
-          lastRan = Date.now();
-        }
-      }, wait - (Date.now() - lastRan) || 0);
-    }
-  };
-}
-
-exports.throttle = throttle;
-
-function paramSetup() {
-  colorspaceOptions();
-  var url = new URL(window.location);
-  var params = new URLSearchParams(url.search.slice(1));
-  pathName = url.pathname; // // If parameters exist, use parameter; else use default html input values
-
-  if (params.has('colorKeys')) {
-    var cr = params.get('colorKeys');
-    var crs = cr.split(',');
-
-    if (crs[0] == 0) {
-      crs = ['#707070'];
-    }
-
-    for (var i = 0; i < crs.length; i++) {
-      addColor(crs[i]);
-    }
-  }
-
-  if (params.has('base')) {
-    document.getElementById('bgField').value = "#" + params.get('base');
-  }
-
-  if (params.has('ratios')) {
-    // transform parameter values into array of numbers
-    var rat = params.get('ratios');
-    var ratios = rat.split(',');
-    ratios = ratios.map(Number);
-
-    if (ratios[0] == 0) {
-      // if no parameter value, default to [3, 4.5]
-      ratios = [3, 4.5];
-    } else {}
-
-    for (var _i = 0; _i < ratios.length; _i++) {
-      addRatio(ratios[_i]);
-    }
-  }
-
-  if (params.has('mode')) {
-    document.querySelector('select[name="mode"]').value = params.get('mode');
+  if (typeId == 'Hex') {
+    return d3.rgb(c).formatHex();
   } else {
-    addColor('#6fa7ff');
-    addRatio(3);
-    addRatio(4.5);
-  }
-
-  colorInput();
-}
-
-paramSetup(); // Add ratio inputs
-
-function addRatio(v) {
-  var s = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '#cacaca';
-
-  // increment by default
-  if (v == undefined) {
-    // find highest value
-    var hi = Math.max.apply(Math, _toConsumableArray(ratioInputs));
-    var lo = Math.min.apply(Math, _toConsumableArray(ratioInputs));
-
-    if (hi < 20) {
-      v = Number(hi + 1).toFixed(2);
+    if (typeId == 'HSLuv') {
+      A = d3.hsluv(c).l;
+      B = d3.hsluv(c).u;
+      C = d3.hsluv(c).v;
     }
 
-    if (hi == 21) {
-      v = Number(hi - 1).toFixed(2);
-    }
-  }
-
-  var ratios = document.getElementById('ratioInput-wrapper');
-  var div = document.createElement('div');
-  var sliderWrapper = document.getElementById('colorSlider-wrapper');
-  var slider = document.createElement('input');
-  var randId = randomId();
-  div.className = 'ratio-Item';
-  div.id = randId + '-item';
-  var sw = document.createElement('span');
-  sw.className = 'ratio-Swatch';
-  sw.id = randId + '-sw';
-  sw.style.backgroundColor = s;
-  var input = document.createElement('input');
-  input.className = 'spectrum-Textfield ratio-Field';
-  input.type = "number";
-  input.min = '-10';
-  input.max = '21';
-  input.step = '.01';
-  input.placeholder = 4.5;
-  input.id = randId;
-  input.value = v;
-  input.onkeydown = checkRatioStepModifiers;
-  input.oninput = debounce(colorInput, 100);
-  var button = document.createElement('button');
-  button.className = 'spectrum-ActionButton spectrum-ActionButton--quiet';
-  button.title = 'Delete contrast ratio';
-  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
-  slider.type = 'range';
-  slider.min = '0';
-  slider.max = '100';
-  slider.value = v;
-  slider.step = '.01';
-  slider.className = 'colorSlider';
-  slider.id = randId + "-sl";
-  slider.disabled = true;
-  sliderWrapper.appendChild(slider);
-  button.onclick = deleteRatio;
-  div.appendChild(sw);
-  div.appendChild(input);
-  div.appendChild(button);
-  ratios.appendChild(div);
-}
-
-function newColor(e) {
-  var parent = e.target.parentNode.id;
-  var id = parent.replace('-item', '');
-  var self = document.getElementById(id);
-  var v = self.value;
-  var swId = parent.replace('-item', '-sw');
-  var sw = document.getElementById(swId);
-
-  if (v.startsWith("#") !== true && v.length == 6) {
-    h = '#';
-    v = h.concat(v);
-    self.value = v;
-  }
-
-  sw.value = v;
-  colorInput();
-}
-
-function addColor(s) {
-  var colorInputs = document.getElementById('keyColor-wrapper');
-  var div = document.createElement('div');
-  var randId = randomId();
-  div.className = 'keyColor';
-  div.id = randId + '-item'; // var sw = document.createElement('span');
-
-  var sw = document.createElement('input');
-  sw.type = "color";
-  sw.value = s;
-  sw.oninput = throttle(colorInput, 50);
-  sw.className = 'keyColor-Item';
-  sw.id = randId + '-sw';
-  sw.style.backgroundColor = s;
-  var button = document.createElement('button');
-  button.className = 'spectrum-ActionButton';
-  button.title = 'Delete key color';
-  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
-  button.onclick = deleteColor;
-  div.appendChild(sw);
-  div.appendChild(button);
-  colorInputs.appendChild(div);
-} // When adding new ratios in UI, run colorinput as well
-
-
-window.addNewRatio = function addNewRatio() {
-  addRatio();
-  colorInput();
-}; // When adding new colors in UI, run colorinput as well
-
-
-window.addNewColor = function addNewColor() {
-  addColor();
-  colorInput();
-};
-
-window.addBulk = function addBulk() {
-  document.getElementById('addBulkColorDialog').classList.add("is-open");
-  document.getElementById('dialogOverlay').style.display = 'block';
-  var bgInput = document.getElementById('bgField_2');
-  var bg = document.getElementById('bgField');
-  bgInput.value = bg.value;
-};
-
-window.cancelBulk = function cancelBulk() {
-  document.getElementById('addBulkColorDialog').classList.remove("is-open");
-  document.getElementById('dialogOverlay').style.display = 'none';
-};
-
-window.bulkColorInput = function bulkColorInput() {
-  var bulkInputs = document.getElementById('bulkColors');
-  var bulkValues = bulkInputs.value.replace(/\r\n/g, "\n").replace(/[,\/]/g, "\n").replace(" ", "").replace(/['\/]/g, "").replace(/["\/]/g, "").replace(" ", "").split("\n");
-
-  for (var i = 0; i < bulkValues.length; i++) {
-    if (!bulkValues[i].startsWith('#')) {
-      bulkValues[i] = '#' + bulkValues[i];
-    }
-  }
-
-  var isSwatch = document.getElementById('importAsSwatch').checked;
-  var bgInput = document.getElementById('bgField_2').value; // input in Dialog
-
-  var bg = document.getElementById('bgField'); // input in UI
-  // add key colors for each input
-
-  for (var _i2 = 0; _i2 < bulkValues.length; _i2++) {
-    addColor(d3.color(bulkValues[_i2]).formatHex());
-  }
-
-  if (isSwatch) {
-    // create ratio inputs for each contrast
-    for (var _i3 = 0; _i3 < bulkValues.length; _i3++) {
-      var cr = contrastColors.contrast([d3.rgb(bulkValues[_i3]).r, d3.rgb(bulkValues[_i3]).g, d3.rgb(bulkValues[_i3]).b], [d3.rgb(bgInput).r, d3.rgb(bgInput).g, d3.rgb(bgInput).b]);
-      addRatio(cr.toFixed(2));
+    if (typeId == 'HSL') {
+      A = d3.hsl(c).h;
+      B = d3.hsl(c).s * 100;
+      C = d3.hsl(c).l * 100;
     }
 
-    bg.value = bgInput;
-  } // Hide dialog
-
-
-  cancelBulk(); // Run colorinput
-
-  colorInput(); // clear inputs on close
-
-  bulkInputs.value = " ";
-}; // Test with #a9e6dc,#7cd6c7,#5ec3bb,#48b1b2,#3b9da5,#308b9a,#22738a,#195b72,#134555
-// Should return crs of 1.40, 1.71, 2.10, 2.56, 3.21, 3.97, 5.40, 7.55, 10.45
-
-
-window.clearAllColors = function clearAllColors() {
-  document.getElementById('keyColor-wrapper').innerHTML = ' ';
-  colorInput();
-}; // Delete ratio input
-
-
-function deleteRatio(e) {
-  var id = e.target.parentNode.id;
-  var self = document.getElementById(id);
-  var sliderid = id.replace('-item', '') + '-sl';
-  var slider = document.getElementById(sliderid);
-  self.remove();
-  slider.remove();
-  colorInput();
-}
-
-function deleteColor(e) {
-  var id = e.target.parentNode.id;
-  var self = document.getElementById(id);
-  self.remove();
-  colorInput();
-}
-
-exports.deleteColor = deleteColor;
-
-window.openTab = function openTab(evt, tabName) {
-  // Declare all variables
-  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
-
-  tabcontent = document.getElementsByClassName("tabcontent");
-
-  for (var _i4 = 0; _i4 < tabcontent.length; _i4++) {
-    tabcontent[_i4].style.display = "none";
-  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
-
-
-  tablinks = document.getElementsByClassName("main-Tabs-item");
-
-  for (var _i5 = 0; _i5 < tablinks.length; _i5++) {
-    tablinks[_i5].className = tablinks[_i5].className.replace(" is-selected", "");
-  } // Show the current tab, and add an "active" class to the button that opened the tab
-
-
-  document.getElementById(tabName).style.display = "flex";
-  evt.currentTarget.className += " is-selected";
-};
-
-window.openAppTab = function openAppTab(evt, tabName) {
-  // Declare all variables
-  var i, appTabContent, apptablinks; // Get main tab containers and hide them
-
-  appTabContent = document.getElementsByClassName("appTabContent");
-
-  for (var _i6 = 0; _i6 < appTabContent.length; _i6++) {
-    appTabContent[_i6].style.display = "none";
-  } // Get all main tabs with class="spectrum-Tabs-item" and remove the class "active"
-
-
-  apptablinks = document.getElementsByClassName("app-Tabs-item");
-
-  for (var _i7 = 0; _i7 < apptablinks.length; _i7++) {
-    apptablinks[_i7].className = apptablinks[_i7].className.replace(" is-selected", "");
-  } // Show the current tab, and add an "active" class to the button that opened the tab
-
-
-  document.getElementById(tabName).style.display = "grid";
-  evt.currentTarget.className += " is-selected";
-}; // Open default tabs
-
-
-document.getElementById("tabDemo").click();
-
-function randomId() {
-  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
-}
-
-exports.randomId = randomId;
-
-function createDemo(c, z) {
-  var smallText = 'Small text demo';
-  var largeText = 'Large text';
-  var buttonText = 'Button';
-  var wrap = document.getElementById('demoWrapper');
-  var item = document.createElement('div');
-  item.className = 'demoItem';
-  var demo = document.createElement('div');
-  demo.className = 'spectrum-Typography demo';
-  var h = document.createElement('h4');
-  h.className = 'spectrum-Heading2 demoHeading';
-  var title = document.createTextNode(largeText);
-  var p = document.createElement('p');
-  p.className = 'spectrum-Body3 demoText';
-  var text = document.createTextNode(smallText);
-  var b = document.createElement('button');
-  b.className = 'spectrum-Button demoButton';
-  var bF = document.createElement('button');
-  bF.className = 'spectrum-Button demoButton';
-  var label = document.createTextNode(buttonText);
-  var label2 = document.createTextNode(buttonText);
-  h.appendChild(title);
-  p.appendChild(text);
-  b.appendChild(label);
-  bF.appendChild(label2);
-  demo.appendChild(h);
-  demo.appendChild(p);
-  demo.appendChild(b);
-  demo.appendChild(bF);
-  var demoIn = document.createElement('div');
-  demoIn.className = 'spectrum-Typography demoInverted';
-  var hIn = document.createElement('h4');
-  hIn.className = 'spectrum-Heading2 demoHeading';
-  var pIn = document.createElement('p');
-  pIn.className = 'spectrum-Body3 demoText';
-  var bIn = document.createElement('button');
-  bIn.className = 'spectrum-Button demoButton';
-  var bFIn = document.createElement('button');
-  bFIn.className = 'spectrum-Button demoButton';
-  var titleIn = document.createTextNode('Large text');
-  var textIn = document.createTextNode(smallText);
-  var labelIn = document.createTextNode(buttonText);
-  var labelIn2 = document.createTextNode(buttonText);
-  hIn.appendChild(titleIn);
-  pIn.appendChild(textIn);
-  bIn.appendChild(labelIn);
-  bFIn.appendChild(labelIn2);
-  demoIn.appendChild(hIn);
-  demoIn.appendChild(pIn);
-  demoIn.appendChild(bIn);
-  demoIn.appendChild(bFIn);
-  item.appendChild(demo);
-  item.appendChild(demoIn);
-  wrap.appendChild(item);
-  demoIn.style.backgroundColor = c;
-  demoIn.style.color = z;
-  demo.style.color = c;
-  p.style.color = c;
-  h.style.color = c;
-  b.style.color = c;
-  bF.style.backgroundColor = c;
-  bF.style.borderColor = c;
-  bF.style.color = z;
-  bFIn.style.color = c;
-  bFIn.style.backgroundColor = z;
-  bFIn.style.borderColor = z;
-  b.style.borderColor = c;
-  pIn.style.color = z;
-  hIn.style.color = z;
-  bIn.style.color = z;
-  bIn.style.borderColor = z;
-  demoWrapper.style.backgroundColor = z;
-}
-
-function colorspaceOptions() {
-  colorspace.options.length = 0;
-  chart3dColorspace.options.length = 0;
-  chart2dColorspace.options.length = 0;
-  var opts = {
-    'CAM02': 'CIECAM02',
-    'LCH': 'Lch',
-    'LAB': 'Lab',
-    'HSL': 'HSL',
-    'HSLuv': 'HSLuv',
-    'HSV': 'HSV',
-    'RGB': 'RGB'
-  };
-  var opts2 = {
-    'CAM02': 'CIECAM02 (recommended)',
-    'LCH': 'Lch',
-    'LAB': 'Lab',
-    'HSL': 'HSL',
-    'HSLuv': 'HSLuv',
-    'HSV': 'HSV',
-    'RGB': 'RGB'
-  };
-
-  for (var index in opts) {
-    colorspace.options[colorspace.options.length] = new Option(opts[index], index);
-    chart3dColorspace.options[chart3dColorspace.options.length] = new Option(opts2[index], index);
-    chart2dColorspace.options[chart2dColorspace.options.length] = new Option(opts2[index], index);
-  }
-
-  chart3dColorspace.value = 'CAM02';
-  chart2dColorspace.value = 'CAM02';
-} // Ramp function to create HTML canvas color scale
-
-
-function ramp(color, n) {
-  n = window.innerHeight - 284;
-  var container = d3.select('#colorScale');
-  var canvas = container.append("canvas").attr("height", n).attr("width", 1);
-  var context = canvas.node().getContext("2d");
-  canvas.style.width = "40px";
-  canvas.style.imageRendering = "pixelated";
-
-  for (var i = 0; i < n; ++i) {
-    // only do this for actual colors
-    if (color[i] !== undefined) {
-      context.fillStyle = color[i]; // color[i / (n - 1)]
-
-      context.fillRect(0, i, 1, 1);
-    }
-  }
-
-  return canvas;
-}
-
-function checkRatioStepModifiers(e) {
-  if (!e.shiftKey) return;
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-  e.preventDefault();
-  var value = Number(e.target.value);
-  var newValue;
-
-  switch (e.key) {
-    case 'ArrowDown':
-      newValue = value - 1;
-      e.target.value = newValue.toFixed(2);
-      e.target.oninput();
-      break;
-
-    case 'ArrowUp':
-      newValue = value + 1;
-      e.target.value = newValue.toFixed(2);
-      e.target.oninput();
-      break;
-
-    default:
-  }
-} // Calculate Color and generate Scales
-
-
-window.colorInput = colorInput;
-
-function colorInput() {
-  document.getElementById('colorScale').innerHTML = '';
-  var spaceOpt = document.getElementById('chart3dColorspace').value;
-  var inputs = document.getElementsByClassName('keyColor-Item');
-  var background = document.getElementById('bgField').value;
-  var mode = document.querySelector('select[name="mode"]').value; // Clamp ratios convert decimal numbers to whole negatives and disallow
-  // inputs less than 1 and greater than -1.
-
-  for (var i = 0; i < ratioFields.length; i++) {
-    val = ratioFields[i].value;
-
-    if (val < 1 && val > -1) {
-      ratioFields[i].value = (10 / (val * 10)).toFixed(2) * -1;
-    } else {}
-  }
-
-  var rfIds = [];
-
-  for (var _i8 = 0; _i8 < ratioFields.length; _i8++) {
-    rfIds.push(ratioFields[_i8].id);
-  }
-
-  ratioInputs = [];
-  var inputColors = []; // For each ratio input field, push the value into the args array for generateContrastColors
-
-  for (var _i9 = 0; _i9 < ratioFields.length; _i9++) {
-    ratioInputs.push(ratioFields[_i9].value);
-  }
-
-  for (var _i10 = 0; _i10 < inputs.length; _i10++) {
-    inputColors.push(inputs[_i10].value);
-  } // Convert input value into a split array of hex values.
-
-
-  var tempArgs = []; // remove any whitespace from inputColors
-
-  tempArgs.push(inputColors);
-  colorArgs = tempArgs.join("").split(',').filter(String);
-  var shift = 1;
-  var clamping = document.getElementById('sequentialClamp').checked; // Generate scale data so we have access to all 3000 swatches to draw the gradient on the left
-
-  var scaleData = contrastColors.createScale({
-    swatches: 3000,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-  var n = window.innerHeight - 282;
-  var rampData = contrastColors.createScale({
-    swatches: n,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-  newColors = contrastColors.generateContrastColors({
-    colorKeys: colorArgs,
-    base: background,
-    ratios: ratioInputs,
-    colorspace: mode,
-    shift: shift
-  }); // Create values for sliders
-
-  var Values = [];
-  var maxVal = 100;
-
-  for (var _i11 = 0; _i11 < newColors.length; _i11++) {
-    Values.push(maxVal * (d3.hsluv(newColors[_i11]).v / 100)); // wrong direction. Needs inversed.
-    // Values.push(maxVal * (d3.hsluv(newColors[i]).v / 100))
-  } // Values.sort(function(a, b){return a-b});
-  // Values.sort(function(a, b){return a-b});
-
-
-  var values = [];
-  values = values.concat(0, Values, maxVal);
-  values.sort(function (a, b) {
-    return a + b;
-  });
-  var reverseShift = 1 / shift;
-  var sqrtValues = d3.scalePow().exponent(reverseShift).domain([1, maxVal]).range([1, maxVal]);
-  sqrtValues = values.map(function (d) {
-    if (sqrtValues(d) < 0) {
-      return 0;
-    } else {
-      return sqrtValues(d);
-    }
-  });
-
-  for (var _i12 = 0; _i12 < newColors.length; _i12++) {
-    // Calculate value of color and apply to slider position/value
-    var val = d3.hsluv(newColors[_i12]).v;
-    var newVal = sqrtValues[_i12 + 1];
-    val = newVal; // Find corresponding input/slider id
-
-    var slider = document.getElementById(rfIds[_i12] + '-sl');
-    slider.value = val; // apply color to subsequent swatch
-
-    var swatch = document.getElementById(rfIds[_i12] + '-sw');
-    swatch.style.backgroundColor = newColors[_i12];
-  } // Generate Gradient as HTML Canvas element
-
-
-  var filteredColors = rampData.colors;
-  ramp(filteredColors, n);
-  var backgroundR = d3.rgb(background).r;
-  var backgroundG = d3.rgb(background).g;
-  var backgroundB = d3.rgb(background).b;
-  var colorOutputWrapper = document.getElementById('colorOutputs');
-  colorOutputWrapper.innerHTML = '';
-  var wrap = document.getElementById('demoWrapper');
-  wrap.innerHTML = '';
-
-  for (var _i13 = 0; _i13 < newColors.length; _i13++) {
-    var colorOutput = document.createElement('div');
-    var colorOutputVal = newColors[_i13];
-    var colorOutputText = document.createTextNode(d3.rgb(colorOutputVal).hex());
-    var bg = d3.color(background).rgb();
-    var outputRatio = contrastColors.contrast([d3.rgb(newColors[_i13]).r, d3.rgb(newColors[_i13]).g, d3.rgb(newColors[_i13]).b], [bg.r, bg.g, bg.b]);
-    var ratioText = document.createTextNode(outputRatio.toFixed(2));
-    var s1 = document.createElement('span');
-    var s2 = document.createElement('span');
-    colorOutputWrapper.appendChild(colorOutput);
-    colorOutput.className = 'colorOutputBlock';
-    colorOutput.style.backgroundColor = colorOutputVal;
-    colorOutput.setAttribute('data-clipboard-text', colorOutputVal);
-    s1.appendChild(colorOutputText);
-    s1.className = 'colorOutputValue';
-    s2.appendChild(ratioText);
-    colorOutput.appendChild(s1);
-    colorOutput.appendChild(s2);
-
-    if (contrastColors.luminance(d3.rgb(newColors[_i13]).r, d3.rgb(newColors[_i13]).g, d3.rgb(newColors[_i13]).b) < 0.275) {
-      colorOutput.style.color = "#ffffff";
-    } else {
-      colorOutput.style.color = '#000000';
+    if (typeId == 'HSV') {
+      A = d3.hsv(c).h;
+      B = d3.hsv(c).s * 100;
+      C = d3.hsv(c).v * 100;
     }
 
-    createDemo(newColors[_i13], background);
-  }
-
-  var copyColors = document.getElementById('copyAllColors');
-  copyColors.setAttribute('data-clipboard-text', newColors); // update URL parameters
-
-  updateParams(inputColors, background.substr(1), ratioInputs, mode);
-  var data = chartData.createData(scaleData.colors);
-  charts.showCharts('CAM02', data);
-  colorSpaceFeedback('CAM02'); // manually enter default of CAM02
-}
-
-window.onresize = colorInput; // Passing variable parameters to URL
-
-function updateParams(c, b, r, m) {
-  var url = new URL(window.location);
-  var params = new URLSearchParams(url.search.slice(1));
-  var tabColor = document.getElementById("tabColor");
-  params.set('colorKeys', c);
-  params.set('base', b);
-  params.set('ratios', r);
-  params.set('mode', m);
-  var cStrings = c.toString().replace(/[#\/]/g, '"#').replace(/[,\/]/g, '",');
-  cStrings = cStrings + '"';
-  window.history.replaceState({}, '', '?' + params); // update the page's URL.
-
-  var p = document.getElementById('params');
-  p.innerHTML = " ";
-  var call = 'generateContrastColors({ ';
-  var pcol = 'colorKeys: [' + cStrings + '], ';
-  var pbas = 'base: "#' + b + '", ';
-  var prat = 'ratios: [' + r + '], ';
-  var pmod = ' colorspace: "' + m + '"});';
-  var text1 = document.createTextNode(call);
-  var text2 = document.createTextNode(pcol);
-  var text3 = document.createTextNode(pbas);
-  var text4 = document.createTextNode(prat);
-  var text7 = document.createTextNode(pmod);
-  p.appendChild(text1);
-  p.appendChild(text2);
-  p.appendChild(text3);
-  p.appendChild(text4);
-  p.appendChild(text7);
-} // Sort swatches in UI
-
-
-function sort() {
-  ratioInputs.sort(function (a, b) {
-    return a - b;
-  }); // Update ratio inputs with new values
-
-  for (var i = 0; i < ratioInputs.length; i++) {
-    ratioFields[i].value = ratioInputs[i];
-  }
-}
-
-window.sortRatios = function sortRatios() {
-  sort();
-  colorInput();
-};
-
-function returnRatioCube(lum) {
-  var a = 1.45;
-  var b = 0.7375;
-  var c = 2.5;
-  var x = lum / 100;
-  var exp = x * -1 / a + b;
-  var y = Math.pow(exp, 3) * c;
-  var r = y * 20 + 1;
-
-  if (r > 1) {
-    return r;
-  }
-
-  if (r < 1 && r >= 0) {
-    return 1;
-  }
-}
-
-function interpolateLumArray() {
-  var lums = [];
-
-  for (var i = 0; i < newColors.length; i++) {
-    lums.push(d3.hsluv(newColors[i]).v);
-  }
-
-  var startLum = Math.min.apply(Math, lums);
-  var endLum = Math.max.apply(Math, lums);
-  var interpolator = d3.interpolateNumber(startLum, endLum);
-
-  for (var _i14 = 1; _i14 < lums.length - 1; _i14++) {
-    lums[_i14] = interpolator(_i14 / lums.length);
-  }
-
-  lums.sort(function (a, b) {
-    return b - a;
-  });
-  return lums;
-} // Redistribute contrast swatches
-
-
-window.distributeCube = function distributeCube() {
-  sort();
-  setTimeout(function () {
-    var lums = interpolateLumArray();
-
-    for (var i = 1; i < lums.length - 1; i++) {
-      ratioFields[i].value = returnRatioCube(lums[i]).toFixed(2);
+    if (typeId == 'CAM02') {
+      A = d3.jab(c).J;
+      B = d3.jab(c).a;
+      C = d3.jab(c).b;
     }
-  }, 300);
-  setTimeout(function () {
-    colorInput();
-  }, 450);
-}; // Function to distribute swatches based on linear interpolation between HSLuv
-// lightness values.
 
+    if (typeId == 'Lab') {
+      A = d3.lab(c).l;
+      B = d3.lab(c).a;
+      C = d3.lab(c).b;
+    }
 
-window.distributeLum = function distributeLum() {
-  var lums = interpolateLumArray();
-  var NewContrast = [];
+    if (typeId == 'Lch') {
+      A = d3.hcl(c).l;
+      B = d3.hcl(c).c;
+      C = d3.hcl(c).h;
+    }
 
-  for (var i = 1; i < newColors.length - 1; i++) {
-    // Re-assign V value as lums[i]
-    var L = d3.hsluv(newColors[i]).l;
-    var U = d3.hsluv(newColors[i]).u;
-    var V = lums[i];
-    var NewRGB = d3.hsluv(L, U, V);
-    var rgbArray = [d3.rgb(NewRGB).r, d3.rgb(NewRGB).g, d3.rgb(NewRGB).b];
-    var baseRgbArray = [d3.rgb(background).r, d3.rgb(background).g, d3.rgb(background).b];
-    NewContrast.push(contrastColors.contrast(rgbArray, baseRgbArray).toFixed(2));
-  } // Concatenate first and last contrast array with new contrast array (middle)
+    if (typeId == 'RGB') {
+      A = d3.rgb(c).r;
+      B = d3.rgb(c).g;
+      C = d3.rgb(c).b;
+    }
 
-
-  var newRatios = [];
-  newRatios = newRatios.concat(ratioInputs[0], NewContrast, ratioInputs[ratioInputs.length - 1]); // Delete all ratios
-
-  var ratioItems = document.getElementsByClassName('ratio-Item');
-
-  while (ratioItems.length > 0) {
-    ratioItems[0].parentNode.removeChild(ratioItems[0]);
+    return new Array(A.toFixed(), B.toFixed(), C.toFixed());
   }
-
-  var sliders = document.getElementById('colorSlider-wrapper');
-  sliders.innerHTML = ' '; // Add all new
-
-  for (var _i15 = 0; _i15 < newRatios.length; _i15++) {
-    addRatio(newRatios[_i15]);
-  }
-
-  colorInput();
-}; // Create alert feedback for each colorspace
-
-
-function colorSpaceFeedback(spaceOpt) {
-  var alertWrapper = document.getElementById('chart3dAlert');
-  alertWrapper.innerHTML = ' ';
-  var alert = document.createElement('div');
-  alert.className = 'spectrum-Alert';
-
-  if (spaceOpt == 'CAM02') {
-    alert.classList.add('spectrum-Alert--info');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">Recommended color space for color evaluation</div>\n      <div class=\"spectrum-Alert-content\">CIECAM02 is a perceptually uniform model of color. Irregularities seen in this space reflect perceived irregularities in color.\n        <a href=\"https://en.wikipedia.org/wiki/CIECAM02\" target=\"_blank\" class=\"spectrum-Link\">Learn more about CIECAM02</a>\n      </div>";
-  }
-
-  if (spaceOpt == 'LAB' || spaceOpt == 'LCH') {
-    alert.classList.add('spectrum-Alert--info');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">Acceptable color space for color evaluation</div>\n      <div class=\"spectrum-Alert-content\">Lab (Lch in cylindrical form) is a well-known and used color space based on human perception of color.\n        <a href=\"https://en.wikipedia.org/wiki/CIELAB_color_space\" target=\"_blank\" class=\"spectrum-Link\">Learn more about LAB & LCH </a>\n      </div>";
-  }
-
-  if (spaceOpt == 'HSL' || spaceOpt == 'HSV' || spaceOpt == 'HSLuv' || spaceOpt == 'RGB') {
-    alert.classList.add('spectrum-Alert--warning');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">This color space not recommended for evaluating color models</div>\n      <div class=\"spectrum-Alert-content\">Irregularities seen in this color space do not accurately represent perceptual irregularities in the color scale itself.\n        <a href=\"https://en.wikipedia.org/wiki/HSL_and_HSV\" target=\"_blank\" class=\"spectrum-Link\">Learn more about RGB color spaces</a>\n      </div>";
-  }
-
-  alertWrapper.appendChild(alert);
 }
 
-exports.colorSpaceFeedback = colorSpaceFeedback;
-window.colorSpaceFeedback = colorSpaceFeedback;
+function inputConvert(val) {
+  var valNums, valArr;
 
-function updateCharts(selectObject) {
-  var spaceOpt = selectObject.value;
-  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
-  charts.init3dChart();
-  charts.showCharts(spaceOpt, colorInterpSpace);
-  colorSpaceFeedback(spaceOpt);
+  if (val.match(/^hsl\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+    // convert to proper format (percentages)
+
+    val = d3.hsl(Number(valArr[0]), Number(valArr[1] / 100), Number(valArr[2] / 100)).formatHsl();
+  }
+
+  if (val.match(/^hsv\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.hsv(Number(valArr[0]), Number(valArr[1] / 100), Number(valArr[2] / 100)).formatHsl();
+  }
+
+  if (val.match(/^lab\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.lab(Number(valArr[0]), Number(valArr[1]), Number(valArr[2])).formatHsl();
+  }
+
+  if (val.match(/^lch\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.hcl(Number(valArr[2]), Number(valArr[1]), Number(valArr[0])).formatHsl();
+  }
+
+  if (val.match(/^jab\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.jab(Number(valArr[0]), Number(valArr[1]), Number(valArr[2])).formatHsl();
+  }
+
+  if (val.match(/^hsluv\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.hsluv(Number(valArr[0]), Number(valArr[1]), Number(valArr[2])).formatHsl();
+  }
+
+  var r = d3.rgb(val).r;
+  var g = d3.rgb(val).g;
+  var b = d3.rgb(val).b;
+  return [r.toFixed(), g.toFixed(), b.toFixed()];
 }
 
-window.updateCharts = updateCharts; // Temporary
+function colorInputSync() {
+  var valFg = inputForeground.value;
+  var colorInputForeground = document.getElementById('foregroundColorInput');
+  var valFgRgb = inputConvert(valFg);
+  var colorInputFgVal = d3.rgb(valFgRgb[0], valFgRgb[1], valFgRgb[2]).formatHex();
+  colorInputForeground.value = colorInputFgVal;
+  var valBg = inputBackground.value;
+  var colorInputBackground = document.getElementById('backgroundColorInput');
+  var valBgRgb = inputConvert(valBg);
+  var colorInputBgVal = d3.rgb(valBgRgb[0], valBgRgb[1], valBgRgb[2]).formatHex();
+  colorInputBackground.value = colorInputBgVal;
+}
 
-window.generateBaseScale = generateBaseScale;
-window.minPositive = minPositive;
-window.ratioName = ratioName;
-},{"@spectrum-css/vars/dist/spectrum-global.css":"../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../node_modules/@spectrum-css/typography/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../node_modules/@spectrum-css/tabs/dist/index-vars.css","@spectrum-css/illustratedmessage/dist/index-vars.css":"../node_modules/@spectrum-css/illustratedmessage/dist/index-vars.css","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/charts.scss":"scss/charts.scss","./scss/style.scss":"scss/style.scss","@adobe/focus-ring-polyfill":"../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","loadicons":"../node_modules/loadicons/index.js","clipboard":"../node_modules/clipboard/dist/clipboard.js","d3":"../node_modules/d3/index.js","d3-cam02":"../node_modules/d3-cam02/index.js","d3-hsluv":"../node_modules/d3-hsluv/index.js","d3-hsv":"../node_modules/d3-hsv/index.js","d3-3d":"../node_modules/d3-3d/build/d3-3d.js","./charts.js":"charts.js","./data.js":"data.js"}]},{},["index.js"], null)
-//# sourceMappingURL=/src.e31bb0bc.js.map
+function returnContrast() {
+  colorInputSync();
+  var foregroundInput = inputForeground.value;
+  var backgroundInput = inputBackground.value;
+  var output = document.getElementById('ratioOutput');
+  output.innerHTML = ' ';
+  var rat = document.createElement('span');
+  rat.className = 'contrastRatio'; // let fg = [d3.rgb(foreground).r, d3.rgb(foreground).g, d3.rgb(foreground).b];
+  // let bg = [d3.rgb(background).r, d3.rgb(background).g, d3.rgb(background).b];
+
+  var fg = inputConvert(foregroundInput);
+  var bg = inputConvert(backgroundInput);
+  var foreground = 'rgb(' + fg[0] + ', ' + fg[1] + ', ' + fg[2] + ')';
+  var background = 'rgb(' + bg[0] + ', ' + bg[1] + ', ' + bg[2] + ')';
+  var baseV = d3.hsluv(backgroundInput).v / 100;
+  console.log(baseV);
+  var ratio = contrastColors.contrast(fg, bg, baseV); // get rid of that negative ratio...
+
+  if (ratio < 0) {
+    ratio = ratio * -1;
+  }
+
+  if (isNaN(ratio)) {
+    ratio = '-';
+  }
+
+  var ratioText = document.createTextNode(ratio.toFixed(2));
+  var ratioToOneText = document.createTextNode(':1');
+  var ratioToOne = document.createElement('span');
+  ratioToOne.classList.add('ratioToOne');
+  ratioToOne.appendChild(ratioToOneText);
+  var lgTextWrap = document.createElement('div');
+  var smTextWrap = document.createElement('div');
+  var uiTextWrap = document.createElement('div');
+  lgTextWrap.classList.add('passFail');
+  smTextWrap.classList.add('passFail');
+  uiTextWrap.classList.add('passFail');
+  var lgTextHead = document.createTextNode('Large text');
+  var smTextHead = document.createTextNode('Small text');
+  var uiTextHead = document.createTextNode('Graphics and UI components');
+  var lgHeading = document.createElement('span');
+  lgHeading.classList.add('heading--passFail', 'spectrum-Detail', 'spectrum-Detail--M');
+  var smHeading = document.createElement('span');
+  smHeading.classList.add('heading--passFail', 'spectrum-Detail', 'spectrum-Detail--M');
+  var uiHeading = document.createElement('span');
+  uiHeading.classList.add('heading--passFail', 'spectrum-Detail', 'spectrum-Detail--M');
+  lgHeading.appendChild(lgTextHead);
+  smHeading.appendChild(smTextHead);
+  uiHeading.appendChild(uiTextHead);
+  var badgeLg = document.createElement('div');
+  badgeLg.className = 'badge';
+  var badgeSm = document.createElement('div');
+  badgeSm.className = 'badge';
+  var badgeUi = document.createElement('div');
+  badgeUi.className = 'badge';
+
+  if (ratio < 3) {
+    badgeLg.classList.add('badge--error');
+    badgeLg.classList.remove('badge--success');
+    badgeLg.innerHTML = 'Fail (AA)';
+    badgeSm.classList.add('badge--error');
+    badgeSm.classList.remove('badge--success');
+    badgeSm.innerHTML = 'Fail (AA)';
+    badgeUi.classList.add('badge--error');
+    badgeUi.classList.remove('badge--success');
+    badgeUi.innerHTML = 'Fail (AA)';
+  }
+
+  if (ratio > 3 && ratio < 4.5) {
+    badgeLg.classList.add('badge--success');
+    badgeLg.classList.remove('badge--error');
+    badgeLg.innerHTML = 'Pass (AA)';
+    badgeSm.classList.add('badge--error');
+    badgeSm.classList.remove('badge--success');
+    badgeSm.innerHTML = 'Fail (AA)';
+    badgeUi.classList.add('badge--success');
+    badgeUi.classList.remove('badge--error');
+    badgeUi.innerHTML = 'Pass (AA)';
+  }
+
+  if (ratio > 4.5) {
+    badgeLg.classList.add('badge--success');
+    badgeLg.classList.remove('badge--error');
+    badgeLg.innerHTML = 'Pass (AA)';
+    badgeSm.classList.add('badge--success');
+    badgeSm.classList.remove('badge--error');
+    badgeSm.innerHTML = 'Pass (AA)';
+    badgeUi.classList.add('badge--success');
+    badgeUi.classList.remove('badge--error');
+    badgeUi.innerHTML = 'Pass (AA)';
+  }
+
+  lgTextWrap.appendChild(lgHeading);
+  lgTextWrap.appendChild(badgeLg);
+  smTextWrap.appendChild(smHeading);
+  smTextWrap.appendChild(badgeSm);
+  uiTextWrap.appendChild(uiHeading);
+  uiTextWrap.appendChild(badgeUi);
+  rat.appendChild(ratioText);
+  rat.appendChild(ratioToOne);
+  output.appendChild(rat);
+  output.appendChild(lgTextWrap);
+  output.appendChild(smTextWrap);
+  output.appendChild(uiTextWrap);
+  buildDemo(foreground, background);
+}
+
+function buildDemo(text, background) {
+  var demo = document.getElementById('demoWrapper');
+  var largeTxt = document.getElementById('largeText');
+  var smallTxt = document.getElementById('smallText');
+  var button = document.getElementById('demoButton');
+  var icon = document.getElementById('demoIcon');
+  var buttonText = document.getElementById('demoButtonText');
+  demo.style.backgroundColor = background;
+  button.style.backgroundColor = background;
+  button.style.borderColor = text;
+  icon.style.color = text;
+  buttonText.style.color = text;
+  largeTxt.style.color = text;
+  smallTxt.style.color = text;
+}
+
+colorInputForeground.addEventListener('input', function () {
+  inputForeground.value = colorInputForeground.value;
+  returnContrast();
+});
+colorInputBackground.addEventListener('input', function () {
+  inputBackground.value = colorInputBackground.value;
+  returnContrast();
+});
+inputForeground.addEventListener('input', returnContrast);
+inputBackground.addEventListener('input', returnContrast); // type.addEventListener('input', returnColor);
+
+setup();
+returnContrast();
+},{"@spectrum-css/vars/dist/spectrum-global.css":"../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../node_modules/@spectrum-css/tabs/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../node_modules/@spectrum-css/typography/dist/index-vars.css","./scss/style.scss":"scss/style.scss","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/converter.scss":"scss/converter.scss","@adobe/focus-ring-polyfill":"../node_modules/@adobe/focus-ring-polyfill/index.js","loadicons":"../node_modules/loadicons/index.js","d3":"../node_modules/d3/index.js","d3-cam02":"../node_modules/d3-cam02/index.js","d3-hsluv":"../node_modules/d3-hsluv/index.js","d3-hsv":"../node_modules/d3-hsv/index.js","d3-3d":"../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs"}]},{},["contrast-checker.js"], null)
+//# sourceMappingURL=/contrast-checker.90639fa8.js.map
