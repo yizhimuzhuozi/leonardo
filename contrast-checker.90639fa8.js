@@ -153,6 +153,8 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
 },{}],"../node_modules/@spectrum-css/slider/dist/index-vars.css":[function(require,module,exports) {
 
+},{}],"../node_modules/@spectrum-css/colorslider/dist/index-vars.css":[function(require,module,exports) {
+
 },{}],"../node_modules/@spectrum-css/tabs/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../node_modules/@spectrum-css/typography/dist/index-vars.css":[function(require,module,exports) {
@@ -31479,6 +31481,7 @@ exports.default = _default;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.sliderRangeInteraction = sliderRangeInteraction;
 exports.returnContrast = returnContrast;
 
 require("@spectrum-css/vars/dist/spectrum-global.css");
@@ -31516,6 +31519,12 @@ require("@spectrum-css/buttongroup/dist/index-vars.css");
 require("@spectrum-css/tooltip/dist/index-vars.css");
 
 require("@spectrum-css/slider/dist/index-vars.css");
+
+require("@spectrum-css/colorslider/dist/index-vars.css");
+
+require("@spectrum-css/colorhandle/dist/index-vars.css");
+
+require("@spectrum-css/colorloupe/dist/index-vars.css");
 
 require("@spectrum-css/tabs/dist/index-vars.css");
 
@@ -31579,61 +31588,46 @@ function setup() {
   inputBackground.defaultValue = 'rgb(255, 255, 255)';
 }
 
-function convert(c) {
-  var typeId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'RGB';
-  var A, B, C;
-
-  if (typeId == 'Hex') {
-    return d3.rgb(c).formatHex();
-  } else {
-    if (typeId == 'HSLuv') {
-      A = d3.hsluv(c).l;
-      B = d3.hsluv(c).u;
-      C = d3.hsluv(c).v;
-    }
-
-    if (typeId == 'HSL') {
-      A = d3.hsl(c).h;
-      B = d3.hsl(c).s * 100;
-      C = d3.hsl(c).l * 100;
-    }
-
-    if (typeId == 'HSV') {
-      A = d3.hsv(c).h;
-      B = d3.hsv(c).s * 100;
-      C = d3.hsv(c).v * 100;
-    }
-
-    if (typeId == 'CAM02') {
-      A = d3.jab(c).J;
-      B = d3.jab(c).a;
-      C = d3.jab(c).b;
-    }
-
-    if (typeId == 'Lab') {
-      A = d3.lab(c).l;
-      B = d3.lab(c).a;
-      C = d3.lab(c).b;
-    }
-
-    if (typeId == 'Lch') {
-      A = d3.hcl(c).l;
-      B = d3.hcl(c).c;
-      C = d3.hcl(c).h;
-    }
-
-    if (typeId == 'RGB') {
-      A = d3.rgb(c).r;
-      B = d3.rgb(c).g;
-      C = d3.rgb(c).b;
-    }
-
-    return new Array(A.toFixed(), B.toFixed(), C.toFixed());
-  }
+function alphaBlend(c1, c2) {
+  var r1, g1, b1, a1;
+  var r2, g2, b2;
+  r1 = c1[0];
+  g1 = c1[1];
+  b1 = c1[2];
+  a1 = c1[3];
+  r2 = c2[0];
+  g2 = c2[1];
+  b2 = c2[2];
+  var r3 = r2 + (r1 - r2) * a1;
+  var g3 = g2 + (g1 - g2) * a1;
+  var b3 = b2 + (b1 - b2) * a1;
+  var c3 = [r3, g3, b3];
+  return c3;
 }
 
 function inputConvert(val) {
   var valNums, valArr;
+  var a = 1;
+
+  if (val.match(/^rgb\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+    // convert to proper format (percentages)
+
+    val = d3.rgb(Number(valArr[0]), Number(valArr[1]), Number(valArr[2])).formatRgb();
+  } // RGBa
+
+
+  if (val.match(/^rgba\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+    // convert to proper format (percentages)
+
+    val = d3.rgb(Number(valArr[0]), Number(valArr[1]), Number(valArr[2]), Number(valArr[3])).formatRgb();
+    a = d3.rgb(val).opacity;
+  }
 
   if (val.match(/^hsl\(/)) {
     valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
@@ -31642,6 +31636,17 @@ function inputConvert(val) {
     // convert to proper format (percentages)
 
     val = d3.hsl(Number(valArr[0]), Number(valArr[1] / 100), Number(valArr[2] / 100)).formatHsl();
+  } // HSLa
+
+
+  if (val.match(/^hsla\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+    // convert to proper format (percentages)
+
+    val = d3.hsl(Number(valArr[0]), Number(valArr[1] / 100), Number(valArr[2] / 100), Number(valArr[3])).formatHsl();
+    a = d3.rgb(val).opacity;
   }
 
   if (val.match(/^hsv\(/)) {
@@ -31650,6 +31655,16 @@ function inputConvert(val) {
     valArr = valNums.split(','); // split numbers into array
 
     val = d3.hsv(Number(valArr[0]), Number(valArr[1] / 100), Number(valArr[2] / 100)).formatHsl();
+  } // HSVa
+
+
+  if (val.match(/^hsva\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.hsv(Number(valArr[0]), Number(valArr[1] / 100), Number(valArr[2] / 100), Number(valArr[3])).formatHsl();
+    a = d3.rgb(val).opacity;
   }
 
   if (val.match(/^lab\(/)) {
@@ -31658,6 +31673,16 @@ function inputConvert(val) {
     valArr = valNums.split(','); // split numbers into array
 
     val = d3.lab(Number(valArr[0]), Number(valArr[1]), Number(valArr[2])).formatHsl();
+  } // LABa
+
+
+  if (val.match(/^laba\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.lab(Number(valArr[0]), Number(valArr[1]), Number(valArr[2]), Number(valArr[3])).formatHsl();
+    a = d3.rgb(val).opacity;
   }
 
   if (val.match(/^lch\(/)) {
@@ -31666,6 +31691,16 @@ function inputConvert(val) {
     valArr = valNums.split(','); // split numbers into array
 
     val = d3.hcl(Number(valArr[2]), Number(valArr[1]), Number(valArr[0])).formatHsl();
+  } // LCHa
+
+
+  if (val.match(/^lcha\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.hcl(Number(valArr[2]), Number(valArr[1]), Number(valArr[0]), Number(valArr[3])).formatHsl();
+    a = d3.rgb(val).opacity;
   }
 
   if (val.match(/^jab\(/)) {
@@ -31674,6 +31709,16 @@ function inputConvert(val) {
     valArr = valNums.split(','); // split numbers into array
 
     val = d3.jab(Number(valArr[0]), Number(valArr[1]), Number(valArr[2])).formatHsl();
+  } // JABa
+
+
+  if (val.match(/^jaba\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.jab(Number(valArr[0]), Number(valArr[1]), Number(valArr[2]), Number(valArr[3])).formatHsl();
+    a = d3.rgb(val).opacity;
   }
 
   if (val.match(/^hsluv\(/)) {
@@ -31682,12 +31727,22 @@ function inputConvert(val) {
     valArr = valNums.split(','); // split numbers into array
 
     val = d3.hsluv(Number(valArr[0]), Number(valArr[1]), Number(valArr[2])).formatHsl();
+  } // HSLuva
+
+
+  if (val.match(/^hsluva\(/)) {
+    valNums = val.match(/\(.*?\)/g).toString().replace("(", "").replace(")", "").trim(); // find numbers only
+
+    valArr = valNums.split(','); // split numbers into array
+
+    val = d3.hsluv(Number(valArr[0]), Number(valArr[1]), Number(valArr[2]), Number(valArr[3])).formatHsl();
+    a = d3.rgb(val).opacity;
   }
 
   var r = d3.rgb(val).r;
   var g = d3.rgb(val).g;
   var b = d3.rgb(val).b;
-  return [r.toFixed(), g.toFixed(), b.toFixed()];
+  return [Number(r.toFixed()), Number(g.toFixed()), Number(b.toFixed()), Number(a.toFixed(2))];
 }
 
 function colorInputSync() {
@@ -31703,8 +31758,83 @@ function colorInputSync() {
   colorInputBackground.value = colorInputBgVal;
 }
 
+function colorSlider() {
+  var input = document.getElementById('foregroundInput');
+  var inputColor = input.value;
+  var grad = document.getElementById('alphaSliderGradient');
+  var range = document.getElementById('alphaSliderRange');
+  var handle = document.getElementById('alphaSliderHandle');
+  var handleWrap = document.getElementById('alphaSliderHandleWrap');
+  var sliderWidth = 208;
+  var c = inputConvert(inputColor);
+  var color = 'rgba(' + c[0] + ', ' + c[1] + ', ' + c[2] + ', ' + c[3] + ')';
+  var start = 'rgba(' + d3.rgb(color).r + ', ' + d3.rgb(color).g + ', ' + d3.rgb(color).b + ', ' + '0' + ')'; // transform this to rgba fomat 
+
+  var end = 'rgba(' + d3.rgb(color).r + ', ' + d3.rgb(color).g + ', ' + d3.rgb(color).b + ', ' + '1' + ')'; // transform this to rgba fomat 
+
+  var linearGrad = 'linear-gradient(to right, ' + start + ' 0%, ' + end + ' 100%)';
+  handle.style.backgroundColor = color;
+  grad.style.backgroundImage = linearGrad;
+  range.value = c[3] * 100;
+  handleWrap.style.left = sliderWidth * c[3];
+}
+
+function sliderRangeInteraction(value) {
+  var sliderWidth = 208;
+  var handleWrap = document.getElementById('alphaSliderHandleWrap');
+  var pos = value / 100;
+  var posString = ', ' + "".concat(pos) + ')';
+  var colorInput = document.getElementById('foregroundInput');
+  var inputVal = colorInput.value;
+  var newVal = inputVal;
+
+  if (inputVal.match(/^#/)) {
+    var rgb = d3.rgb(inputVal).formatRgb(); // first put in RGB format 
+
+    newVal = rgb.replace('rgb', 'rgba').replace(')', posString);
+  }
+
+  if (inputVal.match(/^rgb\(/)) {
+    newVal = inputVal.replace('rgb', 'rgba').replace(')', posString);
+  }
+
+  if (inputVal.match(/^hsl\(/)) {
+    newVal = inputVal.replace('hsl', 'hsla').replace(')', posString);
+  }
+
+  if (inputVal.match(/^hsv\(/)) {
+    newVal = inputVal.replace('hsv', 'hsva').replace(')', posString);
+  }
+
+  if (inputVal.match(/^lab\(/)) {
+    newVal = inputVal.replace('lab', 'laba').replace(')', posString);
+  }
+
+  if (inputVal.match(/^lch\(/)) {
+    newVal = inputVal.replace('lch', 'lcha').replace(')', posString);
+  }
+
+  if (inputVal.match(/^jab\(/)) {
+    newVal = inputVal.replace('jab', 'jaba').replace(')', posString);
+  }
+
+  if (inputVal.match(/^hsluv\(/)) {
+    newVal = inputVal.replace('hsluv', 'hsluva').replace(')', posString);
+  }
+
+  if (inputVal.match(/^rgba\(/) || inputVal.match(/^hsla\(/) || inputVal.match(/^hsva\(/) || inputVal.match(/^laba\(/) || inputVal.match(/^lcha\(/) || inputVal.match(/^jaba\(/) || inputVal.match(/^hsluva\(/)) {
+    var alphaString = pos + ')';
+    newVal = inputVal.replace(/[^,]+$/, alphaString);
+  }
+
+  colorInput.value = newVal;
+  handleWrap.style.left = sliderWidth * pos;
+  returnContrast();
+}
+
 function returnContrast() {
   colorInputSync();
+  colorSlider();
   var foregroundInput = inputForeground.value;
   var backgroundInput = inputBackground.value;
   var output = document.getElementById('ratioOutput');
@@ -31715,11 +31845,19 @@ function returnContrast() {
 
   var fg = inputConvert(foregroundInput);
   var bg = inputConvert(backgroundInput);
-  var foreground = 'rgb(' + fg[0] + ', ' + fg[1] + ', ' + fg[2] + ')';
+  var foreground;
+
+  if (fg.length > 3) {
+    foreground = 'rgba(' + fg[0] + ', ' + fg[1] + ', ' + fg[2] + ', ' + fg[3] + ')';
+  } else {
+    foreground = 'rgb(' + fg[0] + ', ' + fg[1] + ', ' + fg[2] + ')';
+  }
+
   var background = 'rgb(' + bg[0] + ', ' + bg[1] + ', ' + bg[2] + ')';
-  var baseV = d3.hsluv(backgroundInput).v / 100;
-  console.log(baseV);
-  var ratio = contrastColors.contrast(fg, bg, baseV); // get rid of that negative ratio...
+  var baseV = d3.hsluv(backgroundInput).v / 100; // blend alpha foreground over background in case color is transparent
+
+  var fgBlend = alphaBlend(fg, bg);
+  var ratio = contrastColors.contrast(fgBlend, bg, baseV); // get rid of that negative ratio...
 
   if (ratio < 0) {
     ratio = ratio * -1;
@@ -31839,5 +31977,6 @@ inputBackground.addEventListener('input', returnContrast); // type.addEventListe
 
 setup();
 returnContrast();
-},{"@spectrum-css/vars/dist/spectrum-global.css":"../node_modules/@spectrum-css/vars/dist/spectrum-global.css","@spectrum-css/vars/dist/spectrum-medium.css":"../node_modules/@spectrum-css/vars/dist/spectrum-medium.css","@spectrum-css/vars/dist/spectrum-light.css":"../node_modules/@spectrum-css/vars/dist/spectrum-light.css","@spectrum-css/page/dist/index-vars.css":"../node_modules/@spectrum-css/page/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../node_modules/@spectrum-css/icon/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../node_modules/@spectrum-css/link/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../node_modules/@spectrum-css/alert/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../node_modules/@spectrum-css/radio/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../node_modules/@spectrum-css/dialog/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../node_modules/@spectrum-css/button/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../node_modules/@spectrum-css/textfield/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../node_modules/@spectrum-css/dropdown/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../node_modules/@spectrum-css/checkbox/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../node_modules/@spectrum-css/buttongroup/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../node_modules/@spectrum-css/tooltip/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../node_modules/@spectrum-css/slider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../node_modules/@spectrum-css/tabs/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../node_modules/@spectrum-css/typography/dist/index-vars.css","./scss/style.scss":"scss/style.scss","./scss/colorinputs.scss":"scss/colorinputs.scss","./scss/converter.scss":"scss/converter.scss","@adobe/focus-ring-polyfill":"../node_modules/@adobe/focus-ring-polyfill/index.js","loadicons":"../node_modules/loadicons/index.js","d3":"../node_modules/d3/index.js","d3-cam02":"../node_modules/d3-cam02/index.js","d3-hsluv":"../node_modules/d3-hsluv/index.js","d3-hsv":"../node_modules/d3-hsv/index.js","d3-3d":"../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs"}]},{},["contrast-checker.js"], null)
+window.sliderRangeInteraction = sliderRangeInteraction;
+},{"@spectrum-css/vars/dist/spectrum-global.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-medium.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-light.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/page/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/colorslider/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/colorhandle/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/colorloupe/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","./scss/style.scss":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","./scss/colorinputs.scss":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","./scss/converter.scss":"../node_modules/@spectrum-css/colorslider/dist/index-vars.css","@adobe/focus-ring-polyfill":"../node_modules/@adobe/focus-ring-polyfill/index.js","loadicons":"../node_modules/loadicons/index.js","d3":"../node_modules/d3/index.js","d3-cam02":"../node_modules/d3-cam02/index.js","d3-hsluv":"../node_modules/d3-hsluv/index.js","d3-hsv":"../node_modules/d3-hsv/index.js","d3-3d":"../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs"}]},{},["contrast-checker.js"], null)
 //# sourceMappingURL=/contrast-checker.90639fa8.js.map

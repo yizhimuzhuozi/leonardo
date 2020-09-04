@@ -4984,6 +4984,243 @@ a.spectrum-ActionButton {
             background: var(--spectrum-slider-fill-track-color-disabled, var(--spectrum-global-color-gray-300));
           }
 
+.spectrum-ColorSlider.is-focused .spectrum-ColorSlider-handle {
+  width: calc(var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)) * 2);
+  height: calc(var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)) * 2);
+
+  margin-left: calc(-1 * var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)));
+  margin-top: calc(-1 * var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)));
+}
+
+.spectrum-ColorSlider-slider {
+  opacity: 0.0001;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+.spectrum-ColorSlider {
+  position: relative;
+  display: block;
+  width: var(--spectrum-colorslider-default-width, var(--spectrum-global-dimension-size-2400));
+  height: var(--spectrum-colorslider-height, var(--spectrum-global-dimension-size-300));
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+
+  cursor: default;
+}
+
+.spectrum-ColorSlider.is-focused {
+    z-index: 2;
+  }
+
+.spectrum-ColorSlider.is-disabled {
+    pointer-events: none;
+  }
+
+.spectrum-ColorSlider--vertical {
+  display: inline-block;
+
+  width: var(--spectrum-colorslider-vertical-width, var(--spectrum-global-dimension-size-300));
+  height: var(--spectrum-colorslider-vertical-default-height, var(--spectrum-global-dimension-size-2400));
+}
+
+.spectrum-ColorSlider--vertical .spectrum-ColorSlider-handle {
+    left: 50%;
+    top: 0;
+  }
+
+.spectrum-ColorSlider-handle {
+  left: 0;
+  top: 50%;
+}
+
+.spectrum-ColorSlider-handle:after {
+    border-radius: 0%;
+    width: var(--spectrum-global-dimension-size-300);
+    height: var(--spectrum-global-dimension-size-300);
+  }
+
+.spectrum-ColorSlider-checkerboard {
+  background-size:
+    var(--spectrum-global-dimension-static-size-200, 16px)
+    var(--spectrum-global-dimension-static-size-200, 16px);
+  background-position:
+    0 0,
+    0 var(--spectrum-global-dimension-static-size-100, 8px),
+    var(--spectrum-global-dimension-static-size-100, 8px) calc(-1 * var(--spectrum-global-dimension-static-size-100, 8px)),
+    calc(-1 * var(--spectrum-global-dimension-static-size-100, 8px)) 0;
+}
+
+.spectrum-ColorSlider-checkerboard:before {
+    content: '';
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: var(--spectrum-colorslider-border-radius, var(--spectrum-alias-border-radius-regular));
+  }
+
+.spectrum-ColorSlider-gradient,
+.spectrum-ColorSlider-checkerboard {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--spectrum-colorslider-border-radius, var(--spectrum-alias-border-radius-regular));
+}
+
+.spectrum-ColorSlider-checkerboard {
+  background-color: var(--spectrum-global-color-static-white, rgb(255, 255, 255));
+  background-image:
+    linear-gradient(-45deg, transparent 75.5%, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 75.5%),
+    linear-gradient(45deg, transparent 75.5%, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 75.5%),
+    linear-gradient(-45deg, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 25.5%, transparent 25.5%),
+    linear-gradient(45deg, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 25.5%, transparent 25.5%);
+}
+
+.spectrum-ColorSlider-checkerboard:before {
+    box-shadow: inset 0 0 0 var(--spectrum-colorslider-border-size, var(--spectrum-alias-border-size-thin)) var(--spectrum-colorarea-border-color);
+  }
+
+.spectrum-ColorSlider.is-disabled .spectrum-ColorSlider-checkerboard {
+      background: var(--spectrum-colorslider-fill-color-disabled, var(--spectrum-global-color-gray-300));
+    }
+
+.spectrum-ColorSlider.is-disabled .spectrum-ColorSlider-checkerboard:before {
+        box-shadow: 0 0 0 var(--spectrum-colorslider-border-size, var(--spectrum-alias-border-size-thin)) var(--spectrum-colorslider-border-color-disabled, var(--spectrum-global-color-gray-300));
+      }
+
+.spectrum-ColorSlider.is-disabled .spectrum-ColorSlider-gradient {
+      display: none
+    }
+
+.spectrum-ColorHandle.is-focused,
+.spectrum-ColorHandle.focus-ring {
+  width: calc(var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)) * 2);
+  height: calc(var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)) * 2);
+
+  margin-left: calc(-1 * var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)));
+  margin-top: calc(-1 * var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)));
+}
+
+.spectrum-ColorHandle {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  width: var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200));
+  height: var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200));
+
+  margin-left: calc(-1 * var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)) / 2);
+  margin-top: calc(-1 * var(--spectrum-colorhandle-size, var(--spectrum-global-dimension-size-200)) / 2);
+
+  border-width: var(--spectrum-colorhandle-inner-border-size, var(--spectrum-global-dimension-static-size-25));
+  border-style: solid;
+
+  background-size:
+    var(--spectrum-global-dimension-static-size-200, 16px)
+    var(--spectrum-global-dimension-static-size-200, 16px);
+  background-position:
+    calc(-1 * var(--spectrum-global-dimension-static-size-25, 2px)) calc(-1 * var(--spectrum-global-dimension-static-size-25, 2px)),
+    calc(-1 * var(--spectrum-global-dimension-static-size-25, 2px)) calc(var(--spectrum-global-dimension-static-size-100, 8px) + -1 * var(--spectrum-global-dimension-static-size-25, 2px)),
+    calc(var(--spectrum-global-dimension-static-size-100, 8px) + -1 * var(--spectrum-global-dimension-static-size-25, 2px)) calc(-1 * var(--spectrum-global-dimension-static-size-100, 8px) + -1 * var(--spectrum-global-dimension-static-size-25, 2px)),
+    calc(-1 * var(--spectrum-global-dimension-static-size-100, 8px) + -1 * var(--spectrum-global-dimension-static-size-25, 2px)) calc(-1 * var(--spectrum-global-dimension-static-size-25, 2px));
+
+  transition:
+    width var(--spectrum-global-animation-duration-100, 130ms) ease-in-out,
+    height var(--spectrum-global-animation-duration-100, 130ms) ease-in-out,
+    border-width var(--spectrum-global-animation-duration-100, 130ms) ease-in-out,
+    margin-left var(--spectrum-global-animation-duration-100, 130ms) ease-in-out,
+    margin-top var(--spectrum-global-animation-duration-100, 130ms) ease-in-out;
+}
+
+.spectrum-ColorHandle,
+  .spectrum-ColorHandle:after {
+    border-radius: 100%;
+  }
+
+.spectrum-ColorHandle:after {
+    content: '';
+    left: calc(50% - var(--spectrum-global-dimension-size-300) / 2);
+    top: calc(50% - var(--spectrum-global-dimension-size-300) / 2);
+    position: absolute;
+    display: block;
+    width: var(--spectrum-global-dimension-size-300);
+    height: var(--spectrum-global-dimension-size-300);
+  }
+
+.spectrum-ColorHandle.is-disabled {
+    pointer-events: none;
+  }
+
+.spectrum-ColorHandle-color {
+  border-radius: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.spectrum-ColorHandle {
+  border-color: var(--spectrum-colorhandle-inner-border-color, var(--spectrum-global-color-static-white));
+  box-shadow: 0 0 0 var(--spectrum-colorhandle-outer-border-size, var(--spectrum-global-dimension-static-size-10)) rgba(0, 0, 0, 0.42);
+
+  background-color: var(--spectrum-global-color-static-white, rgb(255, 255, 255));
+  background-image:
+    linear-gradient(-45deg, transparent 75.5%, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 75.5%),
+    linear-gradient(45deg, transparent 75.5%, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 75.5%),
+    linear-gradient(-45deg, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 25.5%, transparent 25.5%),
+    linear-gradient(45deg, var(--spectrum-global-color-static-gray-500, rgb(188, 188, 188)) 25.5%, transparent 25.5%);
+}
+
+.spectrum-ColorHandle.is-disabled {
+    border-color: var(--spectrum-colorhandle-inner-border-color-disabled, var(--spectrum-global-color-gray-400));
+    background: var(--spectrum-colorhandle-fill-color-disabled, var(--spectrum-global-color-gray-300));
+    box-shadow: none;
+  }
+
+.spectrum-ColorHandle.is-disabled .spectrum-ColorHandle-color {
+      display: none;
+    }
+
+.spectrum-ColorHandle-color {
+  box-shadow: inset 0 0 0 var(--spectrum-colorhandle-outer-border-size, var(--spectrum-global-dimension-static-size-10)) rgba(0, 0, 0, 0.42);
+}
+
+.spectrum-ColorLoupe {
+  width: calc(var(--spectrum-colorhandle-loupe-width, var(--spectrum-global-dimension-static-size-600)) + var(--spectrum-colorhandle-inner-border-size, var(--spectrum-global-dimension-static-size-25)) * 2);
+  height: calc(var(--spectrum-colorhandle-loupe-height, var(--spectrum-global-dimension-static-size-800)) + var(--spectrum-colorhandle-inner-border-size, var(--spectrum-global-dimension-static-size-25)) * 2);
+
+  position: absolute;
+  transform: translate(0, var(--spectrum-global-dimension-static-size-100, 8px));
+  opacity: 0;
+  transform-origin: bottom center;
+  bottom: calc(50% + var(--spectrum-global-dimension-static-size-200, 16px));
+  left: calc(50% - (var(--spectrum-colorhandle-loupe-width, var(--spectrum-global-dimension-static-size-600)) + var(--spectrum-colorhandle-inner-border-size, var(--spectrum-global-dimension-static-size-25)) * 2) / 2);
+  transition: transform 100ms ease-in-out,
+              opacity 125ms ease-in-out;
+
+  pointer-events: none;
+}
+
+.spectrum-ColorLoupe.is-open {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+
+.spectrum-ColorLoupe-outer {
+  stroke-width: var(--spectrum-colorhandle-loupe-outer-border-size, var(--spectrum-global-dimension-static-size-10));
+}
+
+.spectrum-ColorLoupe-outer {
+  fill: var(--spectrum-colorhandle-loupe-inner-border-color, var(--spectrum-global-color-static-white));
+  stroke: var(--spectrum-colorhandle-loupe-outer-border-color, rgba(50,50,50,0.1));
+}
+
 .spectrum-Tabs {
   display: -ms-flexbox;
   display: flex;
@@ -9761,11 +9998,11 @@ h1 + cite {
   gap: 32px;
 }
 .spectrum-Form-item--row .spectrum-Form-item {
-  width: 182px;
+  width: 210px;
 }
 
 .spectrum-Textfield {
-  width: 20ch;
+  width: 24ch;
 }
 
 .converter--column {
@@ -9785,7 +10022,7 @@ h1 + cite {
   padding: 72px 48px;
   border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  height: 168px;
+  height: 218px;
   display: flex;
   justify-content: center;
 }
@@ -9859,6 +10096,18 @@ h1 + cite {
 
 #contrastCheckInput {
   height: 340px;
+}
+
+#alphaSlider {
+  width: 208px;
+}
+
+.spectrum-ColorSlider-slider {
+  z-index: 1;
+  pointer-events: all;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
 }
 
 /*# sourceMappingURL=/contrast-checker.90639fa8.css.map */

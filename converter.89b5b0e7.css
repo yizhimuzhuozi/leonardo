@@ -9761,11 +9761,11 @@ h1 + cite {
   gap: 32px;
 }
 .spectrum-Form-item--row .spectrum-Form-item {
-  width: 182px;
+  width: 210px;
 }
 
 .spectrum-Textfield {
-  width: 20ch;
+  width: 24ch;
 }
 
 .converter--column {
@@ -9785,7 +9785,7 @@ h1 + cite {
   padding: 72px 48px;
   border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  height: 168px;
+  height: 218px;
   display: flex;
   justify-content: center;
 }
@@ -9859,6 +9859,18 @@ h1 + cite {
 
 #contrastCheckInput {
   height: 340px;
+}
+
+#alphaSlider {
+  width: 208px;
+}
+
+.spectrum-ColorSlider-slider {
+  z-index: 1;
+  pointer-events: all;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
 }
 
 /*# sourceMappingURL=/converter.89b5b0e7.css.map */
