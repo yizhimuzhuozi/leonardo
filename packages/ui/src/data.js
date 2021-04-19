@@ -13,75 +13,9 @@ governing permissions and limitations under the License.
 import * as d3 from 'd3';
 
 // Create data based on colorspace
+
+
 function createData(colors) {
-  let CAM_J = [];
-  let CAM_A = [];
-  let CAM_B = [];
-  let LAB_L = [];
-  let LAB_A = [];
-  let LAB_B = [];
-  let LCH_L = [];
-  let LCH_C = [];
-  let LCH_H = [];
-  let HSL_H = [];
-  let HSL_S = [];
-  let HSL_L = [];
-  let HSV_H = [];
-  let HSV_S = [];
-  let HSV_V = [];
-  let HSLuv_L = [];
-  let HSLuv_U = [];
-  let HSLuv_V = [];
-  let RGB_R = [];
-  let RGB_G = [];
-  let RGB_B = [];
-
-  for(let i=4; i<colors.length; i++) { // Clip array to eliminate NaN values
-    CAM_J.push(d3.jab(colors[i]).J);
-    CAM_A.push(d3.jab(colors[i]).a);
-    CAM_B.push(d3.jab(colors[i]).b);
-    LAB_L.push(d3.lab(colors[i]).l);
-    LAB_A.push(d3.lab(colors[i]).a);
-    LAB_B.push(d3.lab(colors[i]).b);
-    LCH_L.push(d3.hcl(colors[i]).l);
-    LCH_C.push(d3.hcl(colors[i]).c);
-    LCH_H.push(d3.hcl(colors[i]).h);
-    RGB_R.push(d3.rgb(colors[i]).r);
-    RGB_G.push(d3.rgb(colors[i]).g);
-    RGB_B.push(d3.rgb(colors[i]).b);
-    HSL_H.push(d3.hsl(colors[i]).h);
-    HSL_S.push(d3.hsl(colors[i]).s);
-    HSL_L.push(d3.hsl(colors[i]).l);
-    HSV_H.push(d3.hsv(colors[i]).h);
-    HSV_S.push(d3.hsv(colors[i]).s);
-    HSV_V.push(d3.hsv(colors[i]).v);
-    HSLuv_L.push(d3.hsluv(colors[i]).l);
-    HSLuv_U.push(d3.hsluv(colors[i]).u);
-    HSLuv_V.push(d3.hsluv(colors[i]).v);
-  }
-
-  // Filter out "NaN" values from these arrays
-  CAM_J = CAM_J.filter(function(value) {return !Number.isNaN(value);});
-  CAM_A = CAM_A.filter(function(value) {return !Number.isNaN(value);});
-  CAM_B = CAM_B.filter(function(value) {return !Number.isNaN(value);});
-  LAB_L = LAB_L.filter(function(value) {return !Number.isNaN(value);});
-  LAB_A = LAB_A.filter(function(value) {return !Number.isNaN(value);});
-  LAB_B = LAB_B.filter(function(value) {return !Number.isNaN(value);});
-  LCH_L = LCH_L.filter(function(value) {return !Number.isNaN(value);});
-  LCH_C = LCH_C.filter(function(value) {return !Number.isNaN(value);});
-  LCH_H = LCH_H.filter(function(value) {return !Number.isNaN(value);});
-  RGB_R = RGB_R.filter(function(value) {return !Number.isNaN(value);});
-  RGB_G = RGB_G.filter(function(value) {return !Number.isNaN(value);});
-  RGB_B = RGB_B.filter(function(value) {return !Number.isNaN(value);});
-  HSL_H = HSL_H.filter(function(value) {return !Number.isNaN(value);});
-  HSL_S = HSL_S.filter(function(value) {return !Number.isNaN(value);});
-  HSL_L = HSL_L.filter(function(value) {return !Number.isNaN(value);});
-  HSV_H = HSV_H.filter(function(value) {return !Number.isNaN(value);});
-  HSV_S = HSV_S.filter(function(value) {return !Number.isNaN(value);});
-  HSV_V = HSV_V.filter(function(value) {return !Number.isNaN(value);});
-  HSLuv_L = HSLuv_L.filter(function(value) {return !Number.isNaN(value);});
-  HSLuv_U = HSLuv_U.filter(function(value) {return !Number.isNaN(value);});
-  HSLuv_V = HSLuv_V.filter(function(value) {return !Number.isNaN(value);});
 
   window.CAMArrayJ = [];
   window.CAMArrayA = [];
@@ -127,141 +61,159 @@ function createData(colors) {
   window.HSLuvArrayUmin = [];
   window.HSLuvArrayVmin = [];
 
-  // Shorten the numbers in the array for chart purposes
+
+  let length = colors.length - 4
   var maxVal = 300;
-  var delta = Math.floor( CAM_J.length / maxVal );
+  var maxDelta = Math.floor( length / maxVal );
+  var minMaxVal = 25;
+  var minDelta = Math.floor( length / minMaxVal );
+  
+  for(let i = 0; i < length; i += maxDelta){
+    let jab = d3.jab(colors[i+4])
+    let lab = d3.lab(colors[i+4])
+    let hcl = d3.hcl(colors[i+4])
+    let rgb = d3.rgb(colors[i+4])
+    let hsl = d3.hsl(colors[i+4])
+    let hsv = d3.hsv(colors[i+4])
+    let hsluv = d3.hsluv(colors[i+4])
 
-  for (let i = 0; i < CAM_J.length; i=i+delta) {
-    CAMArrayJ.push(CAM_J[i]);
-  }
-  for (let i = 0; i < CAM_A.length; i=i+delta) {
-    CAMArrayA.push(CAM_A[i]);
-  }
-  for (let i = 0; i < CAM_B.length; i=i+delta) {
-    CAMArrayB.push(CAM_B[i]);
-  }
-  for (let i = 0; i < LAB_L.length; i=i+delta) {
-    LABArrayL.push(LAB_L[i]);
-  }
-  for (let i = 0; i < LAB_A.length; i=i+delta) {
-    LABArrayA.push(LAB_A[i]);
-  }
-  for (let i = 0; i < LAB_B.length; i=i+delta) {
-    LABArrayB.push(LAB_B[i]);
-  }
-  for (let i = 0; i < LCH_L.length; i=i+delta) {
-    LCHArrayL.push(LCH_L[i]);
-  }
-  for (let i = 0; i < LCH_C.length; i=i+delta) {
-    LCHArrayC.push(LCH_C[i]);
-  }
-  for (let i = 0; i < LCH_H.length; i=i+delta) {
-    LCHArrayH.push(LCH_H[i]);
-  }
-  for (let i = 0; i < RGB_R.length; i=i+delta) {
-    RGBArrayR.push(RGB_R[i]);
-  }
-  for (let i = 0; i < RGB_G.length; i=i+delta) {
-    RGBArrayG.push(RGB_G[i]);
-  }
-  for (let i = 0; i < RGB_B.length; i=i+delta) {
-    RGBArrayB.push(RGB_B[i]);
-  }
-  for (let i = 0; i < HSL_H.length; i=i+delta) {
-    HSLArrayH.push(HSL_H[i]);
-  }
-  for (let i = 0; i < HSL_S.length; i=i+delta) {
-    HSLArrayS.push(HSL_S[i]);
-  }
-  for (let i = 0; i < HSL_L.length; i=i+delta) {
-    HSLArrayL.push(HSL_L[i]);
-  }
-  for (let i = 0; i < HSV_H.length; i=i+delta) {
-    HSVArrayH.push(HSV_H[i]);
-  }
-  for (let i = 0; i < HSV_S.length; i=i+delta) {
-    HSVArrayS.push(HSV_S[i]);
-  }
-  for (let i = 0; i < HSV_V.length; i=i+delta) {
-    HSVArrayL.push(HSV_V[i]);
-  }
-  for (let i = 0; i < HSLuv_L.length; i=i+delta) {
-    HSLuvArrayL.push(HSLuv_L[i]);
-  }
-  for (let i = 0; i < HSLuv_U.length; i=i+delta) {
-    HSLuvArrayU.push(HSLuv_U[i]);
-  }
-  for (let i = 0; i < HSLuv_V.length; i=i+delta) {
-    HSLuvArrayV.push(HSLuv_V[i]);
+    
+    CAMArrayJ.push(jab.J);
+    CAMArrayA.push(jab.a);
+    CAMArrayB.push(jab.b);
+    LABArrayL.push(lab.l);
+    LABArrayA.push(lab.a);
+    LABArrayB.push(lab.b);
+    LCHArrayL.push(hcl.l);
+    LCHArrayC.push(hcl.c);
+    LCHArrayH.push(hcl.h);
+    RGBArrayR.push(rgb.r);
+    RGBArrayG.push(rgb.g);
+    RGBArrayB.push(rgb.b);
+    HSLArrayH.push(hsl.h);
+    HSLArrayS.push(hsl.s);
+    HSLArrayL.push(hsl.l);
+    HSVArrayH.push(hsv.h);
+    HSVArrayS.push(hsv.s);
+    HSVArrayL.push(hsv.v);
+    HSLuvArrayL.push(hsluv.l);
+    HSLuvArrayU.push(hsluv.u);
+    HSLuvArrayV.push(hsluv.v);
   }
 
-  // Minimized data set
-  var maxValmin = 25;
-  var deltamin = Math.floor( CAM_J.length / maxValmin );
+  for(let i = 0; i < length; i += minDelta){
+    let jab = d3.jab(colors[i+4])
+    let lab = d3.lab(colors[i+4])
+    let hcl = d3.hcl(colors[i+4])
+    let rgb = d3.rgb(colors[i+4])
+    let hsl = d3.hsl(colors[i+4])
+    let hsv = d3.hsv(colors[i+4])
+    let hsluv = d3.hsluv(colors[i+4])
 
-  for (let i = 0; i < CAM_J.length; i=i+deltamin) {
-    CAMArrayJmin.push(CAM_J[i]);
+    CAMArrayJmin.push(jab.J);
+    CAMArrayAmin.push(jab.a);
+    CAMArrayBmin.push(jab.b);
+    LABArrayLmin.push(lab.l);
+    LABArrayAmin.push(lab.a);
+    LABArrayBmin.push(lab.b);
+    LCHArrayLmin.push(hcl.l);
+    LCHArrayCmin.push(hcl.c);
+    LCHArrayHmin.push(hcl.h);
+    RGBArrayRmin.push(rgb.r);
+    RGBArrayGmin.push(rgb.g);
+    RGBArrayBmin.push(rgb.b);
+    HSLArrayHmin.push(hsl.h);
+    HSLArraySmin.push(hsl.s);
+    HSLArrayLmin.push(hsl.l);
+    HSVArrayHmin.push(hsv.h);
+    HSVArraySmin.push(hsv.s);
+    HSVArrayLmin.push(hsv.v);
+    HSLuvArrayLmin.push(hsluv.l);
+    HSLuvArrayUmin.push(hsluv.u);
+    HSLuvArrayVmin.push(hsluv.v);
   }
-  for (let i = 0; i < CAM_A.length; i=i+deltamin) {
-    CAMArrayAmin.push(CAM_A[i]);
+
+  // this results in us losing some samples to NaN, but
+  // is closish to doing it on the full array
+  // and still faster
+
+  for(let i = HSLArrayH.length - 1; i >= 0; i--){
+    if(isNaN(HSLArrayH[i]) ||
+      isNaN(HSLArrayS[i]) ||
+      isNaN(HSLArrayL[i])){
+      HSLArrayH.splice(i,1)
+      HSLArrayS.splice(i,1)
+      HSLArrayL.splice(i,1)
+    }
+    if(isNaN(HSVArrayH[i]) ||
+      isNaN(HSVArrayS[i]) ||
+      isNaN(HSVArrayL[i])){
+      HSVArrayH.splice(i,1)
+      HSVArrayS.splice(i,1)
+      HSVArrayL.splice(i,1)
+    }
+    if(isNaN(LCHArrayL[i]) ||
+      isNaN(LCHArrayC[i]) ||
+      isNaN(LCHArrayH[i])){
+      LCHArrayL.splice(i,1)
+      LCHArrayC.splice(i,1)
+      LCHArrayH.splice(i,1)
+    }
   }
-  for (let i = 0; i < CAM_B.length; i=i+deltamin) {
-    CAMArrayBmin.push(CAM_B[i]);
+
+  for(let i = HSLArrayHmin.length - 1; i >= 0; i--){
+    if(isNaN(HSLArrayHmin[i]) ||
+      isNaN(HSLArraySmin[i]) ||
+      isNaN(HSLArrayLmin[i])){
+      HSLArrayHmin.splice(i,1)
+      HSLArraySmin.splice(i,1)
+      HSLArrayLmin.splice(i,1)
+    }
+    if(isNaN(HSVArrayHmin[i]) ||
+      isNaN(HSVArraySmin[i]) ||
+      isNaN(HSVArrayLmin[i])){
+      HSVArrayHmin.splice(i,1)
+      HSVArraySmin.splice(i,1)
+      HSVArrayLmin.splice(i,1)
+    }
+    if(isNaN(LCHArrayLmin[i]) ||
+      isNaN(LCHArrayCmin[i]) ||
+      isNaN(LCHArrayHmin[i])){
+      LCHArrayLmin.splice(i,1)
+      LCHArrayCmin.splice(i,1)
+      LCHArrayHmin.splice(i,1)
+    }
   }
-  for (let i = 0; i < LAB_L.length; i=i+deltamin) {
-    LABArrayLmin.push(LAB_L[i]);
+
+
+  // Filter out "NaN" values from these arrays
+
+  function isANumber(value){
+    return !Number.isNaN(value);
   }
-  for (let i = 0; i < LAB_A.length; i=i+deltamin) {
-    LABArrayAmin.push(LAB_A[i]);
-  }
-  for (let i = 0; i < LAB_B.length; i=i+deltamin) {
-    LABArrayBmin.push(LAB_B[i]);
-  }
-  for (let i = 0; i < LCH_L.length; i=i+deltamin) {
-    LCHArrayLmin.push(LCH_L[i]);
-  }
-  for (let i = 0; i < LCH_C.length; i=i+deltamin) {
-    LCHArrayCmin.push(LCH_C[i]);
-  }
-  for (let i = 0; i < LCH_H.length; i=i+deltamin) {
-    LCHArrayHmin.push(LCH_H[i]);
-  }
-  for (let i = 0; i < RGB_R.length; i=i+deltamin) {
-    RGBArrayRmin.push(RGB_R[i]);
-  }
-  for (let i = 0; i < RGB_G.length; i=i+deltamin) {
-    RGBArrayGmin.push(RGB_G[i]);
-  }
-  for (let i = 0; i < RGB_B.length; i=i+deltamin) {
-    RGBArrayBmin.push(RGB_B[i]);
-  }
-  for (let i = 0; i < HSL_H.length; i=i+deltamin) {
-    HSLArrayHmin.push(HSL_H[i]);
-  }
-  for (let i = 0; i < HSL_S.length; i=i+deltamin) {
-    HSLArraySmin.push(HSL_S[i]);
-  }
-  for (let i = 0; i < HSL_L.length; i=i+deltamin) {
-    HSLArrayLmin.push(HSL_L[i]);
-  }
-  for (let i = 0; i < HSV_H.length; i=i+deltamin) {
-    HSVArrayHmin.push(HSV_H[i]);
-  }
-  for (let i = 0; i < HSV_S.length; i=i+deltamin) {
-    HSVArraySmin.push(HSV_S[i]);
-  }
-  for (let i = 0; i < HSV_V.length; i=i+deltamin) {
-    HSVArrayLmin.push(HSV_V[i]);
-  }
-  for (let i = 0; i < HSLuv_L.length; i=i+deltamin) {
-    HSLuvArrayLmin.push(HSLuv_L[i]);
-  }
-  for (let i = 0; i < HSLuv_U.length; i=i+deltamin) {
-    HSLuvArrayUmin.push(HSLuv_U[i]);
-  }
-  for (let i = 0; i < HSLuv_V.length; i=i+deltamin) {
-    HSLuvArrayVmin.push(HSLuv_V[i]);
-  }
+
+  // CAM_J = CAM_J.filter(isANumber);
+  // CAM_A = CAM_A.filter(isANumber);
+  // CAM_B = CAM_B.filter(isANumber);
+  // LAB_L = LAB_L.filter(isANumber);
+  // LAB_A = LAB_A.filter(isANumber);
+  // LAB_B = LAB_B.filter(isANumber);
+  // LCH_L = LCH_L.filter(isANumber);
+  // LCH_C = LCH_C.filter(isANumber);
+  // LCH_H = LCH_H.filter(isANumber);
+  // RGB_R = RGB_R.filter(isANumber);
+  // RGB_G = RGB_G.filter(isANumber);
+  // RGB_B = RGB_B.filter(isANumber);
+  // HSL_H = HSL_H.filter(isANumber);
+  // HSL_S = HSL_S.filter(isANumber);
+  // HSL_L = HSL_L.filter(isANumber);
+  // HSV_H = HSV_H.filter(isANumber);
+  // HSV_S = HSV_S.filter(isANumber);
+  // HSV_V = HSV_V.filter(isANumber);
+  // HSLuv_L = HSLuv_L.filter(isANumber);
+  // HSLuv_U = HSLuv_U.filter(isANumber);
+  // HSLuv_V = HSLuv_V.filter(isANumber);
+
 
   const fillRange = (start, end) => {
     return Array(end - start + 1).fill().map((item, index) => start + index);
