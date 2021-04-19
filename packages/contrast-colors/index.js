@@ -219,14 +219,15 @@ function createScale({
     .range([1, swatches]);
 
   sqrtDomains = domains.map((d) => {
-    if (sqrtDomains(d) < 0) {
-      return 0;
-    }
-    return sqrtDomains(d);
+    let sqrtedDomain = sqrtDomains(d)
+    
+    return sqrtedDomain < 0 ? 0 : sqrtedDomain;
   });
 
   // Transform square root in order to smooth gradient
   domains = sqrtDomains;
+
+
 
   let sortedColor = colorKeys
     // Convert to HSLuv and keep track of original indices
@@ -236,13 +237,7 @@ function createScale({
     // Retrieve original RGB color
     .map(data => colorKeys[data.index]);
 
-  let inverseSortedColor = colorKeys
-    // Convert to HSLuv and keep track of original indices
-    .map((c, i) => { return {colorKeys: cArray(c), index: i} })
-    // Sort by lightness
-    .sort((c1, c2) => c1.colorKeys[2] - c2.colorKeys[2])
-    // Retrieve original RGB color
-    .map(data => colorKeys[data.index]);
+  let inverseSortedColor = sortedColor.slice().reverse()
 
   let ColorsArray = [];
 
@@ -325,7 +320,7 @@ function generateContrastColors({
   colorspace = 'LAB',
   smooth = false,
   output = 'HEX'
-} = {}) {
+} = {},scaleData) {
   if (!base) {
     throw new Error(`Base is undefined`);
   }
@@ -350,12 +345,17 @@ function generateContrastColors({
 
   let swatches = 3000;
 
-  let scaleData = createScale({swatches: swatches, colorKeys: colorKeys, colorspace: colorspace, shift: 1, smooth: smooth});
+  // use passed scale data if exists to avoid regenning
+  scaleData = scaleData ? scaleData : createScale({swatches: swatches, colorKeys: colorKeys, colorspace: colorspace, shift: 1, smooth: smooth});
+  
   let baseV = (d3.hsluv(base).v) / 100;
-
+  let baseRGB = d3.rgb(base)
+  let baseRgbArray = [baseRGB.r, baseRGB.g, baseRGB.b];
+  
   let Contrasts = d3.range(swatches).map((d) => {
-    let rgbArray = [d3.rgb(scaleData.scale(d)).r, d3.rgb(scaleData.scale(d)).g, d3.rgb(scaleData.scale(d)).b];
-    let baseRgbArray = [d3.rgb(base).r, d3.rgb(base).g, d3.rgb(base).b];
+    let scaledRGB = d3.rgb(scaleData.scale(d))
+    
+    let rgbArray = [scaledRGB.r, scaledRGB.g, scaledRGB.b];
     let ca = contrast(rgbArray, baseRgbArray, baseV).toFixed(2);
 
     return Number(ca);
