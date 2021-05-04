@@ -193,7 +193,9 @@ function paramSetup() {
     document.querySelector('select[name="mode"]').value = params.get('mode');
   }
   else {
-    addColor('#6fa7ff');
+    addColor('#59C4F3');
+    addColor('#063B9D');
+    document.querySelector('select[name="mode"]').value = 'RGB';
     addRatio(3);
     addRatio(4.5);
   }
@@ -426,7 +428,10 @@ window.openTab = function openTab(evt, tabName) {
   // Show the current tab, and add an "active" class to the button that opened the tab
   document.getElementById(tabName).style.display = "flex";
   evt.currentTarget.className += " is-selected";
-  
+
+  if(tabName === 'chartsWrapper' || tabName === 'modelWrapper') {
+    setColorInputDirty()
+  }
 }
 
 window.openAppTab = function openAppTab(evt, tabName) {
@@ -761,11 +766,11 @@ function colorInput() {
   urlUpdateTimer = setTimeout(()=>{
     updateParams(inputColors, background.substr(1), ratioInputs, mode);
   },100)
+    
+  let data = chartData.createData(scaleData.colors);
   if(!chartHidden){
     let chartMode = document.getElementById('chart2dColorspace').value;
-    
-    let data = chartData.createData(scaleData.colors);
-    charts.showCharts('CAM02', data);
+    charts.showCharts(chartMode, data);
   }
   colorSpaceFeedback('CAM02'); // manually enter default of CAM02
 }
