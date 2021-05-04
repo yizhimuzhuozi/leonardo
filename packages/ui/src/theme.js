@@ -66,6 +66,7 @@ new ClipboardJS('.themeOutputSwatch');
 window.generateAdaptiveTheme = contrastColors.generateAdaptiveTheme;
 
 var currentBackgroundColor;
+let urlUpdateTimer;
 
 let cvdModeDropdown = document.getElementById('cvdMode');
 
@@ -478,8 +479,13 @@ function addColorScaleUpdate(c, k, s, r) {
   let name = getThemeName();
 
   config = JSON.stringify(config);
-
-  updateParams(name, config);
+  // update URL parameters
+  clearTimeout(urlUpdateTimer)
+  urlUpdateTimer = setTimeout(()=>{
+    updateParams(name, config);
+  },100)
+    
+  // updateParams(name, config);
 }
 
 // Update theme when theme name is changed
@@ -537,7 +543,11 @@ function themeAddColor(c, thisId = this.id) {
   let sw = document.createElement('input');
   sw.type = "color";
   sw.value = c;
-  sw.oninput = throttle(themeUpdateParams, 50);
+  // sw.oninput = throttle(themeUpdateParams, 50);
+  sw.oninput = () => {clearTimeout(urlUpdateTimer)
+  urlUpdateTimer = setTimeout(()=>{
+    themeUpdateParams();
+  },100)}
 
   sw.className = 'keyColor-Item';
   sw.id = randId + '-sw';
@@ -563,7 +573,12 @@ function themeAddColorUpdate(c, thisId = this.id) {
 
   config = JSON.stringify(config);
 
-  updateParams(name, config);
+  // update URL parameters
+  clearTimeout(urlUpdateTimer)
+  urlUpdateTimer = setTimeout(()=>{
+    updateParams(name, config);
+  },100)
+  // updateParams(name, config);
 }
 
 function themeDeleteItem(e) {
@@ -808,62 +823,112 @@ function themeInput() {
       themeSwatchRamp(arr, gradientId);
     }
 
-    let themeColorArray = [];
-
-    let varPrefix = '--';
-
     // Iterate each color from theme except 1st object (background)
-    for (let i=0; i<theme.length; i++) {
-      let wrapper = document.createElement('div');
+    // for (let i=0; i<theme.length; i++) {
+    //   let wrapper = document.createElement('div');
 
-      let swatchWrapper = document.createElement('div');
-      swatchWrapper.className = 'themeOutputColor';
+    //   let swatchWrapper = document.createElement('div');
+    //   swatchWrapper.className = 'themeOutputColor';
 
-      // Iterate each color value
-      if (theme[i].values) {
-        let p = document.createElement('p');
-        p.className = 'spectrum-Subheading';
-        p.innerHTML = theme[i].name;
+    //   // Iterate each color value
+    //   if (theme[i].values) {
+    //     let p = document.createElement('p');
+    //     p.className = 'spectrum-Subheading';
+    //     p.innerHTML = theme[i].name;
 
-        wrapper.appendChild(p);
+    //     wrapper.appendChild(p);
 
-        for(let j=0; j<theme[i].values.length; j++) { // for each value object
-          let key = theme[i].values[j].name; // output "name" of color
-          let prop = varPrefix.concat(key);
-          let originalValue = theme[i].values[j].value; // output value of color
-          // transform original color based on preview mode
-          let value = cvdColors(originalValue);
+    //     for(let j=0; j<theme[i].values.length; j++) { // for each value object
+    //       let key = theme[i].values[j].name; // output "name" of color
+    //       let prop = varPrefix.concat(key);
+    //       let originalValue = theme[i].values[j].value; // output value of color
+    //       // transform original color based on preview mode
+    //       let value = cvdColors(originalValue);
 
-          // create CSS property
-          document.documentElement.style
-            .setProperty(prop, value);
-          // create swatch
-          let div = document.createElement('div');
-          div.className = 'themeOutputSwatch';
-          // copy text should be for value of original color, not of preview color.
-          div.setAttribute('data-clipboard-text', originalValue);
-          div.setAttribute('tabindex', '0');
-          div.style.backgroundColor = value;
+    //       // create CSS property
+    //       document.documentElement.style
+    //         .setProperty(prop, value);
+    //       // create swatch
+    //       let div = document.createElement('div');
+    //       div.className = 'themeOutputSwatch';
+    //       // copy text should be for value of original color, not of preview color.
+    //       div.setAttribute('data-clipboard-text', originalValue);
+    //       div.setAttribute('tabindex', '0');
+    //       div.style.backgroundColor = value;
 
 
-          swatchWrapper.appendChild(div);
-          themeColorArray.push(originalValue);
-        }
-        wrapper.appendChild(swatchWrapper);
-      }
-      else if (theme[i].background) {
-        let p = document.createElement('p');
-        p.className = 'spectrum-Subheading';
-        p.innerHTML = 'Background';
+    //       swatchWrapper.appendChild(div);
+    //       themeColorArray.push(originalValue);
+    //     }
+    //     wrapper.appendChild(swatchWrapper);
+    //   }
+    //   else if (theme[i].background) {
+    //     let p = document.createElement('p');
+    //     p.className = 'spectrum-Subheading';
+    //     p.innerHTML = 'Background';
 
-        wrapper.appendChild(p);
+    //     wrapper.appendChild(p);
 
-        // grab background color data
-        let key = 'theme-background'; // "name" of color
+    //     // grab background color data
+    //     let key = 'theme-background'; // "name" of color
+    //     let prop = varPrefix.concat(key);
+    //     let originalValue = theme[i].background; // output value of color
+    //     // set global variable value. Probably shouldn't do it this way.
+    //     currentBackgroundColor = originalValue;
+    //     let value = cvdColors(originalValue);
+
+    //     // create CSS property
+    //     document.documentElement.style
+    //       .setProperty(prop, value);
+    //     // create swatch
+    //     let div = document.createElement('div');
+    //     div.className = 'themeOutputSwatch';
+    //     div.setAttribute('tabindex', '0');
+    //     div.setAttribute('data-clipboard-text', originalValue);
+    //     div.style.backgroundColor = value;
+
+    //     swatchWrapper.appendChild(div);
+    //     wrapper.appendChild(swatchWrapper);
+
+    //     themeColorArray.push(originalValue);
+    //   }
+
+    //   themeOutputs.appendChild(wrapper);
+    // }
+    let themeColorArray = createCSSproperties(theme, themeOutputs);
+
+    // Run toggle to ensure proper visibility shown based on view mode
+    toggleConfigs();
+
+    let copyThemeColors = document.getElementById('copyThemeColors');
+    copyThemeColors.setAttribute('data-clipboard-text', themeColorArray);
+    paramsOutput.innerHTML = JSON.stringify(themeConfigs, null, 2);
+  }
+}
+
+function createCSSproperties(theme, themeOutputs) {
+  let themeColorArray = [];
+  let varPrefix = '--';
+
+  for (let i=0; i<theme.length; i++) {
+    let wrapper = document.createElement('div');
+
+    let swatchWrapper = document.createElement('div');
+    swatchWrapper.className = 'themeOutputColor';
+
+    // Iterate each color value
+    if (theme[i].values) {
+      let p = document.createElement('p');
+      p.className = 'spectrum-Subheading';
+      p.innerHTML = theme[i].name;
+
+      wrapper.appendChild(p);
+
+      for(let j=0; j<theme[i].values.length; j++) { // for each value object
+        let key = theme[i].values[j].name; // output "name" of color
         let prop = varPrefix.concat(key);
-        let originalValue = theme[i].background; // output value of color
-        // set global variable value. Probably shouldn't do it this way.
-        currentBackgroundColor = originalValue;
+        let originalValue = theme[i].values[j].value; // output value of color
+        // transform original color based on preview mode
         let value = cvdColors(originalValue);
 
         // create CSS property
@@ -872,25 +937,51 @@ function themeInput() {
         // create swatch
         let div = document.createElement('div');
         div.className = 'themeOutputSwatch';
-        div.setAttribute('tabindex', '0');
+        // copy text should be for value of original color, not of preview color.
         div.setAttribute('data-clipboard-text', originalValue);
+        div.setAttribute('tabindex', '0');
         div.style.backgroundColor = value;
 
-        swatchWrapper.appendChild(div);
-        wrapper.appendChild(swatchWrapper);
 
+        swatchWrapper.appendChild(div);
         themeColorArray.push(originalValue);
       }
-
-      themeOutputs.appendChild(wrapper);
+      wrapper.appendChild(swatchWrapper);
     }
-    // Run toggle to ensure proper visibility shown based on view mode
-    toggleConfigs();
+    else if (theme[i].background) {
+      let p = document.createElement('p');
+      p.className = 'spectrum-Subheading';
+      p.innerHTML = 'Background';
 
-    let copyThemeColors = document.getElementById('copyThemeColors');
-    copyThemeColors.setAttribute('data-clipboard-text', themeColorArray);
-    paramsOutput.innerHTML = JSON.stringify(themeConfigs, null, 2);
+      wrapper.appendChild(p);
+
+      // grab background color data
+      let key = 'theme-background'; // "name" of color
+      let prop = varPrefix.concat(key);
+      let originalValue = theme[i].background; // output value of color
+      // set global variable value. Probably shouldn't do it this way.
+      currentBackgroundColor = originalValue;
+      let value = cvdColors(originalValue);
+
+      // create CSS property
+      document.documentElement.style
+        .setProperty(prop, value);
+      // create swatch
+      let div = document.createElement('div');
+      div.className = 'themeOutputSwatch';
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('data-clipboard-text', originalValue);
+      div.style.backgroundColor = value;
+
+      swatchWrapper.appendChild(div);
+      wrapper.appendChild(swatchWrapper);
+
+      themeColorArray.push(originalValue);
+    }
+
+    themeOutputs.appendChild(wrapper);
   }
+  return themeColorArray;
 }
 
 window.themeUpdateParams = themeUpdateParams;
@@ -901,7 +992,12 @@ function themeUpdateParams() {
 
   config = JSON.stringify(config);
 
-  updateParams(name, config);
+  // update URL parameters
+  clearTimeout(urlUpdateTimer)
+  urlUpdateTimer = setTimeout(()=>{
+    updateParams(name, config);
+  },100)
+  // updateParams(name, config);
 }
 
 let sliderB = document.getElementById('themeBrightnessSlider');
@@ -923,7 +1019,11 @@ function sliderInput() {
   let items = document.getElementsByClassName('themeColor_item');
   // If theme items are present, run themeInput
   if (items !== undefined) {
-    themeUpdateParams();
+    // update URL parameters
+    clearTimeout(urlUpdateTimer)
+    urlUpdateTimer = setTimeout(()=>{
+      themeUpdateParams();
+    },100)
   }
 }
 
@@ -1155,6 +1255,7 @@ function neverShowToast() {
   toast.classList.remove("is-visible");
   toast.classList.add("hidden");
 }
+
 
 // Passing variable parameters to URL
 function updateParams(n, t) {
