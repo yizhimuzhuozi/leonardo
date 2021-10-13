@@ -123,9 +123,9 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
 },{}],"../../../node_modules/@spectrum-css/vars/dist/spectrum-light.css":[function(require,module,exports) {
 
-},{}],"../../../node_modules/@spectrum-css/page/dist/index-vars.css":[function(require,module,exports) {
+},{}],"../../../node_modules/@spectrum-css/vars/dist/spectrum-darkest.css":[function(require,module,exports) {
 
-},{}],"../../../node_modules/@spectrum-css/typography/dist/index-vars.css":[function(require,module,exports) {
+},{}],"../../../node_modules/@spectrum-css/page/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../../../node_modules/@spectrum-css/icon/dist/index-vars.css":[function(require,module,exports) {
 
@@ -135,21 +135,31 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
 },{}],"../../../node_modules/@spectrum-css/radio/dist/index-vars.css":[function(require,module,exports) {
 
+},{}],"../../../node_modules/@spectrum-css/sidenav/dist/index-vars.css":[function(require,module,exports) {
+
 },{}],"../../../node_modules/@spectrum-css/dialog/dist/index-vars.css":[function(require,module,exports) {
+
+},{}],"../../../node_modules/@spectrum-css/button/dist/index-vars.css":[function(require,module,exports) {
+
+},{}],"../../../node_modules/@spectrum-css/badge/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css":[function(require,module,exports) {
 
-},{}],"../../../node_modules/@spectrum-css/button/dist/index-vars.css":[function(require,module,exports) {
+},{}],"../../../node_modules/@spectrum-css/actiongroup/dist/index-vars.css":[function(require,module,exports) {
+
+},{}],"../../../node_modules/@spectrum-css/divider/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../../../node_modules/@spectrum-css/fieldgroup/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../../../node_modules/@spectrum-css/textfield/dist/index-vars.css":[function(require,module,exports) {
 
-},{}],"../../../node_modules/@spectrum-css/dropdown/dist/index-vars.css":[function(require,module,exports) {
+},{}],"../../../node_modules/@spectrum-css/picker/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../../../node_modules/@spectrum-css/fieldlabel/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../../../node_modules/@spectrum-css/checkbox/dist/index-vars.css":[function(require,module,exports) {
+
+},{}],"../../../node_modules/@spectrum-css/switch/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"../../../node_modules/@spectrum-css/buttongroup/dist/index-vars.css":[function(require,module,exports) {
 
@@ -159,15 +169,26 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
 },{}],"../../../node_modules/@spectrum-css/tabs/dist/index-vars.css":[function(require,module,exports) {
 
+},{}],"../../../node_modules/@spectrum-css/toast/dist/index-vars.css":[function(require,module,exports) {
+
 },{}],"../../../node_modules/@spectrum-css/illustratedmessage/dist/index-vars.css":[function(require,module,exports) {
 
-},{}],"scss/colorinputs.scss":[function(require,module,exports) {
-
-},{}],"scss/charts.scss":[function(require,module,exports) {
+},{}],"../../../node_modules/@spectrum-css/typography/dist/index-vars.css":[function(require,module,exports) {
 
 },{}],"scss/style.scss":[function(require,module,exports) {
 
-},{}],"../../../node_modules/@adobe/focus-ring-polyfill/index.js":[function(require,module,exports) {
+},{}],"scss/charts.scss":[function(require,module,exports) {
+
+},{}],"scss/colorinputs.scss":[function(require,module,exports) {
+
+},{}],"views/header.scss":[function(require,module,exports) {
+
+},{}],"views/*.scss":[function(require,module,exports) {
+module.exports = {
+  "header": require("./header.scss"),
+  "selectBox": require("./selectBox.scss")
+};
+},{"./header.scss":"views/header.scss","./selectBox.scss":"views/header.scss"}],"../../../node_modules/@adobe/focus-ring-polyfill/index.js":[function(require,module,exports) {
 /**
  *  Copyright 2018 Adobe. All rights reserved.
  *  This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -6699,12 +6720,30 @@ function createScale({
     throw new Error(`Colorkeys missing: returned “${colorKeys}”`);
   }
 
-  let domains = colorKeys
-    .map((key) => swatches - swatches * (chroma(key).hsluv()[2] / 100))
-    .sort((a, b) => a - b)
-    .concat(swatches);
+  let domains;
+  
+  if(fullScale) {
+    // Set domain of each color key based on percentage (as HSLuv lightness)
+    // against the full scale of black to white
+    domains = colorKeys
+      .map((key) => swatches - swatches * (chroma(key).hsluv()[2] / 100))
+      .sort((a, b) => a - b)
+      .concat(swatches);
+      
+    domains.unshift(0);
+  } else {
+    // Domains need to be a percentage of the available luminosity range
+    let lums = colorKeys.map((c) => chroma(c).hsluv()[2] / 100)
+    let min = Math.min(...lums);
+    let max = Math.max(...lums);
 
-  domains.unshift(0);
+    domains = lums
+      .map((lum) => { 
+        if(lum === 0 || isNaN((lum - min) / (max - min))) return 0;
+        else return swatches - (lum - min) / (max - min) * swatches;
+      })
+      .sort((a, b) => a - b)
+  }
 
   // Test logarithmic domain (for non-contrast-based scales)
   let sqrtDomains = makePowScale(shift, [1, swatches], [1, swatches]);
@@ -6736,6 +6775,7 @@ function createScale({
     ColorsArray = sortedColor;
   }
 
+  let smoothScaleArray;
   if (smooth) {
     const stringColors = ColorsArray;
     ColorsArray = ColorsArray.map((d) => chroma(String(d))[space]());
@@ -6754,6 +6794,8 @@ function createScale({
       }
     }
     scale = smoothScale(ColorsArray, domains, space);
+
+    smoothScaleArray = new Array(swatches).fill().map((_, d) => scale(d));
   } else {
     scale = chroma.scale(ColorsArray.map((color) => {
       if (typeof color === 'object' && color.constructor === chroma.Color) {
@@ -6764,9 +6806,13 @@ function createScale({
   }
   if (asFun) {
     return scale;
-  }
+  } 
 
-  const Colors = new Array(swatches).fill().map((_, d) => chroma(scale(d)).hex());
+  // const Colors = new Array(swatches).fill().map((_, d) => chroma(scale(d)).hex());
+  const Colors = 
+    (!smooth || smooth === false) ? 
+    scale.colors(swatches) : 
+    smoothScaleArray;
 
   const colors = Colors.filter((el) => el != null);
 
@@ -7056,6 +7102,7 @@ class Color {
   set colorKeys(colorKeys) {
     this._colorKeys = colorKeys;
     this._colorScale = null;
+    this._generateColorScale();
   }
 
   get colorKeys() {
@@ -7065,6 +7112,7 @@ class Color {
   set colorspace(colorspace) {
     this._colorspace = colorspace;
     this._colorScale = null;
+    this._generateColorScale();
   }
 
   get colorspace() {
@@ -7090,6 +7138,7 @@ class Color {
   set smooth(smooth) {
     this._smooth = smooth;
     this._colorScale = null;
+    this._generateColorScale();
   }
 
   get smooth() {
@@ -7268,7 +7317,6 @@ class Theme {
     this._saturation = saturation;
     // Update all colors key colors
     this._updateColorSaturation(saturation);
-    this._findContrastColors();
   }
 
   get saturation() {
@@ -7380,8 +7428,11 @@ class Theme {
   }
 
   _updateColorSaturation(saturation) {
+    let originalColorKeys = [];
+
     this._colors.map((color) => {
       const colorKeys = color.colorKeys;
+      originalColorKeys.push(colorKeys)
       let newColorKeys = [];
       colorKeys.forEach(key => {
         let currentHsluv = chroma(`${key}`).hsluv();
@@ -7394,6 +7445,14 @@ class Theme {
       // set each colors color keys with new modified array
       color.colorKeys = newColorKeys;
     })
+    // Find contrast colors based on new color keys
+    this._findContrastColors();
+    // Reset the color keys to original values. This is important
+    // to ensure each time saturation is set, the value is a percentage
+    // of the original keys, rather than a percentage of the last modified set
+    this._colors.map((color, index) => {
+      color.colorKeys = originalColorKeys[index];
+    });
   }
 
   _findContrastColors() {
@@ -7429,7 +7488,7 @@ class Theme {
         ratioValues = ratioValues.map((ratio) => multiplyRatios(+ratio, this._contrast));
 
         const contrastColors = searchColors(color, bgRgbArray, baseV, ratioValues).map((clr) => convertColorValue(clr, this._output));
-
+        
         for (let i = 0; i < contrastColors.length; i++) {
           let n;
           if (!swatchNames) {
@@ -7504,6 +7563,43 @@ extendChroma(chroma);
 // console.color('#6fa7ff');
 // console.ramp(chroma.scale(['yellow', 'navy']).mode('hsl'))
 
+function APCAvalidation(fontSize, fontWeight, level) {
+  // Error or warning messages
+  const doNotUse = 'Do not use this color for text.';
+  const byline = 'Color may be used for Copyright or ByLine only.';
+  const notBodyText = 'Do not use this color for body text (blocks or columns).';
+  // Sizes < 48
+  const doNotUseFontWeight = 'Do not use font weight 100';
+  // Sizes 48+
+  const avoidFontWeight = 'Avoid using font weight 100';
+  if(fontWeight === 100 && fontSize < 48) {
+    console.log(doNotUseFontWeight);
+    throw new Warning(doNotUseFontWeight);
+  }
+  if(fontWeight === 100 && fontSize >= 48) {
+    console.log(avoidFontWeight);
+    throw new Warning(avoidFontWeight);
+  }
+  return fontSize, fontWeight;
+  // const APCALookupTable = {
+  //   '10px': ,
+  //   '11px': ,
+  //   '12px': ,
+  //   '14px': ,
+  //   '16px': ,
+  //   '18px': ,
+  //   '24px': ,
+  //   '30px': ,
+  //   '36px': ,
+  //   '48px': ,
+  //   '60px': ,
+  //   '72px': ,
+  //   '96px': ,
+  //   '120px': ,
+  // }
+}
+window.APCAvalidation = APCAvalidation;
+
 module.exports = {
   Color,
   BackgroundColor,
@@ -7514,6 +7610,7 @@ module.exports = {
   minPositive,
   ratioName,
   convertColorValue,
+  APCAvalidation
 };
 
 },{"chroma-js":"../../../node_modules/chroma-js/chroma.js","./chroma-plus":"../../../node_modules/@adobe/leonardo-contrast-colors/chroma-plus.js","./utils":"../../../node_modules/@adobe/leonardo-contrast-colors/utils.js","./color":"../../../node_modules/@adobe/leonardo-contrast-colors/color.js","./backgroundcolor":"../../../node_modules/@adobe/leonardo-contrast-colors/backgroundcolor.js","./theme":"../../../node_modules/@adobe/leonardo-contrast-colors/theme.js"}],"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs":[function(require,module,exports) {
@@ -7641,962 +7738,6 @@ governing permissions and limitations under the License.
   return loadIcons;
 }));
 
-},{}],"../../../node_modules/clipboard/dist/clipboard.js":[function(require,module,exports) {
-var define;
-/*!
- * clipboard.js v2.0.8
- * https://clipboardjs.com/
- *
- * Licensed MIT © Zeno Rocha
- */
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["ClipboardJS"] = factory();
-	else
-		root["ClipboardJS"] = factory();
-})(this, function() {
-return /******/ (function() { // webpackBootstrap
-/******/ 	var __webpack_modules__ = ({
-
-/***/ 134:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, {
-  "default": function() { return /* binding */ clipboard; }
-});
-
-// EXTERNAL MODULE: ./node_modules/tiny-emitter/index.js
-var tiny_emitter = __webpack_require__(279);
-var tiny_emitter_default = /*#__PURE__*/__webpack_require__.n(tiny_emitter);
-// EXTERNAL MODULE: ./node_modules/good-listener/src/listen.js
-var listen = __webpack_require__(370);
-var listen_default = /*#__PURE__*/__webpack_require__.n(listen);
-// EXTERNAL MODULE: ./node_modules/select/src/select.js
-var src_select = __webpack_require__(817);
-var select_default = /*#__PURE__*/__webpack_require__.n(src_select);
-;// CONCATENATED MODULE: ./src/clipboard-action.js
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-
-/**
- * Inner class which performs selection from either `text` or `target`
- * properties and then executes copy or cut operations.
- */
-
-var ClipboardAction = /*#__PURE__*/function () {
-  /**
-   * @param {Object} options
-   */
-  function ClipboardAction(options) {
-    _classCallCheck(this, ClipboardAction);
-
-    this.resolveOptions(options);
-    this.initSelection();
-  }
-  /**
-   * Defines base properties passed from constructor.
-   * @param {Object} options
-   */
-
-
-  _createClass(ClipboardAction, [{
-    key: "resolveOptions",
-    value: function resolveOptions() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      this.action = options.action;
-      this.container = options.container;
-      this.emitter = options.emitter;
-      this.target = options.target;
-      this.text = options.text;
-      this.trigger = options.trigger;
-      this.selectedText = '';
-    }
-    /**
-     * Decides which selection strategy is going to be applied based
-     * on the existence of `text` and `target` properties.
-     */
-
-  }, {
-    key: "initSelection",
-    value: function initSelection() {
-      if (this.text) {
-        this.selectFake();
-      } else if (this.target) {
-        this.selectTarget();
-      }
-    }
-    /**
-     * Creates a fake textarea element, sets its value from `text` property,
-     */
-
-  }, {
-    key: "createFakeElement",
-    value: function createFakeElement() {
-      var isRTL = document.documentElement.getAttribute('dir') === 'rtl';
-      this.fakeElem = document.createElement('textarea'); // Prevent zooming on iOS
-
-      this.fakeElem.style.fontSize = '12pt'; // Reset box model
-
-      this.fakeElem.style.border = '0';
-      this.fakeElem.style.padding = '0';
-      this.fakeElem.style.margin = '0'; // Move element out of screen horizontally
-
-      this.fakeElem.style.position = 'absolute';
-      this.fakeElem.style[isRTL ? 'right' : 'left'] = '-9999px'; // Move element to the same position vertically
-
-      var yPosition = window.pageYOffset || document.documentElement.scrollTop;
-      this.fakeElem.style.top = "".concat(yPosition, "px");
-      this.fakeElem.setAttribute('readonly', '');
-      this.fakeElem.value = this.text;
-      return this.fakeElem;
-    }
-    /**
-     * Get's the value of fakeElem,
-     * and makes a selection on it.
-     */
-
-  }, {
-    key: "selectFake",
-    value: function selectFake() {
-      var _this = this;
-
-      var fakeElem = this.createFakeElement();
-
-      this.fakeHandlerCallback = function () {
-        return _this.removeFake();
-      };
-
-      this.fakeHandler = this.container.addEventListener('click', this.fakeHandlerCallback) || true;
-      this.container.appendChild(fakeElem);
-      this.selectedText = select_default()(fakeElem);
-      this.copyText();
-      this.removeFake();
-    }
-    /**
-     * Only removes the fake element after another click event, that way
-     * a user can hit `Ctrl+C` to copy because selection still exists.
-     */
-
-  }, {
-    key: "removeFake",
-    value: function removeFake() {
-      if (this.fakeHandler) {
-        this.container.removeEventListener('click', this.fakeHandlerCallback);
-        this.fakeHandler = null;
-        this.fakeHandlerCallback = null;
-      }
-
-      if (this.fakeElem) {
-        this.container.removeChild(this.fakeElem);
-        this.fakeElem = null;
-      }
-    }
-    /**
-     * Selects the content from element passed on `target` property.
-     */
-
-  }, {
-    key: "selectTarget",
-    value: function selectTarget() {
-      this.selectedText = select_default()(this.target);
-      this.copyText();
-    }
-    /**
-     * Executes the copy operation based on the current selection.
-     */
-
-  }, {
-    key: "copyText",
-    value: function copyText() {
-      var succeeded;
-
-      try {
-        succeeded = document.execCommand(this.action);
-      } catch (err) {
-        succeeded = false;
-      }
-
-      this.handleResult(succeeded);
-    }
-    /**
-     * Fires an event based on the copy operation result.
-     * @param {Boolean} succeeded
-     */
-
-  }, {
-    key: "handleResult",
-    value: function handleResult(succeeded) {
-      this.emitter.emit(succeeded ? 'success' : 'error', {
-        action: this.action,
-        text: this.selectedText,
-        trigger: this.trigger,
-        clearSelection: this.clearSelection.bind(this)
-      });
-    }
-    /**
-     * Moves focus away from `target` and back to the trigger, removes current selection.
-     */
-
-  }, {
-    key: "clearSelection",
-    value: function clearSelection() {
-      if (this.trigger) {
-        this.trigger.focus();
-      }
-
-      document.activeElement.blur();
-      window.getSelection().removeAllRanges();
-    }
-    /**
-     * Sets the `action` to be performed which can be either 'copy' or 'cut'.
-     * @param {String} action
-     */
-
-  }, {
-    key: "destroy",
-
-    /**
-     * Destroy lifecycle.
-     */
-    value: function destroy() {
-      this.removeFake();
-    }
-  }, {
-    key: "action",
-    set: function set() {
-      var action = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'copy';
-      this._action = action;
-
-      if (this._action !== 'copy' && this._action !== 'cut') {
-        throw new Error('Invalid "action" value, use either "copy" or "cut"');
-      }
-    }
-    /**
-     * Gets the `action` property.
-     * @return {String}
-     */
-    ,
-    get: function get() {
-      return this._action;
-    }
-    /**
-     * Sets the `target` property using an element
-     * that will be have its content copied.
-     * @param {Element} target
-     */
-
-  }, {
-    key: "target",
-    set: function set(target) {
-      if (target !== undefined) {
-        if (target && _typeof(target) === 'object' && target.nodeType === 1) {
-          if (this.action === 'copy' && target.hasAttribute('disabled')) {
-            throw new Error('Invalid "target" attribute. Please use "readonly" instead of "disabled" attribute');
-          }
-
-          if (this.action === 'cut' && (target.hasAttribute('readonly') || target.hasAttribute('disabled'))) {
-            throw new Error('Invalid "target" attribute. You can\'t cut text from elements with "readonly" or "disabled" attributes');
-          }
-
-          this._target = target;
-        } else {
-          throw new Error('Invalid "target" value, use a valid Element');
-        }
-      }
-    }
-    /**
-     * Gets the `target` property.
-     * @return {String|HTMLElement}
-     */
-    ,
-    get: function get() {
-      return this._target;
-    }
-  }]);
-
-  return ClipboardAction;
-}();
-
-/* harmony default export */ var clipboard_action = (ClipboardAction);
-;// CONCATENATED MODULE: ./src/clipboard.js
-function clipboard_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { clipboard_typeof = function _typeof(obj) { return typeof obj; }; } else { clipboard_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return clipboard_typeof(obj); }
-
-function clipboard_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function clipboard_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function clipboard_createClass(Constructor, protoProps, staticProps) { if (protoProps) clipboard_defineProperties(Constructor.prototype, protoProps); if (staticProps) clipboard_defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (clipboard_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-
-
-
-/**
- * Helper function to retrieve attribute value.
- * @param {String} suffix
- * @param {Element} element
- */
-
-function getAttributeValue(suffix, element) {
-  var attribute = "data-clipboard-".concat(suffix);
-
-  if (!element.hasAttribute(attribute)) {
-    return;
-  }
-
-  return element.getAttribute(attribute);
-}
-/**
- * Base class which takes one or more elements, adds event listeners to them,
- * and instantiates a new `ClipboardAction` on each click.
- */
-
-
-var Clipboard = /*#__PURE__*/function (_Emitter) {
-  _inherits(Clipboard, _Emitter);
-
-  var _super = _createSuper(Clipboard);
-
-  /**
-   * @param {String|HTMLElement|HTMLCollection|NodeList} trigger
-   * @param {Object} options
-   */
-  function Clipboard(trigger, options) {
-    var _this;
-
-    clipboard_classCallCheck(this, Clipboard);
-
-    _this = _super.call(this);
-
-    _this.resolveOptions(options);
-
-    _this.listenClick(trigger);
-
-    return _this;
-  }
-  /**
-   * Defines if attributes would be resolved using internal setter functions
-   * or custom functions that were passed in the constructor.
-   * @param {Object} options
-   */
-
-
-  clipboard_createClass(Clipboard, [{
-    key: "resolveOptions",
-    value: function resolveOptions() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      this.action = typeof options.action === 'function' ? options.action : this.defaultAction;
-      this.target = typeof options.target === 'function' ? options.target : this.defaultTarget;
-      this.text = typeof options.text === 'function' ? options.text : this.defaultText;
-      this.container = clipboard_typeof(options.container) === 'object' ? options.container : document.body;
-    }
-    /**
-     * Adds a click event listener to the passed trigger.
-     * @param {String|HTMLElement|HTMLCollection|NodeList} trigger
-     */
-
-  }, {
-    key: "listenClick",
-    value: function listenClick(trigger) {
-      var _this2 = this;
-
-      this.listener = listen_default()(trigger, 'click', function (e) {
-        return _this2.onClick(e);
-      });
-    }
-    /**
-     * Defines a new `ClipboardAction` on each click event.
-     * @param {Event} e
-     */
-
-  }, {
-    key: "onClick",
-    value: function onClick(e) {
-      var trigger = e.delegateTarget || e.currentTarget;
-
-      if (this.clipboardAction) {
-        this.clipboardAction = null;
-      }
-
-      this.clipboardAction = new clipboard_action({
-        action: this.action(trigger),
-        target: this.target(trigger),
-        text: this.text(trigger),
-        container: this.container,
-        trigger: trigger,
-        emitter: this
-      });
-    }
-    /**
-     * Default `action` lookup function.
-     * @param {Element} trigger
-     */
-
-  }, {
-    key: "defaultAction",
-    value: function defaultAction(trigger) {
-      return getAttributeValue('action', trigger);
-    }
-    /**
-     * Default `target` lookup function.
-     * @param {Element} trigger
-     */
-
-  }, {
-    key: "defaultTarget",
-    value: function defaultTarget(trigger) {
-      var selector = getAttributeValue('target', trigger);
-
-      if (selector) {
-        return document.querySelector(selector);
-      }
-    }
-    /**
-     * Returns the support of the given action, or all actions if no action is
-     * given.
-     * @param {String} [action]
-     */
-
-  }, {
-    key: "defaultText",
-
-    /**
-     * Default `text` lookup function.
-     * @param {Element} trigger
-     */
-    value: function defaultText(trigger) {
-      return getAttributeValue('text', trigger);
-    }
-    /**
-     * Destroy lifecycle.
-     */
-
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      this.listener.destroy();
-
-      if (this.clipboardAction) {
-        this.clipboardAction.destroy();
-        this.clipboardAction = null;
-      }
-    }
-  }], [{
-    key: "isSupported",
-    value: function isSupported() {
-      var action = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : ['copy', 'cut'];
-      var actions = typeof action === 'string' ? [action] : action;
-      var support = !!document.queryCommandSupported;
-      actions.forEach(function (action) {
-        support = support && !!document.queryCommandSupported(action);
-      });
-      return support;
-    }
-  }]);
-
-  return Clipboard;
-}((tiny_emitter_default()));
-
-/* harmony default export */ var clipboard = (Clipboard);
-
-/***/ }),
-
-/***/ 828:
-/***/ (function(module) {
-
-var DOCUMENT_NODE_TYPE = 9;
-
-/**
- * A polyfill for Element.matches()
- */
-if (typeof Element !== 'undefined' && !Element.prototype.matches) {
-    var proto = Element.prototype;
-
-    proto.matches = proto.matchesSelector ||
-                    proto.mozMatchesSelector ||
-                    proto.msMatchesSelector ||
-                    proto.oMatchesSelector ||
-                    proto.webkitMatchesSelector;
-}
-
-/**
- * Finds the closest parent that matches a selector.
- *
- * @param {Element} element
- * @param {String} selector
- * @return {Function}
- */
-function closest (element, selector) {
-    while (element && element.nodeType !== DOCUMENT_NODE_TYPE) {
-        if (typeof element.matches === 'function' &&
-            element.matches(selector)) {
-          return element;
-        }
-        element = element.parentNode;
-    }
-}
-
-module.exports = closest;
-
-
-/***/ }),
-
-/***/ 438:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var closest = __webpack_require__(828);
-
-/**
- * Delegates event to a selector.
- *
- * @param {Element} element
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @param {Boolean} useCapture
- * @return {Object}
- */
-function _delegate(element, selector, type, callback, useCapture) {
-    var listenerFn = listener.apply(this, arguments);
-
-    element.addEventListener(type, listenerFn, useCapture);
-
-    return {
-        destroy: function() {
-            element.removeEventListener(type, listenerFn, useCapture);
-        }
-    }
-}
-
-/**
- * Delegates event to a selector.
- *
- * @param {Element|String|Array} [elements]
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @param {Boolean} useCapture
- * @return {Object}
- */
-function delegate(elements, selector, type, callback, useCapture) {
-    // Handle the regular Element usage
-    if (typeof elements.addEventListener === 'function') {
-        return _delegate.apply(null, arguments);
-    }
-
-    // Handle Element-less usage, it defaults to global delegation
-    if (typeof type === 'function') {
-        // Use `document` as the first parameter, then apply arguments
-        // This is a short way to .unshift `arguments` without running into deoptimizations
-        return _delegate.bind(null, document).apply(null, arguments);
-    }
-
-    // Handle Selector-based usage
-    if (typeof elements === 'string') {
-        elements = document.querySelectorAll(elements);
-    }
-
-    // Handle Array-like based usage
-    return Array.prototype.map.call(elements, function (element) {
-        return _delegate(element, selector, type, callback, useCapture);
-    });
-}
-
-/**
- * Finds closest match and invokes callback.
- *
- * @param {Element} element
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @return {Function}
- */
-function listener(element, selector, type, callback) {
-    return function(e) {
-        e.delegateTarget = closest(e.target, selector);
-
-        if (e.delegateTarget) {
-            callback.call(element, e);
-        }
-    }
-}
-
-module.exports = delegate;
-
-
-/***/ }),
-
-/***/ 879:
-/***/ (function(__unused_webpack_module, exports) {
-
-/**
- * Check if argument is a HTML element.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.node = function(value) {
-    return value !== undefined
-        && value instanceof HTMLElement
-        && value.nodeType === 1;
-};
-
-/**
- * Check if argument is a list of HTML elements.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.nodeList = function(value) {
-    var type = Object.prototype.toString.call(value);
-
-    return value !== undefined
-        && (type === '[object NodeList]' || type === '[object HTMLCollection]')
-        && ('length' in value)
-        && (value.length === 0 || exports.node(value[0]));
-};
-
-/**
- * Check if argument is a string.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.string = function(value) {
-    return typeof value === 'string'
-        || value instanceof String;
-};
-
-/**
- * Check if argument is a function.
- *
- * @param {Object} value
- * @return {Boolean}
- */
-exports.fn = function(value) {
-    var type = Object.prototype.toString.call(value);
-
-    return type === '[object Function]';
-};
-
-
-/***/ }),
-
-/***/ 370:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var is = __webpack_require__(879);
-var delegate = __webpack_require__(438);
-
-/**
- * Validates all params and calls the right
- * listener function based on its target type.
- *
- * @param {String|HTMLElement|HTMLCollection|NodeList} target
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listen(target, type, callback) {
-    if (!target && !type && !callback) {
-        throw new Error('Missing required arguments');
-    }
-
-    if (!is.string(type)) {
-        throw new TypeError('Second argument must be a String');
-    }
-
-    if (!is.fn(callback)) {
-        throw new TypeError('Third argument must be a Function');
-    }
-
-    if (is.node(target)) {
-        return listenNode(target, type, callback);
-    }
-    else if (is.nodeList(target)) {
-        return listenNodeList(target, type, callback);
-    }
-    else if (is.string(target)) {
-        return listenSelector(target, type, callback);
-    }
-    else {
-        throw new TypeError('First argument must be a String, HTMLElement, HTMLCollection, or NodeList');
-    }
-}
-
-/**
- * Adds an event listener to a HTML element
- * and returns a remove listener function.
- *
- * @param {HTMLElement} node
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listenNode(node, type, callback) {
-    node.addEventListener(type, callback);
-
-    return {
-        destroy: function() {
-            node.removeEventListener(type, callback);
-        }
-    }
-}
-
-/**
- * Add an event listener to a list of HTML elements
- * and returns a remove listener function.
- *
- * @param {NodeList|HTMLCollection} nodeList
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listenNodeList(nodeList, type, callback) {
-    Array.prototype.forEach.call(nodeList, function(node) {
-        node.addEventListener(type, callback);
-    });
-
-    return {
-        destroy: function() {
-            Array.prototype.forEach.call(nodeList, function(node) {
-                node.removeEventListener(type, callback);
-            });
-        }
-    }
-}
-
-/**
- * Add an event listener to a selector
- * and returns a remove listener function.
- *
- * @param {String} selector
- * @param {String} type
- * @param {Function} callback
- * @return {Object}
- */
-function listenSelector(selector, type, callback) {
-    return delegate(document.body, selector, type, callback);
-}
-
-module.exports = listen;
-
-
-/***/ }),
-
-/***/ 817:
-/***/ (function(module) {
-
-function select(element) {
-    var selectedText;
-
-    if (element.nodeName === 'SELECT') {
-        element.focus();
-
-        selectedText = element.value;
-    }
-    else if (element.nodeName === 'INPUT' || element.nodeName === 'TEXTAREA') {
-        var isReadOnly = element.hasAttribute('readonly');
-
-        if (!isReadOnly) {
-            element.setAttribute('readonly', '');
-        }
-
-        element.select();
-        element.setSelectionRange(0, element.value.length);
-
-        if (!isReadOnly) {
-            element.removeAttribute('readonly');
-        }
-
-        selectedText = element.value;
-    }
-    else {
-        if (element.hasAttribute('contenteditable')) {
-            element.focus();
-        }
-
-        var selection = window.getSelection();
-        var range = document.createRange();
-
-        range.selectNodeContents(element);
-        selection.removeAllRanges();
-        selection.addRange(range);
-
-        selectedText = selection.toString();
-    }
-
-    return selectedText;
-}
-
-module.exports = select;
-
-
-/***/ }),
-
-/***/ 279:
-/***/ (function(module) {
-
-function E () {
-  // Keep this empty so it's easier to inherit from
-  // (via https://github.com/lipsmack from https://github.com/scottcorgan/tiny-emitter/issues/3)
-}
-
-E.prototype = {
-  on: function (name, callback, ctx) {
-    var e = this.e || (this.e = {});
-
-    (e[name] || (e[name] = [])).push({
-      fn: callback,
-      ctx: ctx
-    });
-
-    return this;
-  },
-
-  once: function (name, callback, ctx) {
-    var self = this;
-    function listener () {
-      self.off(name, listener);
-      callback.apply(ctx, arguments);
-    };
-
-    listener._ = callback
-    return this.on(name, listener, ctx);
-  },
-
-  emit: function (name) {
-    var data = [].slice.call(arguments, 1);
-    var evtArr = ((this.e || (this.e = {}))[name] || []).slice();
-    var i = 0;
-    var len = evtArr.length;
-
-    for (i; i < len; i++) {
-      evtArr[i].fn.apply(evtArr[i].ctx, data);
-    }
-
-    return this;
-  },
-
-  off: function (name, callback) {
-    var e = this.e || (this.e = {});
-    var evts = e[name];
-    var liveEvents = [];
-
-    if (evts && callback) {
-      for (var i = 0, len = evts.length; i < len; i++) {
-        if (evts[i].fn !== callback && evts[i].fn._ !== callback)
-          liveEvents.push(evts[i]);
-      }
-    }
-
-    // Remove event from queue to prevent memory leak
-    // Suggested by https://github.com/lazd
-    // Ref: https://github.com/scottcorgan/tiny-emitter/commit/c6ebfaa9bc973b33d110a84a307742b7cf94c953#commitcomment-5024910
-
-    (liveEvents.length)
-      ? e[name] = liveEvents
-      : delete e[name];
-
-    return this;
-  }
-};
-
-module.exports = E;
-module.exports.TinyEmitter = E;
-
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	!function() {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = function(module) {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				function() { return module['default']; } :
-/******/ 				function() { return module; };
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	!function() {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = function(exports, definition) {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	!function() {
-/******/ 		__webpack_require__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
-/******/ 	}();
-/******/ 	
-/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(134);
-/******/ })()
-.default;
-});
 },{}],"../../../node_modules/d3/dist/package.js":[function(require,module,exports) {
 "use strict";
 
@@ -38357,7 +37498,1830 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./src/hsv":"../../../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../../../node_modules/d3-hsv/src/interpolateHsv.js"}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
+},{"./src/hsv":"../../../node_modules/d3-hsv/src/hsv.js","./src/interpolateHsv":"../../../node_modules/d3-hsv/src/interpolateHsv.js"}],"js/d3.js":[function(require,module,exports) {
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// import * as d3 from 'd3';
+// // Import d3 plugins and add them to the d3 namespace
+// import * as d3cam02 from 'd3-cam02';
+// import * as d3hsluv from 'd3-hsluv';
+// import * as d3hsv from 'd3-hsv';
+// import * as d33d from 'd3-3d';
+// Object.assign(d3, d3cam02, d3hsluv, d3hsv, d33d);
+// module.exports = {d3};
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+var d3 = require('d3');
+
+var d3cam02 = require('d3-cam02');
+
+var d3hsluv = require('d3-hsluv');
+
+var d3hsv = require('d3-hsv');
+
+var d3plus = _objectSpread(_objectSpread(_objectSpread(_objectSpread({}, d3), d3cam02), d3hsluv), d3hsv);
+
+d3plus.interpolateJch = function (start, end) {
+  // constant, linear, and colorInterpolate are taken from d3-interpolate
+  // the colorInterpolate function is `nogamma` in the d3-interpolate's color.js
+  var constant = function constant(x) {
+    return function () {
+      return x;
+    };
+  };
+
+  var linear = function linear(a, d) {
+    return function (t) {
+      return a + t * d;
+    };
+  };
+
+  var colorInterpolate = function colorInterpolate(a, b) {
+    var d = b - a;
+    return d ? linear(a, d) : constant(isNaN(a) ? b : a);
+  };
+
+  start = d3plus.jch(start);
+  end = d3plus.jch(end);
+  var zero = Math.abs(start.h - end.h);
+  var plus = Math.abs(start.h - (end.h + 360));
+  var minus = Math.abs(start.h - (end.h - 360));
+
+  if (plus < zero && plus < minus) {
+    end.h += 360;
+  }
+
+  if (minus < zero && minus < plus) {
+    end.h -= 360;
+  }
+
+  var startc = d3.hcl(start + '').c;
+  var endc = d3.hcl(end + '').c;
+
+  if (!startc) {
+    start.h = end.h;
+  }
+
+  if (!endc) {
+    end.h = start.h;
+  }
+
+  var J = colorInterpolate(start.J, end.J),
+      C = colorInterpolate(start.C, end.C),
+      h = colorInterpolate(start.h, end.h),
+      opacity = colorInterpolate(start.opacity, end.opacity);
+  return function (t) {
+    start.J = J(t);
+    start.C = C(t);
+    start.h = h(t);
+    start.opacity = opacity(t);
+    return start + '';
+  };
+};
+
+module.exports = d3plus;
+},{"d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js"}],"js/chroma-plus.js":[function(require,module,exports) {
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+var chromajs = require('chroma-js');
+
+var hsluv = require('hsluv');
+
+var ciebase = require('ciebase');
+
+var ciecam02 = require('ciecam02');
+
+var cam = ciecam02.cam({
+  whitePoint: ciebase.illuminant.D65,
+  adaptingLuminance: 40,
+  backgroundLuminance: 20,
+  surroundType: 'average',
+  discounting: false
+}, ciecam02.cfs('JCh'));
+var xyz = ciebase.xyz(ciebase.workspace.sRGB, ciebase.illuminant.D65);
+
+var jch2rgb = function jch2rgb(jch) {
+  return xyz.toRgb(cam.toXyz({
+    J: jch[0],
+    C: jch[1],
+    h: jch[2]
+  }));
+};
+
+var rgb2jch = function rgb2jch(rgb) {
+  var jch = cam.fromXyz(xyz.fromRgb(rgb));
+  return [jch.J, jch.C, jch.h];
+};
+
+var _ref = function () {
+  var coefs = {
+    k_l: 1,
+    c1: 0.007,
+    c2: 0.0228
+  };
+  var π = Math.PI;
+  var CIECAM02_la = 64 / π / 5;
+  var CIECAM02_k = 1 / (5 * CIECAM02_la + 1);
+  var CIECAM02_fl = 0.2 * Math.pow(CIECAM02_k, 4) * (5 * CIECAM02_la) + 0.1 * Math.pow(1 - Math.pow(CIECAM02_k, 4), 2) * Math.pow(5 * CIECAM02_la, 1 / 3);
+  return [function (jch) {
+    var _jch = _slicedToArray(jch, 3),
+        J = _jch[0],
+        C = _jch[1],
+        h = _jch[2];
+
+    var M = C * Math.pow(CIECAM02_fl, 0.25);
+    var j = (1 + 100 * coefs.c1) * J / (1 + coefs.c1 * J);
+    j /= coefs.k_l;
+    var MPrime = 1 / coefs.c2 * Math.log(1.0 + coefs.c2 * M);
+    var a = MPrime * Math.cos(h * (π / 180));
+    var b = MPrime * Math.sin(h * (π / 180));
+    return [j, a, b];
+  }, function (jab) {
+    var _jab = _slicedToArray(jab, 3),
+        j = _jab[0],
+        a = _jab[1],
+        b = _jab[2];
+
+    var newMPrime = Math.sqrt(a * a + b * b);
+    var newM = (Math.exp(newMPrime * coefs.c2) - 1) / coefs.c2;
+    var h = (180 / π * Math.atan2(b, a) + 360) % 360;
+    var C = newM / Math.pow(CIECAM02_fl, 0.25);
+    var J = j / (1 + coefs.c1 * (100 - j));
+    return [J, C, h];
+  }];
+}(),
+    _ref2 = _slicedToArray(_ref, 2),
+    jch2jab = _ref2[0],
+    jab2jch = _ref2[1];
+
+var jab2rgb = function jab2rgb(jab) {
+  return jch2rgb(jab2jch(jab));
+};
+
+var rgb2jab = function rgb2jab(rgb) {
+  return jch2jab(rgb2jch(rgb));
+};
+
+var con = console; // Usage:
+// console.color('rebeccapurple');
+
+con.color = function (color) {
+  var text = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+  var col = chromajs(color);
+  var l = col.luminance();
+  con.log("%c".concat(color, " ").concat(text), "background-color: ".concat(color, ";padding: 5px; border-radius: 5px; color: ").concat(l > .5 ? '#000' : '#fff'));
+}; // Usage:
+// console.ramp(chroma.scale(['yellow', 'navy']).mode('hsluv'));
+// console.ramp(scale, 3000); // if you need to specify the length of the scale
+
+
+con.ramp = function (scale) {
+  var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  con.log('%c ', "font-size: 1px;line-height: 16px;background: ".concat(chromajs.getCSSGradient(scale, length), ";padding: 0 0 0 200px; border-radius: 2px;"));
+};
+
+var online = function online(x1, y1, x2, y2, x3, y3) {
+  var ε = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : .1;
+
+  if (x1 === x2 || y1 === y2) {
+    return true;
+  }
+
+  var m = (y2 - y1) / (x2 - x1);
+  var x4 = (y3 + x3 / m - y1 + m * x1) / (m + 1 / m);
+  var y4 = y3 + x3 / m - x4 / m;
+  return Math.pow(x3 - x4, 2) + Math.pow(y3 - y4, 2) < Math.pow(ε, 2);
+};
+
+var div = function div(ƒ, dot1, dot2, ε) {
+  var x3 = (dot1[0] + dot2[0]) / 2;
+  var y3 = ƒ(x3);
+
+  if (online.apply(void 0, _toConsumableArray(dot1).concat(_toConsumableArray(dot2), [x3, y3, ε]))) {
+    return null;
+  }
+
+  return [x3, y3];
+};
+
+var split = function split(ƒ, from, to) {
+  var ε = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : .1;
+  var step = (to - from) / 10;
+  var points = [];
+
+  for (var i = from; i < to; i += step) {
+    points.push([i, ƒ(i)]);
+  }
+
+  points.push([to, ƒ(to)]);
+
+  for (var _i2 = 0; _i2 < points.length - 1; _i2++) {
+    var dot = div(ƒ, points[_i2], points[_i2 + 1], ε);
+
+    if (dot) {
+      points.splice(_i2 + 1, 0, dot);
+      _i2--;
+    }
+  }
+
+  for (var _i3 = 0; _i3 < points.length - 2; _i3++) {
+    if (online.apply(void 0, _toConsumableArray(points[_i3]).concat(_toConsumableArray(points[_i3 + 2]), _toConsumableArray(points[_i3 + 1]), [ε]))) {
+      points.splice(_i3 + 1, 1);
+      _i3--;
+    }
+  }
+
+  return points;
+};
+
+var round = function round(x) {
+  var r = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 4;
+  return Math.round(x * Math.pow(10, r)) / Math.pow(10, r);
+};
+
+var getCSSGradient = function getCSSGradient(scale) {
+  var length = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  var deg = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 90;
+  var ε = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : .005;
+  var ptsr = split(function (x) {
+    return scale(x).gl()[0];
+  }, 0, length, ε);
+  var ptsg = split(function (x) {
+    return scale(x).gl()[1];
+  }, 0, length, ε);
+  var ptsb = split(function (x) {
+    return scale(x).gl()[2];
+  }, 0, length, ε);
+  var points = Array.from(new Set([].concat(_toConsumableArray(ptsr.map(function (a) {
+    return round(a[0]);
+  })), _toConsumableArray(ptsg.map(function (a) {
+    return round(a[0]);
+  })), _toConsumableArray(ptsb.map(function (a) {
+    return round(a[0]);
+  }))).sort(function (a, b) {
+    return a - b;
+  })));
+  return "linear-gradient(".concat(deg, "deg, ").concat(points.map(function (x) {
+    return "".concat(scale(x).hex(), " ").concat(round(x * 100), "%");
+  }).join(), ");");
+};
+
+exports.extendChroma = function (chroma) {
+  // JCH
+  chroma.Color.prototype.jch = function () {
+    return rgb2jch(this._rgb.slice(0, 3).map(function (c) {
+      return c / 255;
+    }));
+  };
+
+  chroma.jch = function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _construct(chroma.Color, _toConsumableArray(jch2rgb(args).map(function (c) {
+      return Math.floor(c * 255);
+    })).concat(['rgb']));
+  }; // JAB
+
+
+  chroma.Color.prototype.jab = function () {
+    return rgb2jab(this._rgb.slice(0, 3).map(function (c) {
+      return c / 255;
+    }));
+  };
+
+  chroma.jab = function () {
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    return _construct(chroma.Color, _toConsumableArray(jab2rgb(args).map(function (c) {
+      return Math.floor(c * 255);
+    })).concat(['rgb']));
+  }; // HSLuv
+
+
+  chroma.Color.prototype.hsluv = function () {
+    return hsluv.rgbToHsluv(this._rgb.slice(0, 3).map(function (c) {
+      return c / 255;
+    }));
+  };
+
+  chroma.hsluv = function () {
+    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
+    }
+
+    return _construct(chroma.Color, _toConsumableArray(hsluv.hsluvToRgb(args).map(function (c) {
+      return Math.floor(c * 255);
+    })).concat(['rgb']));
+  };
+
+  var oldInterpol = chroma.interpolate;
+  var RGB2 = {
+    jch: rgb2jch,
+    jab: rgb2jab,
+    hsluv: hsluv.rgbToHsluv
+  };
+
+  var lerpH = function lerpH(a, b, t) {
+    var m = 360;
+    var d = Math.abs(a - b);
+
+    if (d > m / 2) {
+      if (a > b) {
+        b += m;
+      } else {
+        a += m;
+      }
+    }
+
+    return ((1 - t) * a + t * b) % m;
+  };
+
+  chroma.interpolate = function (col1, col2) {
+    var f = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
+    var mode = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'lrgb';
+
+    if (RGB2[mode]) {
+      if (_typeof(col1) !== 'object') {
+        col1 = new chroma.Color(col1);
+      }
+
+      if (_typeof(col2) !== 'object') {
+        col2 = new chroma.Color(col2);
+      }
+
+      var xyz1 = RGB2[mode](col1.gl());
+      var xyz2 = RGB2[mode](col2.gl());
+      var grey1 = Number.isNaN(col1.hsl()[0]);
+      var grey2 = Number.isNaN(col2.hsl()[0]);
+      var X;
+      var Y;
+      var Z;
+
+      switch (mode) {
+        case 'hsluv':
+          if (xyz1[1] < 1e-10) {
+            xyz1[0] = xyz2[0];
+          }
+
+          if (xyz1[1] === 0) {
+            // black or white
+            xyz1[1] = xyz2[1];
+          }
+
+          if (xyz2[1] < 1e-10) {
+            xyz2[0] = xyz1[0];
+          }
+
+          if (xyz2[1] === 0) {
+            // black or white
+            xyz2[1] = xyz1[1];
+          }
+
+          X = lerpH(xyz1[0], xyz2[0], f);
+          Y = xyz1[1] + (xyz2[1] - xyz1[1]) * f;
+          Z = xyz1[2] + (xyz2[2] - xyz1[2]) * f;
+          break;
+
+        case 'jch':
+          if (grey1) {
+            xyz1[2] = xyz2[2];
+          }
+
+          if (grey2) {
+            xyz2[2] = xyz1[2];
+          }
+
+          X = xyz1[0] + (xyz2[0] - xyz1[0]) * f;
+          Y = xyz1[1] + (xyz2[1] - xyz1[1]) * f;
+          Z = lerpH(xyz1[2], xyz2[2], f);
+          break;
+
+        default:
+          X = xyz1[0] + (xyz2[0] - xyz1[0]) * f;
+          Y = xyz1[1] + (xyz2[1] - xyz1[1]) * f;
+          Z = xyz1[2] + (xyz2[2] - xyz1[2]) * f;
+      }
+
+      return chroma[mode](X, Y, Z).alpha(col1.alpha() + f * (col2.alpha() - col1.alpha()));
+    }
+
+    return oldInterpol(col1, col2, f, mode);
+  };
+
+  chroma.getCSSGradient = getCSSGradient;
+};
+},{"chroma-js":"../../../node_modules/chroma-js/chroma.js","hsluv":"../../../node_modules/hsluv/hsluv.js","ciebase":"../../../node_modules/ciebase/index.js","ciecam02":"../../../node_modules/ciecam02/index.js"}],"js/utils.js":[function(require,module,exports) {
+"use strict";
+
+var d3 = _interopRequireWildcard(require("./d3"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+var chroma = require('chroma-js');
+
+var _require = require('./chroma-plus'),
+    extendChroma = _require.extendChroma;
+
+extendChroma(chroma);
+
+function randomId() {
+  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
+}
+
+function throttle(func, wait) {
+  var timerId, lastRan;
+  return function throttled() {
+    var context = this;
+    var args = arguments;
+
+    if (!lastRan) {
+      func.apply(context, args);
+      lastRan = Date.now();
+    } else {
+      clearTimeout(timerId);
+      timerId = setTimeout(function () {
+        if (Date.now() - lastRan >= wait) {
+          func.apply(context, args);
+          lastRan = Date.now();
+        }
+      }, wait - (Date.now() - lastRan) || 0);
+    }
+  };
+}
+
+function camelCase(str) {
+  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+    return index === 0 ? word.toLowerCase() : word.toUpperCase();
+  }).replace(/\s+/g, '');
+}
+
+function convertToCartesian(s, h, clamp) {
+  if (clamp) {
+    if (s > 100) s = 100;
+  } // convert degrees to radians
+
+
+  var hRad = h * Math.PI / 180;
+  var xAxis = s * Math.cos(hRad);
+  var yAxis = s * Math.sin(hRad);
+  return {
+    x: xAxis,
+    y: yAxis
+  };
+}
+
+function filterNaN(x) {
+  if (isNaN(x) || x === undefined) {
+    return 0;
+  } else {
+    return x;
+  }
+}
+
+function removeElementsByClass(className) {
+  var elements = document.getElementsByClassName(className);
+
+  while (elements.length > 0) {
+    elements[0].parentNode.removeChild(elements[0]);
+  }
+}
+
+function round(x) {
+  var n = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var ten = Math.pow(10, n);
+  return Math.round(x * ten) / ten;
+}
+
+var lerp = function lerp(x, y, a) {
+  return x * (1 - a) + y * a;
+}; // Helper function for rounding color values to whole numbers
+// Copied directly from contrast-colors. For some reason it would
+// not import properly.
+
+
+var colorSpaces = {
+  CAM02: 'jab',
+  CAM02p: 'jch',
+  HEX: 'hex',
+  HSL: 'hsl',
+  HSLuv: 'hsluv',
+  HSV: 'hsv',
+  LAB: 'lab',
+  LCH: 'lch',
+  // named per correct color definition order
+  RGB: 'rgb'
+};
+
+function convertColorValue(color, format) {
+  var object = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  if (!color) {
+    throw new Error("Cannot convert color value of \u201C".concat(color, "\u201D"));
+  }
+
+  if (!colorSpaces[format]) {
+    throw new Error("Cannot convert to colorspace \u201C".concat(format, "\u201D"));
+  }
+
+  var space = colorSpaces[format];
+  var colorObj = chroma(String(color))[space]();
+
+  if (format === 'HSL') {
+    colorObj.pop();
+  }
+
+  if (format === 'HEX') {
+    if (object) {
+      var rgb = chroma(String(color)).rgb();
+      return {
+        r: rgb[0],
+        g: rgb[1],
+        b: rgb[2]
+      };
+    }
+
+    return colorObj;
+  }
+
+  var colorObject = {};
+  var newColorObj = colorObj.map(filterNaN);
+  newColorObj = newColorObj.map(function (ch, i) {
+    var rnd = round(ch);
+    var j = i;
+
+    if (space === 'hsluv') {
+      j += 2;
+    }
+
+    var letter = space.charAt(j);
+
+    if (space === 'jch' && letter === 'c') {
+      letter = 'C';
+    }
+
+    colorObject[letter === 'j' ? 'J' : letter] = rnd;
+
+    if (space in {
+      lab: 1,
+      lch: 1,
+      jab: 1,
+      jch: 1
+    }) {
+      if (!object) {
+        if (letter === 'l' || letter === 'j') {
+          rnd += '%';
+        }
+
+        if (letter === 'h') {
+          rnd += 'deg';
+        }
+      }
+    } else if (space !== 'hsluv') {
+      if (letter === 's' || letter === 'l' || letter === 'v') {
+        colorObject[letter] = round(ch, 2);
+
+        if (!object) {
+          rnd = round(ch * 100);
+          rnd += '%';
+        }
+      } else if (letter === 'h' && !object) {
+        rnd += 'deg';
+      }
+    }
+
+    return rnd;
+  });
+  var stringName = space;
+  var stringValue = "".concat(stringName, "(").concat(newColorObj.join(', '), ")");
+
+  if (object) {
+    return colorObject;
+  }
+
+  return stringValue;
+}
+
+function makePowScale() {
+  var exp = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+  var domains = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [0, 1];
+  var range = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [0, 1];
+  var m = (range[1] - range[0]) / (Math.pow(domains[1], exp) - Math.pow(domains[0], exp));
+  var c = range[0] - m * Math.pow(domains[0], exp);
+  return function (x) {
+    return m * Math.pow(x, exp) + c;
+  };
+}
+
+function removeDuplicates(originalArray, prop) {
+  var newArray = [];
+  var lookupObject = {};
+  var keys1 = Object.keys(originalArray);
+  keys1.forEach(function (i) {
+    lookupObject[originalArray[i][prop]] = originalArray[i];
+  });
+  var keys2 = Object.keys(lookupObject);
+  keys2.forEach(function (i) {
+    return newArray.push(lookupObject[i]);
+  });
+  return newArray;
+}
+
+function findMatchingLuminosity(colorScale, colorLen, luminosities, smooth) {
+  var colorSearch = function colorSearch(x) {
+    var first = smooth ? chroma(colorScale(0)).hsluv()[2] : colorScale(0).hsluv()[2];
+    var last = smooth ? chroma(colorScale(colorLen)).hsluv()[2] : colorScale(colorLen).hsluv()[2];
+    var dir = first < last ? 1 : -1;
+    var ε = 0.01;
+    x += 0.005 * Math.sign(x);
+    var step = colorLen / 2;
+    var dot = step;
+    var val = smooth ? chroma(colorScale(dot)).hsluv()[2] : colorScale(dot).hsluv()[2];
+    var counter = 100;
+
+    while (Math.abs(val - x) > ε && counter) {
+      counter--;
+      step /= 2;
+
+      if (val < x) {
+        dot += step * dir;
+      } else {
+        dot -= step * dir;
+      }
+
+      val = smooth ? chroma(colorScale(dot)).hsluv()[2] : colorScale(dot).hsluv()[2];
+    }
+
+    return round(dot, 3);
+  };
+
+  var outputColors = [];
+  luminosities.forEach(function (lum) {
+    if (smooth) {
+      var findColor = colorScale(colorSearch(+lum));
+      outputColors.push(chroma(findColor).hex());
+    } else {
+      outputColors.push(colorScale(colorSearch(+lum)).hex());
+    }
+  });
+  return outputColors;
+}
+
+;
+module.exports = {
+  randomId: randomId,
+  throttle: throttle,
+  convertToCartesian: convertToCartesian,
+  filterNaN: filterNaN,
+  camelCase: camelCase,
+  makePowScale: makePowScale,
+  removeDuplicates: removeDuplicates,
+  round: round,
+  convertColorValue: convertColorValue,
+  findMatchingLuminosity: findMatchingLuminosity,
+  lerp: lerp,
+  removeElementsByClass: removeElementsByClass
+};
+},{"./d3":"js/d3.js","chroma-js":"../../../node_modules/chroma-js/chroma.js","./chroma-plus":"js/chroma-plus.js"}],"js/tabs.js":[function(require,module,exports) {
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function openPanelTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
+
+  tabcontent = document.getElementsByClassName("paneltabcontent");
+
+  for (var _i = 0; _i < tabcontent.length; _i++) {
+    tabcontent[_i].style.display = "none";
+  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+
+
+  tablinks = document.getElementsByClassName("panel-Tabs-item");
+
+  for (var _i2 = 0; _i2 < tablinks.length; _i2++) {
+    tablinks[_i2].className = tablinks[_i2].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(tabName).style.display = "flex";
+  evt.currentTarget.className += " is-selected";
+}
+
+function openSwatchTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
+
+  tabcontent = document.getElementsByClassName("panel-SubTab-Content");
+
+  for (var _i3 = 0; _i3 < tabcontent.length; _i3++) {
+    tabcontent[_i3].style.display = "none";
+  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+
+
+  tablinks = document.getElementsByClassName("panel-SubTabs-item");
+
+  for (var _i4 = 0; _i4 < tablinks.length; _i4++) {
+    tablinks[_i4].className = tablinks[_i4].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(tabName).style.display = "flex";
+  evt.currentTarget.className += " is-selected";
+}
+
+function openTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
+
+  tabcontent = document.getElementsByClassName("tabcontent");
+
+  for (var _i5 = 0; _i5 < tabcontent.length; _i5++) {
+    tabcontent[_i5].style.display = "none";
+  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+
+
+  tablinks = document.getElementsByClassName("main-Tabs-item");
+
+  for (var _i6 = 0; _i6 < tablinks.length; _i6++) {
+    tablinks[_i6].className = tablinks[_i6].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(tabName).style.display = "flex";
+  evt.currentTarget.className += " is-selected";
+}
+
+function openDetailTab(evt, tabName, colors) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+  var thisId = evt.target.id;
+  if (!tabName) tabName = thisId.concat('Content'); // Get all elements with class="tabcontent" and hide them
+
+  tabcontent = document.getElementsByClassName("tabDetailContent");
+
+  for (var _i7 = 0; _i7 < tabcontent.length; _i7++) {
+    tabcontent[_i7].style.display = "none";
+  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+
+
+  tablinks = document.getElementsByClassName("detail-Tabs-item");
+
+  for (var _i8 = 0; _i8 < tablinks.length; _i8++) {
+    tablinks[_i8].className = tablinks[_i8].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(tabName).style.display = "flex";
+  evt.currentTarget.className += " is-selected";
+
+  if (tabName === 'tabModelContent') {// chartData.createData(colors);
+    // charts.init3dChart()
+  }
+
+  ;
+}
+
+function openAppTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
+
+  tabcontent = document.getElementsByClassName("AppTab");
+
+  for (var _i9 = 0; _i9 < tabcontent.length; _i9++) {
+    tabcontent[_i9].style.display = "none";
+  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+
+
+  tablinks = document.getElementsByClassName("app-Tabs-item");
+
+  for (var _i10 = 0; _i10 < tablinks.length; _i10++) {
+    tablinks[_i10].className = tablinks[_i10].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(tabName).style.display = "grid";
+  evt.currentTarget.className += " is-selected";
+}
+
+function openSideNavItem(evt, contentName) {
+  // Declare all variables
+  var i, sidenavcontent, sidenavlinks; // Get all elements with class="sideNavContent" and hide them
+
+  sidenavcontent = document.getElementsByClassName("sideNavContent");
+
+  for (var _i11 = 0; _i11 < sidenavcontent.length; _i11++) {
+    sidenavcontent[_i11].style.display = "none";
+  } // Get all elements with class="spectrum-SideNav-item" and remove the class "is-selected"
+
+
+  sidenavlinks = document.getElementsByClassName("spectrum-SideNav-item");
+
+  for (var _i12 = 0; _i12 < sidenavlinks.length; _i12++) {
+    sidenavlinks[_i12].className = sidenavlinks[_i12].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(contentName).style.display = "grid";
+  evt.currentTarget.parentNode.className += " is-selected";
+}
+
+function openColorTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
+
+  tabcontent = document.getElementsByClassName("colorTabsWrapper");
+
+  for (var _i13 = 0; _i13 < tabcontent.length; _i13++) {
+    tabcontent[_i13].style.display = "none";
+  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+
+
+  tablinks = document.getElementsByClassName("color-Tabs-item");
+
+  for (var _i14 = 0; _i14 < tablinks.length; _i14++) {
+    tablinks[_i14].className = tablinks[_i14].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(tabName).style.display = "flex";
+  evt.currentTarget.className += " is-selected";
+}
+
+function openScaleTab(evt, tabName, scaleType) {
+  // Declare all variables
+  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
+
+  tabcontent = document.getElementsByClassName("".concat(scaleType, "TabsWrapper"));
+
+  for (var _i15 = 0; _i15 < tabcontent.length; _i15++) {
+    tabcontent[_i15].style.display = "none";
+  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
+
+
+  tablinks = document.getElementsByClassName("".concat(scaleType, "-Tabs-item"));
+
+  for (var _i16 = 0; _i16 < tablinks.length; _i16++) {
+    tablinks[_i16].className = tablinks[_i16].className.replace(" is-selected", "");
+  } // Show the current tab, and add an "active" class to the button that opened the tab
+
+
+  document.getElementById(tabName).style.display = "flex";
+  evt.currentTarget.className += " is-selected";
+}
+
+window.openPanelTab = openPanelTab;
+window.openTab = openTab;
+window.openDetailTab = openDetailTab;
+window.openAppTab = openAppTab;
+window.openSideNavItem = openSideNavItem;
+window.openColorTab = openColorTab;
+window.openSwatchTab = openSwatchTab;
+window.openScaleTab = openScaleTab;
+module.exports = {
+  openPanelTab: openPanelTab,
+  openTab: openTab,
+  openDetailTab: openDetailTab,
+  openAppTab: openAppTab,
+  openSideNavItem: openSideNavItem,
+  openScaleTab: openScaleTab,
+  openColorTab: openColorTab
+};
+},{}],"js/initialColorScales.js":[function(require,module,exports) {
+"use strict";
+
+var Leo = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
+
+var d3 = _interopRequireWildcard(require("./d3"));
+
+var _utils = require("./utils");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var chroma = require('chroma-js');
+
+var _require = require('./chroma-plus'),
+    extendChroma = _require.extendChroma;
+
+extendChroma(chroma);
+
+var SequentialScale = /*#__PURE__*/function () {
+  function SequentialScale(_ref) {
+    var swatches = _ref.swatches,
+        colorKeys = _ref.colorKeys,
+        colorspace = _ref.colorspace,
+        smooth = _ref.smooth,
+        shift = _ref.shift,
+        output = _ref.output,
+        correctLightness = _ref.correctLightness;
+
+    _classCallCheck(this, SequentialScale);
+
+    this._swatches = swatches, this._colorKeys = this._sortColorKeys(colorKeys);
+    this._colorspace = colorspace;
+    this._shift = shift;
+    this._smooth = smooth;
+    this._output = output;
+    this._correctLightness = correctLightness;
+    this._colors = this._createColorScale(); // this._luminosities = this._getColorLuminosities();
+
+    this._domains = this._getDomains();
+  }
+
+  _createClass(SequentialScale, [{
+    key: "colorKeys",
+    get: function get() {
+      return this._colorKeys;
+    },
+    set: function set(colors) {
+      this._colorKeys = this._sortColorKeys(colors);
+      this._colors = null;
+      this._colors = this._createColorScale(); // this._luminosities = this._getColorLuminosities();
+
+      this._domains = this._getDomains();
+    }
+  }, {
+    key: "colorspace",
+    get: function get() {
+      return this._colorspace;
+    },
+    set: function set(colorspace) {
+      this._colorspace = colorspace;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "smooth",
+    get: function get() {
+      return this._smooth;
+    },
+    set: function set(smooth) {
+      this._smooth = smooth;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "output",
+    get: function get() {
+      return this._output;
+    },
+    set: function set(output) {
+      this._output = output;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "shift",
+    get: function get() {
+      return Number(this._shift);
+    },
+    set: function set(shift) {
+      this._shift = Number(shift);
+      this._colors = null;
+      this._colors = this._createColorScale();
+      this._domains = this._getDomains();
+    }
+  }, {
+    key: "swatches",
+    get: function get() {
+      return this._swatches;
+    },
+    set: function set(swatches) {
+      this._swatches = swatches;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "colors",
+    get: function get() {
+      return this._colors;
+    }
+  }, {
+    key: "luminosities",
+    get: function get() {
+      return this._luminosities;
+    }
+  }, {
+    key: "domains",
+    get: function get() {
+      return this._domains;
+    }
+  }, {
+    key: "colorFunction",
+    get: function get() {
+      return this._colorFunction;
+    }
+  }, {
+    key: "correctLightness",
+    set: function set(boolean) {
+      this._correctLightness = boolean;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "_sortColorKeys",
+    value: function _sortColorKeys(colors) {
+      var lumsObj = colors.map(function (c) {
+        return {
+          color: c,
+          lum: d3.hsluv(c).v
+        };
+      });
+      lumsObj.sort(function (a, b) {
+        return a.lum < b.lum ? 1 : -1;
+      }); // keep the sorted luminosities
+
+      this._luminosities = lumsObj.map(function (c) {
+        return c.lum;
+      });
+      return lumsObj.map(function (c) {
+        return c.color;
+      });
+    }
+  }, {
+    key: "_createColorScale",
+    value: function _createColorScale() {
+      var _this = this;
+
+      var colorScale;
+
+      if (this._correctLightness) {
+        var initialColorScale = Leo.createScale({
+          swatches: 300,
+          colorKeys: this._colorKeys,
+          colorspace: this._colorspace,
+          shift: this._shift,
+          smooth: this._smooth,
+          fullScale: false,
+          asFun: true
+        });
+        var minLum = Math.min.apply(Math, _toConsumableArray(this._luminosities));
+        var maxLum = Math.max.apply(Math, _toConsumableArray(this._luminosities));
+        var percMax = maxLum - minLum;
+
+        var fillRange = function fillRange(start, end) {
+          return Array(end - start).fill().map(function (item, index) {
+            return start + index;
+          });
+        };
+
+        var dataX = fillRange(0, 100);
+        dataX = dataX.map(function (x) {
+          return x === 0 ? 0 : x / 100;
+        });
+        dataX.push(1);
+        var newLums = dataX.map(function (i) {
+          return (0, _utils.round)(percMax * i + minLum, 2);
+        });
+        var newColors = (0, _utils.findMatchingLuminosity)(initialColorScale, 300, newLums, this._smooth);
+        var filteredColors = newColors.filter(function (x) {
+          return x !== undefined;
+        });
+        var lastColorIndex = filteredColors.length - 1; // Manually ensure first and last user-input key colors
+        // are part of new key colors array being passed to the
+        // new color scale.
+
+        var first = this._smooth ? chroma(initialColorScale(300)) : initialColorScale(300);
+        var last = this._smooth ? chroma(initialColorScale(0)) : initialColorScale(0);
+        filteredColors.splice(0, 1, first.hex());
+        filteredColors.splice(lastColorIndex, 1);
+        filteredColors.splice(lastColorIndex, 1, last.hex());
+        this._colorFunction = Leo.createScale({
+          swatches: this._swatches,
+          colorKeys: filteredColors,
+          colorspace: this._colorspace,
+          shift: this._shift,
+          smooth: false,
+          fullScale: false,
+          asFun: true
+        });
+        colorScale = Leo.createScale({
+          swatches: this._swatches,
+          colorKeys: filteredColors,
+          colorspace: this._colorspace,
+          shift: this._shift,
+          smooth: false,
+          fullScale: false,
+          asFun: false
+        });
+      } else {
+        this._colorFunction = Leo.createScale({
+          swatches: this._swatches,
+          colorKeys: this._colorKeys,
+          colorspace: this._colorspace,
+          shift: this._shift,
+          smooth: false,
+          fullScale: false,
+          asFun: true
+        });
+        colorScale = Leo.createScale({
+          swatches: this._swatches,
+          colorKeys: this._colorKeys,
+          colorspace: this._colorspace,
+          shift: this._shift,
+          smooth: this._smooth,
+          fullScale: false,
+          asFun: false
+        });
+      }
+
+      var formattedColors = colorScale.map(function (c) {
+        return (0, _utils.convertColorValue)(c, _this._output);
+      });
+      formattedColors.reverse();
+      return formattedColors;
+    }
+  }, {
+    key: "_getDomains",
+    value: function _getDomains() {
+      var lums = this._luminosities;
+      var min = Math.min.apply(Math, _toConsumableArray(lums));
+      var max = Math.max.apply(Math, _toConsumableArray(lums));
+      var inverseShift = 1 / Number(this._shift);
+      var percLums = lums.map(function (l) {
+        var perc = (l - min) / (max - min);
+        if (l === 0 || isNaN(perc)) return 0;else return perc;
+      });
+      var sqrtDomains = (0, _utils.makePowScale)(Number(inverseShift));
+      var domains = percLums.map(function (d) {
+        return sqrtDomains(d);
+      });
+      domains.sort(function (a, b) {
+        return b - a;
+      });
+      return domains;
+    }
+  }]);
+
+  return SequentialScale;
+}();
+
+var DivergingScale = /*#__PURE__*/function () {
+  function DivergingScale(_ref2) {
+    var swatches = _ref2.swatches,
+        startKeys = _ref2.startKeys,
+        endKeys = _ref2.endKeys,
+        middleKey = _ref2.middleKey,
+        colorspace = _ref2.colorspace,
+        smooth = _ref2.smooth,
+        shift = _ref2.shift,
+        output = _ref2.output,
+        correctLightness = _ref2.correctLightness;
+
+    _classCallCheck(this, DivergingScale);
+
+    this._swatches = swatches, this._startKeys = startKeys;
+    this._endKeys = endKeys;
+    this._middleKey = middleKey;
+    this._colorspace = colorspace;
+    this._shift = shift;
+    this._smooth = smooth;
+    this._output = output;
+    this._correctLightness = correctLightness; // this._luminosities = this._getColorLuminosities();
+    // this._domains = this._getDomains();
+
+    this._startScale = new SequentialScale({
+      swatches: this._swatches,
+      colorKeys: this._startKeys,
+      colorspace: this._colorspace,
+      smooth: this._smooth,
+      shift: this._shift,
+      correctLightness: this._correctLightness,
+      output: this._output
+    });
+    this._endScale = new SequentialScale({
+      swatches: this._swatches,
+      colorKeys: this._endKeys,
+      colorspace: this._colorspace,
+      smooth: this._smooth,
+      shift: this._shift,
+      correctLightness: this._correctLightness,
+      output: this._output
+    });
+    this._colors = this._createColorScale();
+  }
+
+  _createClass(DivergingScale, [{
+    key: "startKeys",
+    get: function get() {
+      return this._startKeys;
+    },
+    set: function set(colors) {
+      this._startKeys = colors;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "endKeys",
+    get: function get() {
+      return this._endKeys;
+    },
+    set: function set(colors) {
+      this._endKeys = colors;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "middleKey",
+    get: function get() {
+      return this._middleKey;
+    },
+    set: function set(color) {
+      this._middleKey = color;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "colorspace",
+    get: function get() {
+      return this._colorspace;
+    },
+    set: function set(colorspace) {
+      this._colorspace = colorspace;
+      this._startColor.colorspace = colorspace;
+      this._endColor.colorspace = colorspace;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "smooth",
+    get: function get() {
+      return this._smooth;
+    },
+    set: function set(smooth) {
+      this._smooth = smooth;
+      this._startColor.smooth = smooth;
+      this._endColor.smooth = smooth;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "output",
+    get: function get() {
+      return this._output;
+    },
+    set: function set(output) {
+      this._output = output;
+      this._startColor.output = output;
+      this._endColor.output = output;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "shift",
+    get: function get() {
+      return Number(this._shift);
+    },
+    set: function set(shift) {
+      this._shift = Number(shift);
+      this._startColor.shift = shift;
+      this._endColor.shift = shift;
+      this._colors = null;
+      this._colors = this._createColorScale();
+      this._domains = this._getDomains();
+    }
+  }, {
+    key: "swatches",
+    get: function get() {
+      return this._swatches;
+    },
+    set: function set(swatches) {
+      this._swatches = swatches;
+      this._startColor.swatches = swatches;
+      this._endColor.swatches = swatches;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "colors",
+    get: function get() {
+      return this._colors;
+    }
+  }, {
+    key: "luminosities",
+    get: function get() {
+      return this._luminosities;
+    }
+  }, {
+    key: "domains",
+    get: function get() {
+      return this._domains;
+    }
+  }, {
+    key: "colorFunction",
+    get: function get() {
+      return this._colorFunction;
+    }
+  }, {
+    key: "correctLightness",
+    set: function set(boolean) {
+      this._correctLightness = boolean;
+      this._startColor.correctLightness = boolean;
+      this._endColor.correctLightness = boolean;
+      this._colors = null;
+      this._colors = this._createColorScale();
+    }
+  }, {
+    key: "_createColorScale",
+    value: function _createColorScale() {
+      var startColors = this._startScale.colors;
+
+      var endColors = this._endScale.colors.reverse();
+
+      var newColors = [].concat(_toConsumableArray(startColors), _toConsumableArray(endColors));
+      return newColors;
+    }
+  }]);
+
+  return DivergingScale;
+}();
+
+var _sequentialScale = new SequentialScale({
+  swatches: 100,
+  colorKeys: ['#000000', '#cacaca'],
+  colorspace: 'CAM02p',
+  smooth: false,
+  shift: 1,
+  correctLightness: true,
+  output: 'RGB'
+});
+
+var _divergingScale = new DivergingScale({
+  swatches: 100,
+  startKeys: ['#5c3cec', '#9eecff'],
+  endKeys: ['ffca9e', '#700036'],
+  middleKey: '#e7f3f3',
+  colorspace: 'CAM02p',
+  smooth: false,
+  shift: 1,
+  correctLightness: true,
+  output: 'RGB'
+});
+
+window._sequentialScale = _sequentialScale;
+window._divergingScale = _divergingScale;
+module.exports = {
+  _sequentialScale: _sequentialScale,
+  _divergingScale: _divergingScale
+};
+},{"@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","./d3":"js/d3.js","./utils":"js/utils.js","chroma-js":"../../../node_modules/chroma-js/chroma.js","./chroma-plus":"js/chroma-plus.js"}],"js/initialTheme.js":[function(require,module,exports) {
+"use strict";
+
+var Leo = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+// class ColorScaleData {
+//   constructor({ sequential, diverging, categorical }) {
+//     this._sequential = sequential
+//     this._diverging = diverging
+//     this._categorical = categorical;
+//   }
+//   /** 
+//    * SEQUENTIAL
+//    */
+//   // add individual new colors
+//   get sequential() {
+//     return this._sequential;
+//   }
+//   set addSequentialColor(color) {
+//     this._sequential.push(color);
+//   }
+//   // remove individual colors
+//   set removeSequentialColor(color) {
+//     const filteredColors = this._sequential.filter(entry => {return entry.name !== color.name});
+//     this._sequential = filteredColors;
+//   }
+//   // modify individual colors
+//   set updateSequentialColor(param) {
+//     // pass arguments in the format _updateColorParameter(color: 'ColorToChange', [propertyToChange]: 'newValue')
+//     // eg, changing the name of a color: _updateColorParameter(color: 'blue', name: 'cerulean')
+//     let currentColor = this._sequential.filter(entry => {return entry.name === param.color});
+//     currentColor = currentColor[0];
+//     const filteredColors = this._sequential.filter(entry => {return entry.name !== param.color});
+//     if(param.name) currentColor.name = param.name;
+//     if(param.colorKeys) currentColor.colorKeys = param.colorKeys;
+//     if(param.ratios) currentColor.ratios = param.ratios;
+//     if(param.colorspace) currentColor.colorspace = param.colorspace;
+//     if(param.smooth) currentColor.smooth = param.smooth;
+//     filteredColors.push(currentColor);
+//     this._sequential = filteredColors;
+//   }
+//   /** 
+//    * DIVERGING
+//    */
+//   get diverging() {
+//     return this._diverging;
+//   }
+//   // add individual new colors
+//   set addDivergingColor(color) {
+//     this._diverging.push(color);
+//   }
+//   // remove individual colors
+//   set removeDivergingColor(color) {
+//     const filteredColors = this._diverging.filter(entry => {return entry.name !== color.name});
+//     this._diverging = filteredColors;
+//   }
+//   // modify individual colors
+//   set updateDivergingColor(param) {
+//     // pass arguments in the format _updateColorParameter(color: 'ColorToChange', [propertyToChange]: 'newValue')
+//     // eg, changing the name of a color: _updateColorParameter(color: 'blue', name: 'cerulean')
+//     let currentColor = this._diverging.filter(entry => {return entry.name === param.color});
+//     currentColor = currentColor[0];
+//     const filteredColors = this._diverging.filter(entry => {return entry.name !== param.color});
+//     if(param.name) currentColor.name = param.name;
+//     if(param.colorKeys) currentColor.colorKeys = param.colorKeys;
+//     if(param.ratios) currentColor.ratios = param.ratios;
+//     if(param.colorspace) currentColor.colorspace = param.colorspace;
+//     if(param.smooth) currentColor.smooth = param.smooth;
+//     filteredColors.push(currentColor);
+//     this._diverging = filteredColors;
+//   }
+//   /**
+//    * CATEGORICAL
+//    */
+//   get categorical() {
+//     return this._categorical;
+//   }
+//   // add individual new colors
+//   set addCategoricalColor(color) {
+//     this._categorical.push(color);
+//   }
+//   // remove individual colors
+//   set removeCategoricalColor(color) {
+//     const filteredColors = this._categorical.filter(entry => {return entry.name !== color.name});
+//     this._categorical = filteredColors;
+//   }
+//   // modify individual colors
+//   // set updateCategoricalColor(param) {
+//   //   // pass arguments in the format _updateColorParameter(color: 'ColorToChange', [propertyToChange]: 'newValue')
+//   //   // eg, changing the name of a color: _updateColorParameter(color: 'blue', name: 'cerulean')
+//   //   let currentColor = this._categorical.filter(entry => {return entry.name === param.color});
+//   //   currentColor = currentColor[0];
+//   //   const filteredColors = this._diverging.filter(entry => {return entry.name !== param.color});
+//   //   if(param.name) currentColor.name = param.name;
+//   //   if(param.colorKeys) currentColor.colorKeys = param.colorKeys;
+//   //   if(param.ratios) currentColor.ratios = param.ratios;
+//   //   if(param.colorspace) currentColor.colorspace = param.colorspace;
+//   //   if(param.smooth) currentColor.smooth = param.smooth;
+//   //   filteredColors.push(currentColor);
+//   //   this._categorical = filteredColors;
+//   // }
+// }
+// let _colorScales = new ColorScaleData({
+//   sequential: [],
+//   diverging: [],
+//   categorical: []
+// })
+var tempGray = new Leo.BackgroundColor({
+  name: 'Gray',
+  colorKeys: ['#cacaca'],
+  colorspace: 'RGB',
+  ratios: [3, 4.5]
+});
+
+var _theme = new Leo.Theme({
+  colors: [tempGray],
+  backgroundColor: tempGray,
+  lightness: 100,
+  contrast: 1,
+  saturation: 100
+});
+
+window._theme = _theme; // window._colorScales = _colorScales;
+
+module.exports = {
+  tempGray: tempGray,
+  _theme: _theme // _colorScales
+
+};
+},{"@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs"}],"js/getThemeData.js":[function(require,module,exports) {
+"use strict";
+
+var _initialTheme = require("./initialTheme");
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+window.getColorClassById = getColorClassById;
+
+function getColorClassById(id) {
+  var thisElement = document.getElementById(id); // 1. find color name from id
+
+  var colorNameInput = id.concat('_colorName');
+  var colorName = document.getElementById(colorNameInput).value; // 2. Scrape information from the color class of the same name
+
+  return getColorClassByName(colorName);
+}
+
+function getColorClassByName(colorName) {
+  var currentColor = _initialTheme._theme.colors.filter(function (color) {
+    return color.name === colorName;
+  });
+
+  currentColor = currentColor[0];
+  return currentColor;
+} // GET all contrast ratios
+
+
+function getContrastRatios() {
+  var ratioInputs = document.getElementsByClassName('ratio-Field');
+  var ratios = [];
+
+  for (var i = 0; i < ratioInputs.length; i++) {
+    ratios.push(ratioInputs[i].value);
+  }
+
+  return ratios;
+}
+
+function getLuminosities() {
+  var luminosityInputs = document.getElementsByClassName('luminosity-Field');
+  var luminosities = [];
+
+  for (var i = 0; i < luminosityInputs.length; i++) {
+    luminosities.push(Number(luminosityInputs[i].value));
+  }
+
+  return luminosities;
+}
+
+function getThemeName() {
+  // Get name
+  var themeNameInput = document.getElementById('themeNameInput');
+  var themeName = themeNameInput.value;
+  return themeName;
+} // GET Theme Data
+
+
+function getThemeData() {
+  var baseSelectValue = _initialTheme._theme.backgroundColor.name;
+  var colorScales = _initialTheme._theme.colors;
+  var brightness = _initialTheme._theme.lightness;
+  var contrast = _initialTheme._theme.contrast;
+  return {
+    baseScale: baseSelectValue,
+    colorScales: colorScales,
+    brightness: brightness,
+    contrast: contrast
+  };
+}
+
+function getAllColorKeys() {
+  var scales = _initialTheme._theme.colors;
+
+  if (scales) {
+    var colorKeys = [];
+    scales.map(function (scale) {
+      var keys = scale.colorKeys;
+      keys.forEach(function (key) {
+        colorKeys.push(key);
+      });
+    });
+    return colorKeys;
+  } else throw new Error('No color scales defined');
+}
+
+function getAllColorNames() {
+  var colors = _initialTheme._theme.colors;
+  var colorNames = [];
+  colors.forEach(function (color) {
+    return colorNames.push(color.name);
+  });
+  return colorNames;
+}
+
+module.exports = {
+  getColorClassById: getColorClassById,
+  getContrastRatios: getContrastRatios,
+  getThemeName: getThemeName,
+  getThemeData: getThemeData,
+  getAllColorNames: getAllColorNames,
+  getLuminosities: getLuminosities,
+  getColorClassByName: getColorClassByName,
+  getAllColorKeys: getAllColorKeys
+};
+},{"./initialTheme":"js/initialTheme.js"}],"js/createHtmlElement.js":[function(require,module,exports) {
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function createHtmlElement(_ref) {
+  var element = _ref.element,
+      id = _ref.id,
+      className = _ref.className,
+      title = _ref.title,
+      styles = _ref.styles,
+      type = _ref.type,
+      innerHTML = _ref.innerHTML,
+      attributes = _ref.attributes,
+      eventListeners = _ref.eventListeners,
+      appendTo = _ref.appendTo;
+  var el = document.createElement(element);
+  if (id) el.id = id;
+  if (className) el.className = className;
+
+  if (styles) {
+    for (var _i = 0, _Object$entries = Object.entries(styles); _i < _Object$entries.length; _i++) {
+      var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+          prop = _Object$entries$_i[0],
+          value = _Object$entries$_i[1];
+
+      el.style[prop] = value;
+    }
+  }
+
+  if (type) el.type = type;
+  if (innerHTML) el.innerHTML = innerHTML;
+
+  if (attributes) {
+    for (var _i2 = 0, _Object$entries2 = Object.entries(attributes); _i2 < _Object$entries2.length; _i2++) {
+      var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
+          _prop = _Object$entries2$_i[0],
+          _value = _Object$entries2$_i[1];
+
+      el.setAttribute(_prop, _value);
+    }
+  }
+
+  if (title) el.title = title;
+
+  if (eventListeners) {
+    for (var _i3 = 0, _Object$entries3 = Object.entries(eventListeners); _i3 < _Object$entries3.length; _i3++) {
+      var _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2),
+          event = _Object$entries3$_i[0],
+          func = _Object$entries3$_i[1];
+
+      el.addEventListener(event, func);
+    }
+  }
+
+  var dest = document.getElementById(appendTo);
+  dest.appendChild(el);
+}
+
+function createSvgElement(_ref2) {
+  var element = _ref2.element,
+      id = _ref2.id,
+      className = _ref2.className,
+      attributes = _ref2.attributes,
+      styles = _ref2.styles,
+      textContent = _ref2.textContent,
+      appendTo = _ref2.appendTo;
+  var svgns = "http://www.w3.org/2000/svg";
+  var el = document.createElementNS(svgns, element);
+  if (id) el.id = id;
+  if (className) el.className = className;
+
+  if (styles) {
+    for (var _i4 = 0, _Object$entries4 = Object.entries(styles); _i4 < _Object$entries4.length; _i4++) {
+      var _Object$entries4$_i = _slicedToArray(_Object$entries4[_i4], 2),
+          prop = _Object$entries4$_i[0],
+          value = _Object$entries4$_i[1];
+
+      el.style[prop] = value;
+    }
+  }
+
+  if (attributes) {
+    for (var _i5 = 0, _Object$entries5 = Object.entries(attributes); _i5 < _Object$entries5.length; _i5++) {
+      var _Object$entries5$_i = _slicedToArray(_Object$entries5[_i5], 2),
+          _prop2 = _Object$entries5$_i[0],
+          _value2 = _Object$entries5$_i[1];
+
+      el.setAttributeNS(null, _prop2, _value2);
+    }
+  }
+
+  if (textContent) el.textContent = textContent;
+  var dest = document.getElementById(appendTo);
+  dest.appendChild(el);
+}
+
+module.exports = {
+  createHtmlElement: createHtmlElement,
+  createSvgElement: createSvgElement
+};
+},{}],"../../../node_modules/d3-3d/build/d3-3d.js":[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function (global, factory) {
@@ -38773,84 +39737,78 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],"charts.js":[function(require,module,exports) {
+},{}],"js/create3dChart.js":[function(require,module,exports) {
 "use strict";
 
-var d3 = _interopRequireWildcard(require("d3"));
+var d3 = _interopRequireWildcard(require("./d3"));
 
 var d33d = _interopRequireWildcard(require("d3-3d"));
 
 var contrastColors = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
 
+var _initialTheme = require("./initialTheme");
+
+var _utils = require("./utils");
+
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 Object.assign(d3, d33d);
-var chart3dColorspace = document.getElementById('chart3dColorspace');
+
+function dragStart() {
+  var coordinates = d3.mouse(this);
+  var x = coordinates[0];
+  var y = coordinates[1];
+  mx = x;
+  my = y; // mx = d3.event.x;
+  // my = d3.event.y;
+}
+
+function dragged() {
+  var coordinates = d3.mouse(this);
+  var x = coordinates[0];
+  var y = coordinates[1];
+  mouseX = mouseX || 0;
+  mouseY = mouseY || 0;
+  beta = (x - mx + mouseX) * Math.PI / 600;
+  alpha = (y - my + mouseY) * Math.PI / 600 * -1;
+  var data = [grid3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(xGrid), point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(colorPlot), yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine])];
+  processData(data, 0, colors);
+}
+
+function dragEnd() {
+  var coordinates = d3.mouse(this);
+  var x = coordinates[0];
+  var y = coordinates[1];
+  mouseX = x - mx + mouseX;
+  mouseY = y - my + mouseY;
+}
+
 var dest = document.querySelector('.chart3D');
-/*
-Create 2d and 3d chart heights and widths based on known
-paddings and panel dimensions, based on viewport height/width.
-*/
-
-function createChartWidth() {
-  var leftPanel = 304;
-  var rightPanel = 240;
-  var paddings = 100;
-  var offset = leftPanel + rightPanel + paddings;
-  var viewportWidth = window.innerWidth;
-
-  if ((viewportWidth - offset) / 2 > 300) {
-    return (viewportWidth - offset) / 2;
-  } else {
-    return 300;
-  }
-}
-
-function createChartHeight() {
-  var headerHeight = 58;
-  var tabHeight = 48;
-  var paddings = 164;
-  var offset = headerHeight + tabHeight + paddings;
-  var viewportHeight = window.innerHeight;
-  var height = (viewportHeight - offset) / 3;
-
-  if (height < 160) {
-    return 160;
-  } else {
-    return height;
-  }
-}
 
 function create3dChartWidth() {
-  var leftPanel = 304;
-  var rightPanel = 240;
-  var paddings = 72;
-  var offset = leftPanel + rightPanel + paddings;
   var viewportWidth = window.innerWidth;
-  return viewportWidth - offset;
+  var availableSpace = viewportWidth - 390 - 32;
+  return availableSpace;
 }
 
 function create3dChartHeight() {
-  var headerHeight = 58;
-  var tabHeight = 48;
-  var paddings = 164 / 2;
-  var feedbackText = 100;
-  var offset = headerHeight + tabHeight + paddings + feedbackText;
   var viewportHeight = window.innerHeight;
-  return viewportHeight - offset;
+  var availableSpace = viewportHeight - 58 - 44;
+  return availableSpace;
 }
 
 var chartWidth = create3dChartWidth();
@@ -38858,22 +39816,10 @@ var chartHeight = create3dChartHeight();
 var modelScale;
 var yOrigin;
 var viewportHeight = window.innerHeight;
+modelScale = 40;
+yOrigin = chartHeight / 1.5;
 
-if (viewportHeight < 640) {
-  modelScale = 20;
-  yOrigin = chartHeight;
-} else if (viewportHeight >= 640 && viewportHeight < 800) {
-  modelScale = 30;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 800 && viewportHeight < 900) {
-  modelScale = 40;
-  yOrigin = chartHeight / 1.25;
-} else if (viewportHeight >= 900) {
-  modelScale = 50;
-  yOrigin = chartHeight / 1.25;
-}
-
-var origin = [chartWidth / 1.85, chartHeight / 1.25],
+var origin = [chartWidth / 2, yOrigin],
     j = 10,
     scale = modelScale,
     scatter = [],
@@ -38887,8 +39833,11 @@ var origin = [chartWidth / 1.85, chartHeight / 1.25],
 },
     startAngle = Math.PI / 10;
 
-dest.style.width = chartWidth;
-dest.style.height = chartHeight;
+if (dest) {
+  dest.style.width = chartWidth;
+  dest.style.height = chartHeight;
+}
+
 var svg = d3.select(dest).call(d3.drag().on('drag', dragged).on('start', dragStart).on('end', dragEnd)).append('g');
 var mx, my, mouseX, mouseY;
 
@@ -38904,21 +39853,17 @@ var point3d = d3._3d().x(function (d) {
 
 var yScale3d = d3._3d().shape('LINE_STRIP').origin(origin).rotateY(startAngle).rotateX(-startAngle).scale(scale);
 
-function processData(data, tt) {
-  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
-  var chartColors = getChartColors(colorInterpSpace);
-  var color = d3.scaleOrdinal(chartColors);
+function processData(data, tt, colors) {
   /* ----------- GRID ----------- */
-
   var xGrid = svg.selectAll('path.grid').data(data[0], key);
   xGrid.enter().append('path').attr('class', '_3d grid').merge(xGrid).attr('d', grid3d.draw);
   xGrid.exit().remove();
   /* ----------- POINTS ----------- */
 
   var points = svg.selectAll('circle').data(data[1], key);
-  points.enter().append('circle').attr('class', '_3d').attr('opacity', 0).attr('cx', posPointX).attr('cy', posPointY).merge(points).transition().duration(tt).attr('r', 5) // .attr('stroke', function(d){ return d3.color(color(d.id)).darker(3); })
-  .attr('fill', function (d) {
-    return color(d.id);
+  points.enter().append('circle').attr('class', '_3d').attr('opacity', 0).attr('cx', posPointX).attr('cy', posPointY).merge(points).transition().duration(tt).attr('r', 5).attr('fill', function (d) {
+    var index = Number(d.id.replace('point_', '')) - 400;
+    return colors[index];
   }).attr('opacity', 1).attr('cx', posPointX).attr('cy', posPointY);
   points.exit().remove();
   /* ----------- y-Scale ----------- */
@@ -38939,9 +39884,10 @@ function processData(data, tt) {
     return d.projected.x;
   }).attr('y', function (d) {
     return d.projected.y;
-  }) // .text(function(d){ return d[1]*10 <= 0 ? d[1]*-10 : ''; });
-  // .text(function(d) {return d;});
-  .text('-');
+  }); // .text(function(d){ return d[1]*10 <= 0 ? d[1]*-10 : ''; })
+  // .text(function(d) {return d;})
+  // .text('-');
+
   yText.exit().remove();
   d3.selectAll('._3d').sort(d3._3d().sort);
 }
@@ -38954,121 +39900,38 @@ function posPointY(d) {
   return d.projected.y;
 }
 
-var pi = Math.PI;
-
-function init3dChart() {
+function init3dChart(colorData, colors) {
   var cnt = 0;
-  xGrid = [], scatter = [], yLine = [], colorPlot = []; // Taking J from origin argument...
+  var xGrid = [],
+      scatter = [],
+      yLine = [],
+      colorPlot = [];
+  var j = 10; // Taking J from origin argument...
   // z = -10; z < 10; z++ is what it's saying.
 
   for (var z = -j; z < j; z++) {
     for (var x = -j; x < j; x++) {
-      xGrid.push([x, 1, z]); // This is where the point data is gathered:
-
+      xGrid.push([x, 1, z]);
       scatter.push({
         x: x,
         y: d3.randomUniform(0, -10)(),
         z: z,
         id: 'point_' + cnt++
-      }); // dividing LAB data by 10 to fit current grid. Negative y let since chart is in negative space?
-      // colorPlot.push({x: LABArrayA[j]/10, y: LABArrayL[j]/10 * -1, z: LABArrayB[j]/10, id: 'point_' + cnt++});
-    }
-  }
-
-  var spaceOpt = document.getElementById('chart3dColorspace').value;
-  var pi = Math.PI;
-
-  if (spaceOpt == 'CAM02') {
-    for (var i = 0; i < CAMArrayA.length; i++) {
-      colorPlot.push({
-        x: CAMArrayA[i] / 10,
-        y: CAMArrayJ[i] / 10 * -1,
-        z: CAMArrayB[i] / 10,
-        id: 'point_' + cnt++
       });
     }
-  }
+  } // Reset count so that the indexes match
+  // with the colors being passed for the circles
+  // cnt = 0;
 
-  if (spaceOpt == 'LCH') {
-    for (var _i = 0; _i < LCHArrayC.length; _i++) {
-      var angle = LCHArrayH[_i] * (pi / 180);
-      var r = LCHArrayC[_i]; // Polar:
 
+  for (var _j = 0; _j < colorData.length; _j++) {
+    var currentColor = colorData[_j];
+
+    for (var i = 0; i < 100; i++) {
       colorPlot.push({
-        x: r * Math.cos(angle) / 13,
-        y: LCHArrayL[_i] / 13 * -1,
-        z: r * Math.sin(angle) / 13,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: LCHArrayH[i]/(Math.PI * 10), y: LCHArrayL[i]/10 * -1, z: LCHArrayC[i]/10, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'LAB') {
-    for (var _i2 = 0; _i2 < LABArrayA.length; _i2++) {
-      colorPlot.push({
-        x: LABArrayA[_i2] / 13,
-        y: LABArrayL[_i2] / 13 * -1,
-        z: LABArrayB[_i2] / 13,
-        id: 'point_' + cnt++
-      });
-    }
-  }
-
-  if (spaceOpt == 'HSL') {
-    for (var _i3 = 0; _i3 < HSLArrayL.length; _i3++) {
-      var _angle = HSLArrayH[_i3] * (pi / 180);
-
-      var _r = HSLArrayS[_i3]; // Polar:
-
-      colorPlot.push({
-        x: _r * Math.cos(_angle) * 8,
-        y: HSLArrayL[_i3] * 8 * -1,
-        z: _r * Math.sin(_angle) * 8,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSLArrayH[i]/(10*pi) - 7, y: HSLArrayL[i]*10 * -1, z: HSLArrayS[i]*10 - 7, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'HSLuv') {
-    for (var _i4 = 0; _i4 < HSLuvArrayL.length; _i4++) {
-      var _angle2 = HSLuvArrayL[_i4] * (pi / 180);
-
-      var _r2 = HSLuvArrayU[_i4]; // Polar:
-
-      colorPlot.push({
-        x: _r2 * Math.cos(_angle2) / 12,
-        y: HSLuvArrayV[_i4] / 10 * -1,
-        z: _r2 * Math.sin(_angle2) / 12,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSLuvArrayL[i]/(10*pi) - 7, y: HSLuvArrayV[i]/10 * -1, z: HSLuvArrayU[i]/10 -10, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'HSV') {
-    for (var _i5 = 0; _i5 < HSVArrayL.length; _i5++) {
-      var _angle3 = HSVArrayH[_i5] * (pi / 180);
-
-      var _r3 = HSVArrayS[_i5]; // Polar:
-
-      colorPlot.push({
-        x: _r3 * Math.cos(_angle3) * 8,
-        y: HSVArrayL[_i5] * 8 * -1,
-        z: _r3 * Math.sin(_angle3) * 8 - 1.5,
-        id: 'point_' + cnt++
-      }); // Cartesian:
-      // colorPlot.push({x: HSVArrayH[i]/(10*pi) - 7, y: HSVArrayL[i]*10 * -1, z: HSVArrayS[i]*10 -7, id: 'point_' + cnt++});
-    }
-  }
-
-  if (spaceOpt == 'RGB') {
-    for (var _i6 = 0; _i6 < RGBArrayR.length; _i6++) {
-      colorPlot.push({
-        x: RGBArrayR[_i6] / 30 - 5,
-        y: RGBArrayG[_i6] / 30 * -1,
-        z: RGBArrayB[_i6] / 30 - 5,
+        x: currentColor.a[i] / 10,
+        y: currentColor.b[i] / 10 * -1,
+        z: currentColor.c[i] / 10,
         id: 'point_' + cnt++
       });
     }
@@ -39078,51 +39941,742 @@ function init3dChart() {
     return yLine.push([-j, -d, -j]);
   });
   var data = [grid3d(xGrid), point3d(colorPlot), yScale3d([yLine])];
-  processData(data, 500); // 500 is the duration
+  processData(data, 500, colors); // 500 is the duration
 }
 
-function dragStart() {
-  mx = d3.event.x;
-  my = d3.event.y;
+function create3dChart(color) {
+  var mode = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'CAM02';
+  // Identify mode channels
+  var data = [];
+  var colors; // if no color defined, create all colors
+
+  if (!color || color === undefined || color === null) {
+    colors = [];
+
+    _initialTheme._theme.colors.map(function (c) {
+      // Create data objects for each color scale
+      var dataColors = c.backgroundColorScale;
+      data.push(createColorData(dataColors, mode));
+      dataColors.map(function (i) {
+        colors.push(i);
+      });
+    });
+  } else {
+    var dataColors = color.backgroundColorScale;
+    data.push(createColorData(dataColors, mode));
+    colors = _toConsumableArray(dataColors);
+  }
+
+  init3dChart(data, colors);
 }
 
-function dragged() {
-  mouseX = mouseX || 0;
-  mouseY = mouseY || 0;
-  beta = (d3.event.x - mx + mouseX) * Math.PI / 600;
-  alpha = (d3.event.y - my + mouseY) * Math.PI / 600 * -1;
-  var data = [grid3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(xGrid), point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(colorPlot), yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine])];
-  processData(data, 0);
+function createColorData(color, mode) {
+  var f = getChannelsAndFunction(mode);
+
+  var method = function method(d) {
+    return d3[f.func](d);
+  };
+
+  var dataA = color.map(function (d) {
+    var channelValue = method(d)[f.c1]; // Need to do some geometry for polar colorspaces
+
+    if (mode === 'CAM02p' || mode === 'LCH' || mode === 'HSL' || mode === 'HSV' || mode === 'HSLuv') {
+      var s = mode === 'HSL' || mode === 'HSV' ? method(d)[f.c2] * 100 : method(d)[f.c2];
+      var h = channelValue;
+      return (0, _utils.filterNaN)((0, _utils.convertToCartesian)(s, h).x);
+    } else return (0, _utils.filterNaN)(channelValue);
+  });
+  var dataB = color.map(function (d) {
+    var channelValue = method(d)[f.c3];
+    if (mode === 'HSL' || mode === 'HSV') channelValue = channelValue * 100;
+    return (0, _utils.filterNaN)(channelValue);
+  });
+  var dataC = color.map(function (d) {
+    var channelValue = method(d)[f.c2]; // Need to do some geometry for polar colorspaces
+
+    if (mode === 'CAM02p' || mode === 'LCH' || mode === 'HSL' || mode === 'HSV' || mode === 'HSLuv') {
+      var s = mode === 'HSL' || mode === 'HSV' ? channelValue * 100 : channelValue;
+      var h = method(d)[f.c1];
+      return (0, _utils.filterNaN)((0, _utils.convertToCartesian)(s, h).y);
+    }
+
+    return (0, _utils.filterNaN)(channelValue);
+  });
+  return {
+    a: dataA,
+    b: dataB,
+    c: dataC
+  };
 }
 
-function dragEnd() {
-  mouseX = d3.event.x - mx + mouseX;
-  mouseY = d3.event.y - my + mouseY;
-} // d3.selectAll('button').on('click', init3dChart);
+function getChannelsAndFunction(mode) {
+  var c1, c2, c3, func;
+
+  if (mode === 'RGB') {
+    func = 'rgb';
+    c1 = 'r';
+    c2 = 'g';
+    c3 = 'b';
+  } else if (mode === 'LAB') {
+    func = 'lab';
+    c1 = 'a';
+    c2 = 'b';
+    c3 = 'l';
+  } else if (mode === 'LCH') {
+    func = 'lch';
+    c1 = 'h';
+    c2 = 'c';
+    c3 = 'l';
+  } else if (mode === 'CAM02') {
+    func = 'jab';
+    c1 = 'a';
+    c2 = 'b';
+    c3 = 'J';
+  } else if (mode === 'CAM02p') {
+    func = 'jch';
+    c1 = 'h';
+    c2 = 'C';
+    c3 = 'J';
+  } else if (mode === 'HSL') {
+    func = 'hsl';
+    c1 = 'h';
+    c2 = 's';
+    c3 = 'l';
+  } else if (mode === 'HSLuv') {
+    func = 'hsluv';
+    c1 = 'l';
+    c2 = 'u';
+    c3 = 'v';
+  } else if (mode === 'HSV') {
+    func = 'hsv';
+    c1 = 'h';
+    c2 = 's';
+    c3 = 'v';
+  }
+
+  return {
+    func: func,
+    c1: c1,
+    c2: c2,
+    c3: c3
+  };
+} // exports.init3dChart = init3dChart;
 
 
-function createChartHeader(x, dest) {
-  var container = document.getElementById(dest);
-  var subhead = document.createElement('h6');
-  subhead.className = 'spectrum-Subheading';
-  subhead.innerText = x;
-  container.appendChild(subhead);
-} // Make 2d color charts
+module.exports = {
+  create3dChart: create3dChart
+}; // exports.update3dChart = update3dChart;
+// exports.updateCharts = updateCharts;
+// exports.showCharts = showCharts;
+// window.update3dChart = update3dChart;
+// window.updateCharts = updateCharts;
+// exports.showContrastChart = showContrastChart;
+// exports.createChartHeader = createChartHeader;
+// exports.createAllCharts = createAllCharts;
+// exports.createChart = createChart;
+},{"./d3":"js/d3.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","./initialTheme":"js/initialTheme.js","./utils":"js/utils.js"}],"js/polarColorPath.js":[function(require,module,exports) {
+"use strict";
 
+var d3 = _interopRequireWildcard(require("d3"));
 
-function createChart(data, yLabel, xLabel, dest, yMin, yMax) {
-  var xy_chart = d3_xy_chart().width(createChartWidth()).height(createChartHeight()).xlabel(xLabel).ylabel(yLabel);
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function polarColorPath(data, size, scaleType) {
+  var chartWidth = size;
+  var chartHeight = size;
+  var dest = scaleType === 'theme' ? '#colorWheelPaths' : "#".concat(scaleType, "ColorWheelPaths");
+  var yMin = 0;
+  var yMax = chartHeight; // might be wrong variable...
+
+  var xy_chart = d3_xy_chart().width(chartWidth).height(chartHeight).xlabel('xLabel').ylabel('yLabel');
   var svg = d3.select(dest).append("svg").datum(data).call(xy_chart);
 
   function d3_xy_chart() {
-    var width = createChartWidth(),
-        height = createChartHeight(),
+    var width = chartWidth,
+        height = chartHeight,
         xlabel = "X Axis Label",
         ylabel = "Y Axis Label";
 
     function chart(selection) {
       selection.each(function (datasets) {
-        // If no min/max defined, base on min/max from data
+        // Convert datasets to appropriate format
+        var originalData = datasets;
+        var dataX = [];
+        var dataY = [];
+        var dataColor = [];
+        originalData.map(function (d) {
+          dataX.push(d.x);
+          dataY.push(d.y);
+          dataColor.push(d.color);
+        });
+        datasets = [{
+          x: dataX,
+          y: dataY,
+          color: dataColor
+        }];
+        var margin = {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        };
+        var innerwidth = width - margin.left - margin.right;
+        var innerheight = height - margin.top - margin.bottom;
+        var x_scale = d3.scaleLinear().range([0, innerwidth]).domain([yMin, yMax]);
+        var y_scale = d3.scaleLinear().range([innerheight, 0]).domain([yMin, yMax]);
+        var color = '#ffffff';
+        var draw_line = d3.line().curve(d3.curveBasis).x(function (d) {
+          return x_scale(d[0]);
+        }).y(function (d) {
+          return y_scale(d[1]);
+        });
+        var svg = d3.select(this).attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var data_lines = svg.selectAll(".d3_xy_chart_line").data(datasets.map(function (d) {
+          return d3.zip(d.x, d.y);
+        })).enter().append("g").attr("class", "d3_xy_chart_line");
+        data_lines.append("path").attr("class", "line").attr("d", function (d) {
+          return draw_line(d);
+        }).attr("stroke", color).attr("filter", 'drop-shadow( 0 0 1px rgba(0, 0, 0, .5))');
+      });
+    }
+
+    chart.width = function (value) {
+      if (!arguments.length) return width;
+      width = value;
+      return chart;
+    };
+
+    chart.height = function (value) {
+      if (!arguments.length) return height;
+      height = value;
+      return chart;
+    };
+
+    chart.xlabel = function (value) {
+      if (!arguments.length) return xlabel;
+      xlabel = value;
+      return chart;
+    };
+
+    chart.ylabel = function (value) {
+      if (!arguments.length) return ylabel;
+      ylabel = value;
+      return chart;
+    };
+
+    return chart;
+  }
+}
+
+module.exports = {
+  polarColorPath: polarColorPath
+};
+},{"d3":"../../../node_modules/d3/index.js"}],"js/colorDisc.js":[function(require,module,exports) {
+"use strict";
+
+var _d = _interopRequireDefault(require("./d3"));
+
+var _utils = require("./utils");
+
+var _getThemeData = require("./getThemeData");
+
+var _initialTheme = require("./initialTheme");
+
+var _initialColorScales = require("./initialColorScales");
+
+var _createHtmlElement = require("./createHtmlElement");
+
+var _create3dChart = require("./create3dChart");
+
+var _polarColorPath = require("./polarColorPath");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function updateColorDots(mode) {
+  var scaleType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'theme';
+  var size = scaleType === 'theme' ? getColorWheelSize() : 220;
+  var colorClass = scaleType === 'theme' ? _initialTheme._theme : scaleType === 'sequential' ? _initialColorScales._sequentialScale : null; // Create dots for color wheel
+
+  if (!mode) {
+    var colorDotsModeDropdown = scaleType === 'theme' ? document.getElementById('colorDotsMode') : null;
+
+    var _colorDotsMode = scaleType === 'theme' ? colorDotsModeDropdown.value : 'colorKeys';
+
+    mode = _colorDotsMode;
+  }
+
+  var colorWheelModeDropdown = scaleType === 'theme' ? document.getElementById('chartsMode') : document.getElementById("".concat(scaleType, "_chartsMode"));
+  var colorWheelMode, colorWheelLightness;
+
+  if (scaleType === 'theme') {
+    var colorWheelLightnessDropdown = document.getElementById('colorWheelLightness');
+    colorWheelLightness = colorWheelLightnessDropdown.value;
+  } else {
+    colorWheelLightness = 50;
+  }
+
+  colorWheelMode = colorWheelModeDropdown.value;
+  var allColors, dataColors;
+
+  if (scaleType === 'theme') {
+    if (mode === 'colorKeys') {
+      allColors = (0, _getThemeData.getAllColorKeys)();
+    }
+
+    if (mode === 'colorScale') {
+      allColors = [];
+
+      _initialTheme._theme.colors.forEach(function (color) {
+        allColors.push(color.backgroundColorScale[colorWheelLightness]);
+      });
+    }
+  } else {
+    allColors = colorClass.colorKeys;
+  }
+
+  if (!colorWheelMode) colorWheelMode = 'CAM02p';
+  var arr = getConvertedColorCoodrindates(allColors, colorWheelMode, scaleType);
+  createColorWheelDots(arr, colorWheelMode, scaleType);
+}
+
+function getColorWheelSize() {
+  // let dynamicSize = getSmallestWindowDimension() - 200;
+  var minSize = 200;
+  var maxSize = 500; // let colorWheelSize = (dynamicSize > maxSize) ? maxSize : ((dynamicSize < minSize) ? minSize : dynamicSize);
+
+  var windowDimensions = getSmallestWindowDimension();
+  var colorWheelSize = windowDimensions > maxSize ? maxSize : windowDimensions < minSize ? minSize : windowDimensions;
+  return colorWheelSize;
+}
+
+function getConvertedColorCoodrindates(colorValues, mode) {
+  var scaleType = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'theme';
+  var dots = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+  // Cant seem to use the constant colorWheelSize or dotSize here, so we calculate it
+  var size = scaleType === 'theme' ? getColorWheelSize() : 220;
+  var dotSize = dots ? 16 : -2;
+  var defaultAchromaticDotOffset = size / 2 - dotSize / 2;
+  var arr = [];
+  colorValues.map(function (color) {
+    var c, h;
+
+    if (mode === 'HSL' || mode === 'RGB') {
+      c = _d.default.hsl(color).s * 100;
+      h = _d.default.hsl(color).h;
+    }
+
+    if (mode === 'HSLuv') {
+      c = _d.default.hsluv(color).u;
+      h = _d.default.hsluv(color).l;
+    }
+
+    if (mode === 'HSV') {
+      c = _d.default.hsv(color).s * 100;
+      h = _d.default.hsv(color).h;
+    }
+
+    if (mode === 'LCH' || mode === 'LAB') {
+      c = _d.default.hcl(color).c;
+      h = _d.default.hcl(color).h;
+    }
+
+    if (mode === 'CAM02p' || mode === 'CAM02') {
+      c = _d.default.jch(color).C;
+      h = _d.default.jch(color).h;
+    }
+
+    var conversion = (0, _utils.convertToCartesian)(c, h, 'clamp');
+    var x = conversion.x;
+    var y = !dots ? conversion.y * -1 : conversion.y;
+    var newX = shiftValue(x, size, dotSize);
+    var newY = shiftValue(y, size, dotSize);
+    if (isNaN(newX)) newX = defaultAchromaticDotOffset;
+    if (isNaN(newY)) newY = defaultAchromaticDotOffset;
+    arr.push({
+      x: newX,
+      y: newY,
+      color: color
+    });
+  });
+  return arr;
+}
+
+function createColorWheelDots(arr, colorWheelMode) {
+  var scaleType = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'theme';
+  var colorClass = scaleType === 'theme' ? _initialTheme._theme : scaleType === 'sequential' ? _initialColorScales._sequentialScale : null;
+  var polarPathDest = scaleType === 'theme' ? 'colorWheelPaths' : "".concat(scaleType, "ColorWheelPaths");
+  document.getElementById(polarPathDest).innerHTML = ' ';
+  var dotsClass = scaleType === 'theme' ? 'colorDot' : "".concat(scaleType, "ColorDot");
+  var colorWheelId = scaleType === 'theme' ? 'colorWheel' : "".concat(scaleType, "ColorWheel");
+  var canvasId = scaleType === 'theme' ? 'colorWheelCanvas' : "".concat(scaleType, "ColorWheelCanvas");
+  var linesId = scaleType === 'theme' ? 'colorWheelLines' : "".concat(scaleType, "ColorWheelLines");
+  (0, _utils.removeElementsByClass)(dotsClass);
+  var c = document.getElementById(canvasId);
+  var existingLines = document.getElementById(linesId);
+  if (existingLines) existingLines.parentNode.removeChild(existingLines);
+  var size = scaleType === 'theme' ? getColorWheelSize() : 220;
+  var center = size / 2;
+
+  if (scaleType === 'theme') {
+    // Need to loop and create many paths
+    for (var i = 0; i < colorClass.colors.length; i++) {
+      var data = getConvertedColorCoodrindates(colorClass.colors[i].backgroundColorScale, colorWheelMode, scaleType, false);
+      (0, _polarColorPath.polarColorPath)(data, size, scaleType);
+    }
+  } else {
+    var _data = getConvertedColorCoodrindates(colorClass.colors, colorWheelMode, scaleType, false);
+
+    (0, _polarColorPath.polarColorPath)(_data, size, scaleType);
+  }
+
+  var svg = (0, _createHtmlElement.createSvgElement)({
+    element: 'svg',
+    id: linesId,
+    attributes: {
+      height: size,
+      width: size
+    },
+    appendTo: colorWheelId
+  });
+  arr.map(function (obj) {
+    (0, _createHtmlElement.createHtmlElement)({
+      element: 'div',
+      className: dotsClass,
+      styles: {
+        backgroundColor: obj.color,
+        top: obj.y + 'px',
+        left: obj.x + 'px'
+      },
+      appendTo: colorWheelId
+    }); // Create harmony lines
+
+    (0, _createHtmlElement.createSvgElement)({
+      element: 'line',
+      className: 'colorDot-HarmonyLine',
+      attributes: {
+        height: size,
+        width: size,
+        x1: center,
+        y1: center,
+        x2: obj.x + 10,
+        y2: obj.y + 10
+      },
+      styles: {
+        stroke: 'rgba(255, 255, 255, 0.75)',
+        strokeWidth: 2.5,
+        strokeLinecap: "round",
+        filter: 'drop-shadow( 0 0 1px rgba(0, 0, 0, .5))',
+        strokeDasharray: '4 6'
+      },
+      appendTo: linesId
+    });
+  });
+}
+
+function createColorWheel(mode, lightness, scaleType) {
+  var size = scaleType === 'theme' ? getColorWheelSize() : 220;
+  var wheelId = scaleType === 'theme' ? '#colorWheel' : "#".concat(scaleType, "ColorWheel");
+  var canvasId = scaleType === 'theme' ? 'colorWheelCanvas' : "".concat(scaleType, "ColorWheelCanvas");
+
+  var container = _d.default.select(wheelId);
+
+  var canvas = container.append("canvas").attr("height", size).attr("width", size).attr("id", canvasId);
+  var context = canvas.node().getContext('2d');
+  canvas.id = canvasId;
+  var x = size / 2;
+  var y = size / 2;
+  var radius = size / 2;
+  var counterClockwise = false;
+
+  for (var angle = 0; angle <= 360; angle += 1) {
+    var shift = 0;
+    var startAngle = (angle + shift - 2) * Math.PI / 180;
+    var endAngle = (angle + shift) * Math.PI / 180;
+    context.beginPath();
+    context.moveTo(x, y);
+    context.arc(x, y, radius, startAngle, endAngle, counterClockwise);
+    context.closePath();
+    var gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+    var colorStartHsl = void 0,
+        colorMid1Hsl = void 0,
+        colorMid2Hsl = void 0,
+        colorMid3Hsl = void 0,
+        colorStopHsl = void 0;
+
+    if (mode === 'HSL' || mode === 'RGB') {
+      var colorStart = _d.default.hsl(angle, 0, lightness / 100);
+
+      var colorMid1 = _d.default.hsl(angle, 0.25, lightness / 100);
+
+      var colorMid2 = _d.default.hsl(angle, 0.5, lightness / 100);
+
+      var colorMid3 = _d.default.hsl(angle, 0.75, lightness / 100);
+
+      var colorStop = _d.default.hsl(angle, 1, lightness / 100);
+
+      colorStartHsl = _d.default.hsl(colorStart).toString();
+      colorMid1Hsl = _d.default.hsl(colorMid1).toString();
+      colorMid2Hsl = _d.default.hsl(colorMid2).toString();
+      colorMid3Hsl = _d.default.hsl(colorMid3).toString();
+      colorStopHsl = _d.default.hsl(colorStop).toString();
+    } else if (mode === 'HSV') {
+      var _colorStart = _d.default.hsv(angle, 0, lightness / 100);
+
+      var _colorMid = _d.default.hsv(angle, 0.25, lightness / 100);
+
+      var _colorMid2 = _d.default.hsv(angle, 0.5, lightness / 100);
+
+      var _colorMid3 = _d.default.hsv(angle, 0.75, lightness / 100);
+
+      var _colorStop = _d.default.hsv(angle, 1, lightness / 100);
+
+      colorStartHsl = _d.default.hsl(_colorStart).toString();
+      colorMid1Hsl = _d.default.hsl(_colorMid).toString();
+      colorMid2Hsl = _d.default.hsl(_colorMid2).toString();
+      colorMid3Hsl = _d.default.hsl(_colorMid3).toString();
+      colorStopHsl = _d.default.hsl(_colorStop).toString();
+    } else if (mode === 'LCH' || mode === 'LAB') {
+      var _colorStart2 = _d.default.hcl(angle, 0, lightness);
+
+      var _colorMid4 = _d.default.hcl(angle, 25, lightness);
+
+      var _colorMid5 = _d.default.hcl(angle, 50, lightness);
+
+      var _colorMid6 = _d.default.hcl(angle, 75, lightness);
+
+      var _colorStop2 = _d.default.hcl(angle, 100, lightness);
+
+      colorStartHsl = _d.default.hsl(_colorStart2).toString();
+      colorMid1Hsl = _d.default.hsl(_colorMid4).toString();
+      colorMid2Hsl = _d.default.hsl(_colorMid5).toString();
+      colorMid3Hsl = _d.default.hsl(_colorMid6).toString();
+      colorStopHsl = _d.default.hsl(_colorStop2).toString();
+    } else if (mode === 'HSLuv') {
+      var _colorStart3 = _d.default.hsluv(angle, 0, lightness);
+
+      var _colorMid7 = _d.default.hsluv(angle, 25, lightness);
+
+      var _colorMid8 = _d.default.hsluv(angle, 50, lightness);
+
+      var _colorMid9 = _d.default.hsluv(angle, 75, lightness);
+
+      var _colorStop3 = _d.default.hsluv(angle, 100, lightness);
+
+      colorStartHsl = _d.default.hsl(_colorStart3).toString();
+      colorMid1Hsl = _d.default.hsl(_colorMid7).toString();
+      colorMid2Hsl = _d.default.hsl(_colorMid8).toString();
+      colorMid3Hsl = _d.default.hsl(_colorMid9).toString();
+      colorStopHsl = _d.default.hsl(_colorStop3).toString();
+    } else if (mode === 'CAM02' || mode === 'CAM02p') {
+      var _colorStart4 = _d.default.jch(lightness, 0, angle);
+
+      var _colorMid10 = _d.default.jch(lightness, 25, angle);
+
+      var _colorMid11 = _d.default.jch(lightness, 50, angle);
+
+      var _colorMid12 = _d.default.jch(lightness, 75, angle);
+
+      var _colorStop4 = _d.default.jch(lightness, 100, angle);
+
+      colorStartHsl = _d.default.hsl(_colorStart4).toString();
+      colorMid1Hsl = _d.default.hsl(_colorMid10).toString();
+      colorMid2Hsl = _d.default.hsl(_colorMid11).toString();
+      colorMid3Hsl = _d.default.hsl(_colorMid12).toString();
+      colorStopHsl = _d.default.hsl(_colorStop4).toString();
+    }
+
+    gradient.addColorStop(0, colorStartHsl);
+    gradient.addColorStop(0.25, colorMid1Hsl);
+    gradient.addColorStop(0.5, colorMid2Hsl);
+    gradient.addColorStop(0.75, colorMid3Hsl);
+    gradient.addColorStop(1, colorStopHsl);
+    context.fillStyle = gradient;
+    context.fill();
+  }
+}
+
+function getSmallestWindowDimension() {
+  var windowWidth = window.innerWidth;
+  var windowHeight = window.innerHeight;
+  var adjustedWidth = windowWidth - 386; // subtract panel width and padding from measurement
+  // let adjustedHeight = ((window.innerHeight - 232) / 2) - 64;// subtract heading, tabs height and padding from measurement
+
+  var adjustedHeight = window.innerHeight - 234; // subtract heading, tabs height and padding from measurement
+
+  var smallestDimension = adjustedWidth < adjustedHeight ? adjustedWidth : adjustedHeight;
+  return smallestDimension;
+}
+
+getSmallestWindowDimension();
+
+function shiftValue(v, colorWheelSize, dotSize) {
+  v = (0, _utils.filterNaN)(v);
+  var midPoint = colorWheelSize / 2;
+  var scaledValue = v / 100 * midPoint;
+  var shiftedValue = scaledValue + midPoint; // subtract half of the width of the dots to centrally position it.
+
+  var centeredVal = shiftedValue - dotSize / 2 - 2;
+  return centeredVal;
+}
+
+function updateColorWheel(mode, lightness, dots, dotsMode, scaleType) {
+  var canvasId = scaleType === 'theme' ? 'colorWheelCanvas' : "".concat(scaleType, "ColorWheelCanvas");
+  var canvas = document.getElementById(canvasId);
+
+  if (canvas) {
+    canvas.parentNode.removeChild(canvas);
+  }
+
+  createColorWheel(mode, lightness, scaleType);
+  updateColorDots(dotsMode, scaleType);
+}
+
+var colorWheelMode = document.getElementById('chartsMode');
+var colorDotsMode = document.getElementById('colorDotsMode');
+var colorWheelLightness = document.getElementById('colorWheelLightness'); // Not the best way to do this. Basically relying on the id's defined globally above
+// as elements present only in the Theme html file. So all these event listeners
+// are only applied to the theme... eventually I need these on every page with 
+// a color wheel, but the functions are dependant upon a scaleType parameter,
+// which until now I was able to easily, manually pass. Not sure how to 
+// define this aside from manually declaring each specific ID.
+
+if (colorWheelMode) {
+  updateColorWheel(colorWheelMode.value, colorWheelLightness.value, true, null, 'theme');
+  colorWheelMode.addEventListener('input', function (e) {
+    var mode = e.target.value;
+    var colorDotsModeDropdown = document.getElementById('colorDotsMode');
+    var dotsMode = colorDotsModeDropdown.value;
+    updateColorWheel(mode, colorWheelLightness.value, true, 'theme');
+    (0, _create3dChart.create3dChart)(null, mode);
+  });
+
+  window.onresize = function () {
+    updateColorWheel(colorWheelMode.value, colorWheelLightness.value, true, 'theme');
+  };
+
+  colorWheelLightness.addEventListener('input', function (e) {
+    var lightness = e.target.value;
+    var colorDotsModeDropdown = document.getElementById('colorDotsMode');
+    var dotsMode = colorDotsModeDropdown.value;
+    var showDots = dotsMode === 'colorScale' ? true : false;
+    updateColorWheel(colorWheelMode.value, lightness, showDots, dotsMode, 'theme');
+  });
+  colorDotsMode.addEventListener('input', function (e) {
+    var mode = e.target.value;
+    updateColorDots(mode, 'theme');
+  });
+  var colorPathsSwitch = document.getElementById('colorPathsSwitch');
+  var colorPaths = document.getElementById('colorWheelPaths');
+  colorPathsSwitch.addEventListener('change', function (e) {
+    var checked = e.target.checked;
+    if (checked) colorPaths.style.display = 'block';else colorPaths.style.display = 'none';
+  });
+  var colorHarmonyLinesSwitch = document.getElementById('colorHarmonyLinesSwitch');
+  var colorHarmonyLines = document.getElementById('colorWheelLines');
+  colorHarmonyLinesSwitch.addEventListener('change', function (e) {
+    var checked = e.target.checked;
+    if (checked) colorHarmonyLines.style.display = 'block';else colorHarmonyLines.style.display = 'none';
+  });
+}
+
+module.exports = {
+  updateColorDots: updateColorDots,
+  getColorWheelSize: getColorWheelSize,
+  getConvertedColorCoodrindates: getConvertedColorCoodrindates,
+  createColorWheelDots: createColorWheelDots,
+  createColorWheel: createColorWheel,
+  getSmallestWindowDimension: getSmallestWindowDimension,
+  shiftValue: shiftValue,
+  updateColorWheel: updateColorWheel
+};
+},{"./d3":"js/d3.js","./utils":"js/utils.js","./getThemeData":"js/getThemeData.js","./initialTheme":"js/initialTheme.js","./initialColorScales":"js/initialColorScales.js","./createHtmlElement":"js/createHtmlElement.js","./create3dChart":"js/create3dChart.js","./polarColorPath":"js/polarColorPath.js"}],"js/createChart.js":[function(require,module,exports) {
+"use strict";
+
+var d3 = _interopRequireWildcard(require("d3"));
+
+var _colorDisc = require("./colorDisc");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function createChart(data, yLabel, xLabel, dest, yMin, yMax) {
+  var finiteScale = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
+  var visColors = arguments.length > 7 ? arguments[7] : undefined;
+  var scaleType = arguments.length > 8 ? arguments[8] : undefined;
+  var chartWidth, chartHeight;
+  var windowWidth = window.innerWidth;
+  var windowHeight = window.innerHeight;
+  var adjustedHeight = (windowHeight - 300) / 2; // subtract heading, tabs height and padding from measurement
+
+  var maxWidth = 800;
+
+  if (dest === '#interpolationChart' || dest === '#interpolationChart2' || dest === '#interpolationChart3' || dest === "#".concat(scaleType, "InterpolationChart") || dest === "#".concat(scaleType, "InterpolationChart2") || dest === "#".concat(scaleType, "InterpolationChart3")) {
+    var adjustedWidth = windowWidth - (388 + 34); // subtract panel width and padding from measurement
+
+    adjustedWidth = adjustedWidth < maxWidth ? adjustedWidth : maxWidth;
+    chartWidth = adjustedWidth;
+    chartHeight = adjustedHeight - 100;
+  }
+
+  if (dest === '#paletteInterpolationChart' || dest === '#paletteInterpolationChart2' || dest === '#paletteInterpolationChart3') {
+    var _adjustedWidth = windowWidth - (388 + 32); // subtract panel width and padding from measurement
+
+
+    _adjustedWidth = _adjustedWidth < maxWidth ? _adjustedWidth : maxWidth;
+    chartWidth = _adjustedWidth;
+    chartHeight = (windowHeight - 150) / 2;
+  }
+
+  if (dest === '#RGBchart' || dest === "#sequentialRGBchart" || dest === '#divergingRGBchart') {
+    var _adjustedWidth2 = windowWidth - (388 + 32); // subtract panel width and padding from measurement
+
+
+    _adjustedWidth2 = _adjustedWidth2 < maxWidth ? _adjustedWidth2 : maxWidth;
+    chartWidth = _adjustedWidth2;
+    chartHeight = adjustedHeight * 1.5;
+  }
+
+  if (dest === '#contrastChart' || dest === '#luminosityChart') {
+    chartWidth = 356;
+    chartHeight = 264;
+  }
+
+  var xy_chart = d3_xy_chart().width(chartWidth).height(chartHeight).xlabel(xLabel).ylabel(yLabel);
+  var svg = d3.select(dest).append("svg").datum(data).call(xy_chart);
+
+  function d3_xy_chart() {
+    var width = chartWidth,
+        height = chartHeight,
+        xlabel = "X Axis Label",
+        ylabel = "Y Axis Label";
+
+    function chart(selection) {
+      selection.each(function (datasets) {
+        console.log(datasets); // If no min/max defined, base on min/max from data
+
         if (yMin == undefined) {
           yMin = d3.min(datasets, function (d) {
             return d3.min(d.y);
@@ -39141,8 +40695,8 @@ function createChart(data, yLabel, xLabel, dest, yMin, yMax) {
         var margin = {
           top: 8,
           right: 8,
-          bottom: 20,
-          left: 32
+          bottom: 36,
+          left: 36
         };
         var innerwidth = width - margin.left - margin.right;
         var innerheight = height - margin.top - margin.bottom;
@@ -39154,21 +40708,63 @@ function createChart(data, yLabel, xLabel, dest, yMin, yMax) {
         var y_scale = d3.scaleLinear().range([innerheight, 0]).domain([yMin, yMax]); // d3.min(datasets, function(d) { return d3.min(d.y); }),
         // d3.max(datasets, function(d) { return d3.max(d.y); }) ]) ;
 
-        var color_scale = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(datasets.length));
+        var color_scale;
+
+        if (!visColors) {
+          color_scale = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(datasets.length));
+        } else {
+          color_scale = function color_scale() {
+            return visColors;
+          };
+        }
+
         var x_axis = d3.axisBottom(x_scale);
         var y_axis = d3.axisLeft(y_scale);
         var x_grid = d3.axisBottom(x_scale).tickSize(-innerheight).tickFormat("");
+
+        if (finiteScale) {
+          x_axis.ticks(d3.max(datasets, function (d) {
+            return d3.max(d.x);
+          }) - 1);
+          x_grid.ticks(d3.max(datasets, function (d) {
+            return d3.max(d.x);
+          }) - 1);
+        }
+
         var y_grid = d3.axisLeft(y_scale).tickSize(-innerwidth).tickFormat("");
-        var draw_line = d3.line().curve(d3.curveLinear).x(function (d) {
+        var draw_line = d3.line().curve(d3.curveBasis).x(function (d) {
           return x_scale(d[0]);
         }).y(function (d) {
           return y_scale(d[1]);
         });
-        var svg = d3.select(this).attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-        svg.append("g").attr("class", "x grid").attr("transform", "translate(0," + innerheight + ")").call(x_grid);
-        svg.append("g").attr("class", "y grid").call(y_grid);
-        svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + innerheight + ")").call(x_axis).append("text").attr("dy", "-.71em").attr("x", innerwidth).style("text-anchor", "end").text(xlabel);
-        svg.append("g").attr("class", "y axis").call(y_axis).append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", "0.71em").style("text-anchor", "end").text(ylabel);
+        var svg = d3.select(this).attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"); // If dest is RGB chart, don't show ticks
+
+        if (dest !== '#RGBchart' || dest !== "#".concat(scaleType, "RGBchart")) {
+          svg.append("g").attr("class", "x grid").attr("transform", "translate(0," + innerheight + ")").call(x_grid);
+          svg.append("g").attr("class", "y grid").call(y_grid);
+          svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + innerheight + ")").call(x_axis).append("text") // .attr("dy", "-.71em")
+          .attr("dy", "2.5em").attr("x", innerwidth / 2).style("text-anchor", "middle").text(xlabel);
+          svg.append("g").attr("class", "y axis").call(y_axis).append("text").attr("transform", "rotate(-90)") // .attr("y", 6)
+          .attr("dy", "-2.25em").attr('x', -innerheight / 2).style("text-anchor", "middle").text(ylabel);
+        } else {
+          svg.append("g").attr("class", "x grid").attr("transform", "translate(0," + innerheight + ")").call(x_grid);
+          svg.append("g").attr("class", "y grid").call(y_grid);
+          svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + innerheight + ")").call(x_axis); // .append("text")
+          // .attr("dy", "-.71em")
+          // .attr("dy", "2.75em")
+          // .attr("x", (innerwidth/2))
+          // .style("text-anchor", "middle")
+          // .text(xlabel) ;
+
+          svg.append("g").attr("class", "y axis").call(y_axis); // .append("text")
+          // .attr("transform", "rotate(-90)")
+          // .attr("y", 6)
+          // .attr("dy", "-2em")
+          // .attr('x', (-innerheight/2))
+          // .style("text-anchor", "middle")
+          // .text(ylabel) ;
+        }
+
         var data_lines = svg.selectAll(".d3_xy_chart_line").data(datasets.map(function (d) {
           return d3.zip(d.x, d.y);
         })).enter().append("g").attr("class", "d3_xy_chart_line");
@@ -39220,655 +40816,140 @@ function createChart(data, yLabel, xLabel, dest, yMin, yMax) {
   }
 }
 
-function toggleGraphs() {
-  var panel = document.getElementById('colorMetrics');
-  var toggle = document.getElementById('toggleMetrics');
-  panel.classList.toggle('visible');
-  toggle.classList.toggle('is-selected');
+function createColorChart(data, yLabel, xLabel, dest, yMin, yMax, colors) {
+  var chartWidth, chartHeight; // let adjustedWidth = smallestWidth / 2 - 16;
+
+  var width = window.innerWidth - 386 - 34;
+  var adjustedWidth = width;
+  var adjustedHeight = window.innerHeight / 3 - 60; // subtract heading, tabs height and padding from measurement
+
+  var maxWidth = 800; // let adjustedWidth = windowWidth - (388 + 40);// subtract panel width and padding from measurement
+  // adjustedWidth = (adjustedWidth < maxWidth) ? adjustedWidth : maxWidth;
+
+  adjustedWidth = adjustedWidth < maxWidth ? adjustedWidth : maxWidth;
+  chartWidth = adjustedWidth;
+  chartHeight = adjustedHeight;
+  var xy_chart = d3_xy_chart().width(chartWidth).height(chartHeight).xlabel(xLabel).ylabel(yLabel);
+  var svg = d3.select(dest).append("svg").datum(data).call(xy_chart);
+
+  function d3_xy_chart() {
+    var width = chartWidth,
+        height = chartHeight,
+        xlabel = "X Axis Label",
+        ylabel = "Y Axis Label";
+
+    function chart(selection) {
+      selection.each(function (datasets) {
+        // If no min/max defined, base on min/max from data
+        if (yMin == undefined) {
+          yMin = d3.min(datasets, function (d) {
+            return d3.min(d.y);
+          });
+        }
+
+        if (yMax == undefined) {
+          yMax = d3.max(datasets, function (d) {
+            return d3.max(d.y);
+          });
+        } //
+        // Create the plot.
+        //
+
+
+        var margin = {
+          top: 8,
+          right: 8,
+          bottom: 36,
+          left: 36
+        };
+        var innerwidth = width - margin.left - margin.right;
+        var innerheight = height - margin.top - margin.bottom;
+        var x_scale = d3.scaleLinear().range([0, innerwidth]).domain([d3.min(datasets, function (d) {
+          return d3.min(d.x);
+        }), d3.max(datasets, function (d) {
+          return d3.max(d.x);
+        })]);
+        var y_scale = d3.scaleLinear().range([innerheight, 0]).domain([yMin, yMax]); // d3.min(datasets, function(d) { return d3.min(d.y); }),
+        // d3.max(datasets, function(d) { return d3.max(d.y); }) ]) ;
+
+        var color_scale = colors;
+        var x_axis = d3.axisBottom(x_scale);
+        var y_axis = d3.axisLeft(y_scale);
+        var x_grid = d3.axisBottom(x_scale).tickSize(-innerheight).tickFormat("");
+        var y_grid = d3.axisLeft(y_scale).tickSize(-innerwidth).tickFormat("");
+        var draw_line = d3.line().curve(d3.curveBasis).x(function (d) {
+          return x_scale(d[0]);
+        }).y(function (d) {
+          return y_scale(d[1]);
+        });
+        var svg = d3.select(this).attr("width", width).attr("height", height).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        svg.append("g").attr("class", "x grid").attr("transform", "translate(0," + innerheight + ")").call(x_grid);
+        svg.append("g").attr("class", "y grid").call(y_grid);
+        svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + innerheight + ")").call(x_axis);
+        svg.append("g").attr("class", "y axis").call(y_axis);
+        var data_lines = svg.selectAll(".d3_xy_chart_line").data(datasets.map(function (d) {
+          return d3.zip(d.x, d.y);
+        })).enter().append("g").attr("class", "d3_xy_chart_line");
+        data_lines.append("path").attr("class", "line").attr("d", function (d) {
+          return draw_line(d);
+        }).attr("stroke", function (_, i) {
+          return color_scale[i];
+        });
+        data_lines.append("text").datum(function (d, i) {
+          return {
+            name: datasets[i].label,
+            final: d[d.length - 1]
+          };
+        }).attr("transform", function (d) {
+          return "translate(" + x_scale(d.final[0]) + "," + y_scale(d.final[1]) + ")";
+        }).attr("x", 3).attr("dy", ".35em").attr("fill", function (_, i) {
+          return color_scale[i];
+        }).text(function (d) {
+          return d.name;
+        });
+      });
+    }
+
+    chart.width = function (value) {
+      if (!arguments.length) return width;
+      width = value;
+      return chart;
+    };
+
+    chart.height = function (value) {
+      if (!arguments.length) return height;
+      height = value;
+      return chart;
+    };
+
+    chart.xlabel = function (value) {
+      if (!arguments.length) return xlabel;
+      xlabel = value;
+      return chart;
+    };
+
+    chart.ylabel = function (value) {
+      if (!arguments.length) return ylabel;
+      ylabel = value;
+      return chart;
+    };
+
+    return chart;
+  }
 }
 
-function createAllCharts(mode) {
-  mode = document.getElementById('chart2dColorspace').value;
-  var chart3 = document.getElementById('chart3Wrapper');
-
-  if (mode == "LCH") {
-    createChartHeader('Chroma / Lightness', 'chart1');
-    createChart(lchDataC, 'Chroma', 'Lightness', "#chart1", 0, 100);
-    createChartHeader('Hue / Lightness', 'chart2');
-    createChart(lchDataH, 'Hue', 'Lightness', "#chart2", 0, 360);
-    createChartHeader('Chroma / Hue', 'chart3');
-    createChart(lchDataCH, 'Chroma', 'Hue', "#chart3", 0, 100);
-  }
-
-  if (mode == "LAB") {
-    createChartHeader('Green Red / Lightness', 'chart1');
-    createChart(labDataA, 'Green - Red', 'Lightness', "#chart1");
-    createChartHeader('Blue Yellow / Lightness', 'chart2');
-    createChart(labDataB, 'Blue - Yellow', 'Lightness', "#chart2");
-    createChartHeader('Green Red / Blue Yellow', 'chart3');
-    createChart(labDataAB, 'Green - Red', 'Blue - Yellow', "#chart3");
-  }
-
-  if (mode == "CAM02") {
-    createChartHeader('Green Red / Lightness', 'chart1');
-    createChart(camDataA, 'Green - Red', 'Lightness', "#chart1");
-    createChartHeader('Blue Yellow / Lightness', 'chart2');
-    createChart(camDataB, 'Blue - Yellow', 'Lightness', "#chart2");
-    createChartHeader('Green Red / Blue Yellow', 'chart3');
-    createChart(camDataAB, 'Green - Red', 'Blue - Yellow', "#chart3");
-  }
-
-  if (mode == "HSL") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hslDataH, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hslDataS, 'Saturation', 'Lightness', "#chart2", 0, 1);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hslDataHS, 'Saturation', 'Hue', "#chart3", 0, 1);
-  }
-
-  if (mode == "HSLuv") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hsluvDataL, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hsluvDataU, 'Saturation', 'Lightness', "#chart2", 0, 100);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hsluvDataLU, 'Saturation', 'Hue', "#chart3", 0, 100);
-  }
-
-  if (mode == "HSV") {
-    createChartHeader('Hue / Lightness', 'chart1');
-    createChart(hsvDataH, 'Hue', 'Lightness', "#chart1", 0, 360);
-    createChartHeader('Saturation / Lightness', 'chart2');
-    createChart(hsvDataS, 'Saturation', 'Lightness', "#chart2", 0, 1);
-    createChartHeader('Saturation / Hue', 'chart3');
-    createChart(hsvDataHS, 'Saturation', 'Hue', "#chart3", 0, 1);
-  }
-
-  if (mode == "RGB") {
-    createChartHeader('Red / Green', 'chart1');
-    createChart(rgbDataR, 'Red', 'Green', "#chart1", 0, 255);
-    createChartHeader('Green / Blue', 'chart2');
-    createChart(rgbDataG, 'Green', 'Blue', "#chart2", 0, 255);
-    createChartHeader('Blue / Red', 'chart3');
-    createChart(rgbDataB, 'Blue', 'Red', "#chart3", 0, 255);
-  }
-
-  createChartHeader('Contrast Ratios', 'contrastChart');
-  createChart(window.contrastData, 'Contrast', 'Swatches', "#contrastChart");
-  init3dChart();
-}
-
-var chartColors = [];
-
-function getChartColors(mode) {
-  var shift = document.getElementById('shiftInput').value;
-  var chartColors = []; // GENERATE PROPER SCALE OF COLORS FOR 3d CHART:
-
-  var chartRGB = contrastColors.createScale({
-    swatches: 340,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-
-  for (var i = 0; i < chartRGB.length; i++) {
-    chartColors.push(chartRGB[i]);
-  }
-
-  return chartColors;
-}
-
-function showCharts(mode, interpolation) {
-  document.getElementById('chart1').innerHTML = ' ';
-  document.getElementById('chart2').innerHTML = ' ';
-  document.getElementById('chart3').innerHTML = ' ';
-  document.getElementById('contrastChart').innerHTML = ' ';
-  chartColors = getChartColors(interpolation);
-  createAllCharts(mode);
-}
-
-;
-exports.init3dChart = init3dChart; // exports.update3dChart = update3dChart;
-// exports.updateCharts = updateCharts;
-
-exports.showCharts = showCharts; // window.update3dChart = update3dChart;
-// window.updateCharts = updateCharts;
-},{"d3":"../../../node_modules/d3/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs"}],"data.js":[function(require,module,exports) {
+module.exports = {
+  createChart: createChart,
+  createColorChart: createColorChart
+};
+},{"d3":"../../../node_modules/d3/index.js","./colorDisc":"js/colorDisc.js"}],"js/createRGBchannelChart.js":[function(require,module,exports) {
 "use strict";
 
-var d3 = _interopRequireWildcard(require("d3"));
+var d3 = _interopRequireWildcard(require("./d3"));
 
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+var _utils = require("./utils");
 
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
-Copyright 2019 Adobe. All rights reserved.
-This file is licensed to you under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License. You may obtain a copy
-of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under
-the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
-OF ANY KIND, either express or implied. See the License for the specific language
-governing permissions and limitations under the License.
-*/
-// Create data based on colorspace
-function createData(colors) {
-  var CAM_J = [];
-  var CAM_A = [];
-  var CAM_B = [];
-  var LAB_L = [];
-  var LAB_A = [];
-  var LAB_B = [];
-  var LCH_L = [];
-  var LCH_C = [];
-  var LCH_H = [];
-  var HSL_H = [];
-  var HSL_S = [];
-  var HSL_L = [];
-  var HSV_H = [];
-  var HSV_S = [];
-  var HSV_V = [];
-  var HSLuv_L = [];
-  var HSLuv_U = [];
-  var HSLuv_V = [];
-  var RGB_R = [];
-  var RGB_G = [];
-  var RGB_B = [];
-
-  for (var i = 4; i < colors.length; i++) {
-    // Clip array to eliminate NaN values
-    CAM_J.push(d3.jab(colors[i]).J);
-    CAM_A.push(d3.jab(colors[i]).a);
-    CAM_B.push(d3.jab(colors[i]).b);
-    LAB_L.push(d3.lab(colors[i]).l);
-    LAB_A.push(d3.lab(colors[i]).a);
-    LAB_B.push(d3.lab(colors[i]).b);
-    LCH_L.push(d3.hcl(colors[i]).l);
-    LCH_C.push(d3.hcl(colors[i]).c);
-    LCH_H.push(d3.hcl(colors[i]).h);
-    RGB_R.push(d3.rgb(colors[i]).r);
-    RGB_G.push(d3.rgb(colors[i]).g);
-    RGB_B.push(d3.rgb(colors[i]).b);
-    HSL_H.push(d3.hsl(colors[i]).h);
-    HSL_S.push(d3.hsl(colors[i]).s);
-    HSL_L.push(d3.hsl(colors[i]).l);
-    HSV_H.push(d3.hsv(colors[i]).h);
-    HSV_S.push(d3.hsv(colors[i]).s);
-    HSV_V.push(d3.hsv(colors[i]).v);
-    HSLuv_L.push(d3.hsluv(colors[i]).l);
-    HSLuv_U.push(d3.hsluv(colors[i]).u);
-    HSLuv_V.push(d3.hsluv(colors[i]).v);
-  } // Filter out "NaN" values from these arrays
-
-
-  CAM_J = CAM_J.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  CAM_A = CAM_A.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  CAM_B = CAM_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_L = LAB_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_A = LAB_A.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LAB_B = LAB_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_L = LCH_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_C = LCH_C.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  LCH_H = LCH_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_R = RGB_R.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_G = RGB_G.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  RGB_B = RGB_B.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_H = HSL_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_S = HSL_S.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSL_L = HSL_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_H = HSV_H.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_S = HSV_S.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSV_V = HSV_V.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_L = HSLuv_L.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_U = HSLuv_U.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  HSLuv_V = HSLuv_V.filter(function (value) {
-    return !Number.isNaN(value);
-  });
-  window.CAMArrayJ = [];
-  window.CAMArrayA = [];
-  window.CAMArrayB = [];
-  window.LABArrayL = [];
-  window.LABArrayA = [];
-  window.LABArrayB = [];
-  window.LCHArrayL = [];
-  window.LCHArrayC = [];
-  window.LCHArrayH = [];
-  window.RGBArrayR = [];
-  window.RGBArrayG = [];
-  window.RGBArrayB = [];
-  window.HSLArrayH = [];
-  window.HSLArrayS = [];
-  window.HSLArrayL = [];
-  window.HSVArrayH = [];
-  window.HSVArrayS = [];
-  window.HSVArrayL = [];
-  window.HSLuvArrayL = [];
-  window.HSLuvArrayU = [];
-  window.HSLuvArrayV = [];
-  window.CAMArrayJmin = [];
-  window.CAMArrayAmin = [];
-  window.CAMArrayBmin = [];
-  window.LABArrayLmin = [];
-  window.LABArrayAmin = [];
-  window.LABArrayBmin = [];
-  window.LCHArrayLmin = [];
-  window.LCHArrayCmin = [];
-  window.LCHArrayHmin = [];
-  window.RGBArrayRmin = [];
-  window.RGBArrayGmin = [];
-  window.RGBArrayBmin = [];
-  window.HSLArrayHmin = [];
-  window.HSLArraySmin = [];
-  window.HSLArrayLmin = [];
-  window.HSVArrayHmin = [];
-  window.HSVArraySmin = [];
-  window.HSVArrayLmin = [];
-  window.HSLuvArrayLmin = [];
-  window.HSLuvArrayUmin = [];
-  window.HSLuvArrayVmin = []; // Shorten the numbers in the array for chart purposes
-
-  var maxVal = 300;
-  var delta = Math.floor(CAM_J.length / maxVal);
-
-  for (var _i = 0; _i < CAM_J.length; _i = _i + delta) {
-    CAMArrayJ.push(CAM_J[_i]);
-  }
-
-  for (var _i2 = 0; _i2 < CAM_A.length; _i2 = _i2 + delta) {
-    CAMArrayA.push(CAM_A[_i2]);
-  }
-
-  for (var _i3 = 0; _i3 < CAM_B.length; _i3 = _i3 + delta) {
-    CAMArrayB.push(CAM_B[_i3]);
-  }
-
-  for (var _i4 = 0; _i4 < LAB_L.length; _i4 = _i4 + delta) {
-    LABArrayL.push(LAB_L[_i4]);
-  }
-
-  for (var _i5 = 0; _i5 < LAB_A.length; _i5 = _i5 + delta) {
-    LABArrayA.push(LAB_A[_i5]);
-  }
-
-  for (var _i6 = 0; _i6 < LAB_B.length; _i6 = _i6 + delta) {
-    LABArrayB.push(LAB_B[_i6]);
-  }
-
-  for (var _i7 = 0; _i7 < LCH_L.length; _i7 = _i7 + delta) {
-    LCHArrayL.push(LCH_L[_i7]);
-  }
-
-  for (var _i8 = 0; _i8 < LCH_C.length; _i8 = _i8 + delta) {
-    LCHArrayC.push(LCH_C[_i8]);
-  }
-
-  for (var _i9 = 0; _i9 < LCH_H.length; _i9 = _i9 + delta) {
-    LCHArrayH.push(LCH_H[_i9]);
-  }
-
-  for (var _i10 = 0; _i10 < RGB_R.length; _i10 = _i10 + delta) {
-    RGBArrayR.push(RGB_R[_i10]);
-  }
-
-  for (var _i11 = 0; _i11 < RGB_G.length; _i11 = _i11 + delta) {
-    RGBArrayG.push(RGB_G[_i11]);
-  }
-
-  for (var _i12 = 0; _i12 < RGB_B.length; _i12 = _i12 + delta) {
-    RGBArrayB.push(RGB_B[_i12]);
-  }
-
-  for (var _i13 = 0; _i13 < HSL_H.length; _i13 = _i13 + delta) {
-    HSLArrayH.push(HSL_H[_i13]);
-  }
-
-  for (var _i14 = 0; _i14 < HSL_S.length; _i14 = _i14 + delta) {
-    HSLArrayS.push(HSL_S[_i14]);
-  }
-
-  for (var _i15 = 0; _i15 < HSL_L.length; _i15 = _i15 + delta) {
-    HSLArrayL.push(HSL_L[_i15]);
-  }
-
-  for (var _i16 = 0; _i16 < HSV_H.length; _i16 = _i16 + delta) {
-    HSVArrayH.push(HSV_H[_i16]);
-  }
-
-  for (var _i17 = 0; _i17 < HSV_S.length; _i17 = _i17 + delta) {
-    HSVArrayS.push(HSV_S[_i17]);
-  }
-
-  for (var _i18 = 0; _i18 < HSV_V.length; _i18 = _i18 + delta) {
-    HSVArrayL.push(HSV_V[_i18]);
-  }
-
-  for (var _i19 = 0; _i19 < HSLuv_L.length; _i19 = _i19 + delta) {
-    HSLuvArrayL.push(HSLuv_L[_i19]);
-  }
-
-  for (var _i20 = 0; _i20 < HSLuv_U.length; _i20 = _i20 + delta) {
-    HSLuvArrayU.push(HSLuv_U[_i20]);
-  }
-
-  for (var _i21 = 0; _i21 < HSLuv_V.length; _i21 = _i21 + delta) {
-    HSLuvArrayV.push(HSLuv_V[_i21]);
-  } // Minimized data set
-
-
-  var maxValmin = 25;
-  var deltamin = Math.floor(CAM_J.length / maxValmin);
-
-  for (var _i22 = 0; _i22 < CAM_J.length; _i22 = _i22 + deltamin) {
-    CAMArrayJmin.push(CAM_J[_i22]);
-  }
-
-  for (var _i23 = 0; _i23 < CAM_A.length; _i23 = _i23 + deltamin) {
-    CAMArrayAmin.push(CAM_A[_i23]);
-  }
-
-  for (var _i24 = 0; _i24 < CAM_B.length; _i24 = _i24 + deltamin) {
-    CAMArrayBmin.push(CAM_B[_i24]);
-  }
-
-  for (var _i25 = 0; _i25 < LAB_L.length; _i25 = _i25 + deltamin) {
-    LABArrayLmin.push(LAB_L[_i25]);
-  }
-
-  for (var _i26 = 0; _i26 < LAB_A.length; _i26 = _i26 + deltamin) {
-    LABArrayAmin.push(LAB_A[_i26]);
-  }
-
-  for (var _i27 = 0; _i27 < LAB_B.length; _i27 = _i27 + deltamin) {
-    LABArrayBmin.push(LAB_B[_i27]);
-  }
-
-  for (var _i28 = 0; _i28 < LCH_L.length; _i28 = _i28 + deltamin) {
-    LCHArrayLmin.push(LCH_L[_i28]);
-  }
-
-  for (var _i29 = 0; _i29 < LCH_C.length; _i29 = _i29 + deltamin) {
-    LCHArrayCmin.push(LCH_C[_i29]);
-  }
-
-  for (var _i30 = 0; _i30 < LCH_H.length; _i30 = _i30 + deltamin) {
-    LCHArrayHmin.push(LCH_H[_i30]);
-  }
-
-  for (var _i31 = 0; _i31 < RGB_R.length; _i31 = _i31 + deltamin) {
-    RGBArrayRmin.push(RGB_R[_i31]);
-  }
-
-  for (var _i32 = 0; _i32 < RGB_G.length; _i32 = _i32 + deltamin) {
-    RGBArrayGmin.push(RGB_G[_i32]);
-  }
-
-  for (var _i33 = 0; _i33 < RGB_B.length; _i33 = _i33 + deltamin) {
-    RGBArrayBmin.push(RGB_B[_i33]);
-  }
-
-  for (var _i34 = 0; _i34 < HSL_H.length; _i34 = _i34 + deltamin) {
-    HSLArrayHmin.push(HSL_H[_i34]);
-  }
-
-  for (var _i35 = 0; _i35 < HSL_S.length; _i35 = _i35 + deltamin) {
-    HSLArraySmin.push(HSL_S[_i35]);
-  }
-
-  for (var _i36 = 0; _i36 < HSL_L.length; _i36 = _i36 + deltamin) {
-    HSLArrayLmin.push(HSL_L[_i36]);
-  }
-
-  for (var _i37 = 0; _i37 < HSV_H.length; _i37 = _i37 + deltamin) {
-    HSVArrayHmin.push(HSV_H[_i37]);
-  }
-
-  for (var _i38 = 0; _i38 < HSV_S.length; _i38 = _i38 + deltamin) {
-    HSVArraySmin.push(HSV_S[_i38]);
-  }
-
-  for (var _i39 = 0; _i39 < HSV_V.length; _i39 = _i39 + deltamin) {
-    HSVArrayLmin.push(HSV_V[_i39]);
-  }
-
-  for (var _i40 = 0; _i40 < HSLuv_L.length; _i40 = _i40 + deltamin) {
-    HSLuvArrayLmin.push(HSLuv_L[_i40]);
-  }
-
-  for (var _i41 = 0; _i41 < HSLuv_U.length; _i41 = _i41 + deltamin) {
-    HSLuvArrayUmin.push(HSLuv_U[_i41]);
-  }
-
-  for (var _i42 = 0; _i42 < HSLuv_V.length; _i42 = _i42 + deltamin) {
-    HSLuvArrayVmin.push(HSLuv_V[_i42]);
-  }
-
-  var fillRange = function fillRange(start, end) {
-    return Array(end - start + 1).fill().map(function (item, index) {
-      return start + index;
-    });
-  };
-
-  var dataX = fillRange(0, CAMArrayJ.length - 1);
-  var dataXcyl = fillRange(0, LCHArrayL.length - 1);
-  var dataXcontrast = fillRange(0, ratioInputs.length - 1);
-  window.labFullData = [{
-    x: LABArrayL,
-    y: LABArrayA,
-    z: LABArrayB
-  }];
-  window.camDataA = [{
-    x: CAMArrayJmin,
-    y: CAMArrayAmin
-  }];
-  window.camDataB = [{
-    x: CAMArrayJmin,
-    y: CAMArrayBmin
-  }];
-  window.camDataAB = [{
-    x: CAMArrayAmin,
-    y: CAMArrayBmin
-  }];
-  window.labDataA = [{
-    x: LABArrayLmin,
-    y: LABArrayAmin
-  }];
-  window.labDataB = [{
-    x: LABArrayLmin,
-    y: LABArrayBmin
-  }];
-  window.labDataAB = [{
-    x: LABArrayAmin,
-    y: LABArrayBmin
-  }];
-  window.lchDataC = [{
-    x: LCHArrayLmin,
-    y: LCHArrayCmin
-  }];
-  window.lchDataH = [{
-    x: LCHArrayLmin,
-    y: LCHArrayHmin
-  }];
-  window.lchDataCH = [{
-    x: LCHArrayHmin,
-    y: LCHArrayCmin
-  }];
-  window.rgbDataR = [{
-    x: RGBArrayRmin,
-    y: RGBArrayGmin
-  }];
-  window.rgbDataG = [{
-    x: RGBArrayGmin,
-    y: RGBArrayBmin
-  }];
-  window.rgbDataB = [{
-    x: RGBArrayBmin,
-    y: RGBArrayRmin
-  }];
-  window.hslDataH = [{
-    x: HSLArrayLmin,
-    y: HSLArrayHmin
-  }];
-  window.hslDataS = [{
-    x: HSLArrayLmin,
-    y: HSLArraySmin
-  }];
-  window.hslDataHS = [{
-    x: HSLArrayHmin,
-    y: HSLArraySmin
-  }];
-  window.hsvDataH = [{
-    x: HSVArrayLmin,
-    y: HSVArrayHmin
-  }];
-  window.hsvDataS = [{
-    x: HSVArrayLmin,
-    y: HSVArraySmin
-  }];
-  window.hsvDataHS = [{
-    x: HSVArrayHmin,
-    y: HSVArraySmin
-  }];
-  window.hsluvDataL = [{
-    x: HSLuvArrayVmin,
-    y: HSLuvArrayLmin
-  }];
-  window.hsluvDataU = [{
-    x: HSLuvArrayVmin,
-    y: HSLuvArrayUmin
-  }];
-  window.hsluvDataLU = [{
-    x: HSLuvArrayLmin,
-    y: HSLuvArrayUmin
-  }];
-  window.contrastData = [{
-    x: dataXcontrast,
-    y: ratioInputs.map(function (d) {
-      return parseFloat(d);
-    }) // convert to number
-
-  }];
-}
-
-exports.createData = createData;
-},{"d3":"../../../node_modules/d3/index.js"}],"index.js":[function(require,module,exports) {
-"use strict";
-
-require("@spectrum-css/vars/dist/spectrum-global.css");
-
-require("@spectrum-css/vars/dist/spectrum-medium.css");
-
-require("@spectrum-css/vars/dist/spectrum-light.css");
-
-require("@spectrum-css/page/dist/index-vars.css");
-
-require("@spectrum-css/typography/dist/index-vars.css");
-
-require("@spectrum-css/icon/dist/index-vars.css");
-
-require("@spectrum-css/link/dist/index-vars.css");
-
-require("@spectrum-css/alert/dist/index-vars.css");
-
-require("@spectrum-css/radio/dist/index-vars.css");
-
-require("@spectrum-css/dialog/dist/index-vars.css");
-
-require("@spectrum-css/actionbutton/dist/index-vars.css");
-
-require("@spectrum-css/button/dist/index-vars.css");
-
-require("@spectrum-css/fieldgroup/dist/index-vars.css");
-
-require("@spectrum-css/textfield/dist/index-vars.css");
-
-require("@spectrum-css/dropdown/dist/index-vars.css");
-
-require("@spectrum-css/fieldlabel/dist/index-vars.css");
-
-require("@spectrum-css/checkbox/dist/index-vars.css");
-
-require("@spectrum-css/buttongroup/dist/index-vars.css");
-
-require("@spectrum-css/tooltip/dist/index-vars.css");
-
-require("@spectrum-css/slider/dist/index-vars.css");
-
-require("@spectrum-css/tabs/dist/index-vars.css");
-
-require("@spectrum-css/illustratedmessage/dist/index-vars.css");
-
-require("./scss/colorinputs.scss");
-
-require("./scss/charts.scss");
-
-require("./scss/style.scss");
-
-require("@adobe/focus-ring-polyfill");
-
-var Leonardo = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
-
-var _loadicons = _interopRequireDefault(require("loadicons"));
-
-var _clipboard = _interopRequireDefault(require("clipboard"));
-
-var d3 = _interopRequireWildcard(require("d3"));
-
-var d3cam02 = _interopRequireWildcard(require("d3-cam02"));
-
-var d3hsluv = _interopRequireWildcard(require("d3-hsluv"));
-
-var d3hsv = _interopRequireWildcard(require("d3-hsv"));
-
-var d33d = _interopRequireWildcard(require("d3-3d"));
-
-var charts = _interopRequireWildcard(require("./charts.js"));
-
-var chartData = _interopRequireWildcard(require("./data.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _createChart = require("./createChart");
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -39886,860 +40967,1666 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-// expose functions so they can be ran in the console
-window.createScale = Leonardo.createScale;
-window.luminance = Leonardo.luminance;
-window.contrast = Leonardo.contrast;
-window.Color = Leonardo.Color;
-window.Leonardo = Leonardo;
-window.BackgroundColor = Leonardo.BackgroundColor;
-window.Theme = Leonardo.Theme;
-window.minPositive = Leonardo.minPositive;
-window.ratioName = Leonardo.ratioName;
-(0, _loadicons.default)('./spectrum-css-icons.svg');
-(0, _loadicons.default)('./spectrum-icons.svg');
-new _clipboard.default('.copyButton');
-new _clipboard.default('.colorOutputBlock');
-Object.assign(d3, d3cam02, d3hsluv, d3hsv, d33d);
-var bgFieldInput = document.getElementById('bgField');
-var background = bgFieldInput.value; // var colorBlock = document.getElementById('color');
-
-var demoHeading = document.getElementById('demoHeading');
-var demoWrapper = document.getElementById('demoWrapper');
-var userColorBlock = document.getElementById('userColor');
-var userBgBlock = document.getElementById('userBg');
-var ratioInput = document.getElementById('ratio');
-var colorOutputField = document.getElementById('colorOutput');
-var colorspace = document.getElementById('mode');
-var ratioFields = document.getElementsByClassName('ratio-Field');
-window.ratioInputs = [];
-var newColors;
-var pathName;
-window.colorArgs = null;
-bgFieldInput.onchange = throttle(colorInput, 50);
-
-function debounce(func, wait, immediate) {
-  var timerId = null;
-  return function debounced() {
-    var context = this;
-    var args = arguments;
-    clearTimeout(timerId);
-
-    if (immediate && !timerId) {
-      func.apply(context, args);
-    }
-
-    timerId = setTimeout(function () {
-      timerId = null;
-      if (!immediate) func.apply(context, args);
-    }, wait);
-  };
-}
-
-function throttle(func, wait) {
-  var timerId, lastRan;
-  return function throttled() {
-    var context = this;
-    var args = arguments;
-
-    if (!lastRan) {
-      func.apply(context, args);
-      lastRan = Date.now();
-    } else {
-      clearTimeout(timerId);
-      timerId = setTimeout(function () {
-        if (Date.now() - lastRan >= wait) {
-          func.apply(context, args);
-          lastRan = Date.now();
-        }
-      }, wait - (Date.now() - lastRan) || 0);
-    }
-  };
-}
-
-exports.throttle = throttle;
-
-function paramSetup() {
-  colorspaceOptions();
-  var url = new URL(window.location);
-  var params = new URLSearchParams(url.search.slice(1));
-  pathName = url.pathname; // // If parameters exist, use parameter; else use default html input values
-
-  if (params.has('colorKeys')) {
-    var cr = params.get('colorKeys');
-    var crs = cr.split(',');
-
-    if (crs[0] == 0) {
-      crs = ['#707070'];
-    }
-
-    for (var i = 0; i < crs.length; i++) {
-      addColor(crs[i]);
-    }
-  }
-
-  if (params.has('base')) {
-    document.getElementById('bgField').value = "#" + params.get('base');
-  }
-
-  if (params.has('ratios')) {
-    // transform parameter values into array of numbers
-    var rat = params.get('ratios');
-    var ratios = rat.split(',');
-    ratios = ratios.map(Number);
-
-    if (ratios[0] == 0) {
-      // if no parameter value, default to [3, 4.5]
-      ratios = [3, 4.5];
-    } else {}
-
-    for (var _i = 0; _i < ratios.length; _i++) {
-      addRatio(ratios[_i]);
-    }
-  }
-
-  if (params.has('mode')) {
-    document.querySelector('select[name="mode"]').value = params.get('mode');
-  } else {
-    addColor('#6fa7ff');
-    addRatio(3);
-    addRatio(4.5);
-  }
-
-  colorInput();
-}
-
-paramSetup(); // Add ratio inputs
-
-function addRatio(v) {
-  var s = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '#cacaca';
-
-  // increment by default
-  if (v == undefined) {
-    // find highest value
-    var hi = Math.max.apply(Math, _toConsumableArray(ratioInputs));
-    var lo = Math.min.apply(Math, _toConsumableArray(ratioInputs));
-
-    if (hi < 20) {
-      v = Number(hi + 1).toFixed(2);
-    }
-
-    if (hi == 21) {
-      v = Number(hi - 1).toFixed(2);
-    }
-  }
-
-  var ratios = document.getElementById('ratioInput-wrapper');
-  var div = document.createElement('div');
-  var sliderWrapper = document.getElementById('colorSlider-wrapper');
-  var slider = document.createElement('input');
-  var randId = randomId();
-  div.className = 'ratio-Item';
-  div.id = randId + '-item';
-  var sw = document.createElement('span');
-  sw.className = 'ratio-Swatch';
-  sw.id = randId + '-sw';
-  sw.style.backgroundColor = s;
-  var input = document.createElement('input');
-  input.className = 'spectrum-Textfield ratio-Field';
-  input.type = "number";
-  input.min = '-10';
-  input.max = '21';
-  input.step = '.01';
-  input.placeholder = 4.5;
-  input.id = randId;
-  input.value = v;
-  input.onkeydown = checkRatioStepModifiers;
-  input.oninput = debounce(colorInput, 100);
-  var button = document.createElement('button');
-  button.className = 'spectrum-ActionButton spectrum-ActionButton--quiet';
-  button.title = 'Delete contrast ratio';
-  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
-  slider.type = 'range';
-  slider.min = '0';
-  slider.max = '100';
-  slider.value = v;
-  slider.step = '.01';
-  slider.className = 'colorSlider';
-  slider.id = randId + "-sl";
-  slider.disabled = true;
-  sliderWrapper.appendChild(slider);
-  button.onclick = deleteRatio;
-  div.appendChild(sw);
-  div.appendChild(input);
-  div.appendChild(button);
-  ratios.appendChild(div);
-}
-
-function newColor(e) {
-  var parent = e.target.parentNode.id;
-  var id = parent.replace('-item', '');
-  var self = document.getElementById(id);
-  var v = self.value;
-  var swId = parent.replace('-item', '-sw');
-  var sw = document.getElementById(swId);
-
-  if (v.startsWith("#") !== true && v.length == 6) {
-    h = '#';
-    v = h.concat(v);
-    self.value = v;
-  }
-
-  sw.value = v;
-  colorInput();
-}
-
-function addColor(s) {
-  var colorInputs = document.getElementById('keyColor-wrapper');
-  var div = document.createElement('div');
-  var randId = randomId();
-  div.className = 'keyColor';
-  div.id = randId + '-item'; // var sw = document.createElement('span');
-
-  var sw = document.createElement('input');
-  sw.type = "color";
-  sw.value = s;
-  sw.oninput = throttle(colorInput, 50);
-  sw.className = 'keyColor-Item';
-  sw.id = randId + '-sw';
-  sw.style.backgroundColor = s;
-  var button = document.createElement('button');
-  button.className = 'spectrum-ActionButton';
-  button.title = 'Delete key color';
-  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
-  button.onclick = deleteColor;
-  div.appendChild(sw);
-  div.appendChild(button);
-  colorInputs.appendChild(div);
-} // When adding new ratios in UI, run colorinput as well
-
-
-window.addNewRatio = function addNewRatio() {
-  addRatio();
-  colorInput();
-}; // When adding new colors in UI, run colorinput as well
-
-
-window.addNewColor = function addNewColor() {
-  addColor();
-  colorInput();
-};
-
-window.addBulk = function addBulk() {
-  document.getElementById('addBulkColorDialog').classList.add("is-open");
-  document.getElementById('dialogOverlay').style.display = 'block';
-  var bgInput = document.getElementById('bgField_2');
-  var bg = document.getElementById('bgField');
-  bgInput.value = bg.value;
-};
-
-window.cancelBulk = function cancelBulk() {
-  document.getElementById('addBulkColorDialog').classList.remove("is-open");
-  document.getElementById('dialogOverlay').style.display = 'none';
-};
-
-window.bulkColorInput = function bulkColorInput() {
-  var bulkInputs = document.getElementById('bulkColors');
-  var bulkValues = bulkInputs.value.replace(/\r\n/g, "\n").replace(/[,\/]/g, "\n").replace(" ", "").replace(/['\/]/g, "").replace(/["\/]/g, "").replace(" ", "").split("\n");
-
-  for (var i = 0; i < bulkValues.length; i++) {
-    if (!bulkValues[i].startsWith('#')) {
-      bulkValues[i] = '#' + bulkValues[i];
-    }
-  }
-
-  var isSwatch = document.getElementById('importAsSwatch').checked;
-  var bgInput = document.getElementById('bgField_2').value; // input in Dialog
-
-  var bg = document.getElementById('bgField'); // input in UI
-  // add key colors for each input
-
-  for (var _i2 = 0; _i2 < bulkValues.length; _i2++) {
-    addColor(d3.color(bulkValues[_i2]).formatHex());
-  }
-
-  if (isSwatch) {
-    // create ratio inputs for each contrast
-    for (var _i3 = 0; _i3 < bulkValues.length; _i3++) {
-      var cr = Leonardo.contrast([d3.rgb(bulkValues[_i3]).r, d3.rgb(bulkValues[_i3]).g, d3.rgb(bulkValues[_i3]).b], [d3.rgb(bgInput).r, d3.rgb(bgInput).g, d3.rgb(bgInput).b]);
-      addRatio(cr.toFixed(2));
-    }
-
-    bg.value = bgInput;
-  } // Hide dialog
-
-
-  cancelBulk(); // Run colorinput
-
-  colorInput(); // clear inputs on close
-
-  bulkInputs.value = " ";
-}; // Test with #a9e6dc,#7cd6c7,#5ec3bb,#48b1b2,#3b9da5,#308b9a,#22738a,#195b72,#134555
-// Should return crs of 1.40, 1.71, 2.10, 2.56, 3.21, 3.97, 5.40, 7.55, 10.45
-
-
-window.clearAllColors = function clearAllColors() {
-  document.getElementById('keyColor-wrapper').innerHTML = ' ';
-  colorInput();
-}; // Delete ratio input
-
-
-function deleteRatio(e) {
-  var id = e.target.parentNode.id;
-  var self = document.getElementById(id);
-  var sliderid = id.replace('-item', '') + '-sl';
-  var slider = document.getElementById(sliderid);
-  self.remove();
-  slider.remove();
-  colorInput();
-}
-
-function deleteColor(e) {
-  var id = e.target.parentNode.id;
-  var self = document.getElementById(id);
-  self.remove();
-  colorInput();
-}
-
-exports.deleteColor = deleteColor;
-
-window.openTab = function openTab(evt, tabName) {
-  // Declare all variables
-  var i, tabcontent, tablinks; // Get all elements with class="tabcontent" and hide them
-
-  tabcontent = document.getElementsByClassName("tabcontent");
-
-  for (var _i4 = 0; _i4 < tabcontent.length; _i4++) {
-    tabcontent[_i4].style.display = "none";
-  } // Get all elements with class="spectrum-Tabs-item" and remove the class "active"
-
-
-  tablinks = document.getElementsByClassName("main-Tabs-item");
-
-  for (var _i5 = 0; _i5 < tablinks.length; _i5++) {
-    tablinks[_i5].className = tablinks[_i5].className.replace(" is-selected", "");
-  } // Show the current tab, and add an "active" class to the button that opened the tab
-
-
-  document.getElementById(tabName).style.display = "flex";
-  evt.currentTarget.className += " is-selected";
-};
-
-window.openAppTab = function openAppTab(evt, tabName) {
-  // Declare all variables
-  var i, appTabContent, apptablinks; // Get main tab containers and hide them
-
-  appTabContent = document.getElementsByClassName("appTabContent");
-
-  for (var _i6 = 0; _i6 < appTabContent.length; _i6++) {
-    appTabContent[_i6].style.display = "none";
-  } // Get all main tabs with class="spectrum-Tabs-item" and remove the class "active"
-
-
-  apptablinks = document.getElementsByClassName("app-Tabs-item");
-
-  for (var _i7 = 0; _i7 < apptablinks.length; _i7++) {
-    apptablinks[_i7].className = apptablinks[_i7].className.replace(" is-selected", "");
-  } // Show the current tab, and add an "active" class to the button that opened the tab
-
-
-  document.getElementById(tabName).style.display = "grid";
-  evt.currentTarget.className += " is-selected";
-}; // Open default tabs
-
-
-document.getElementById("tabDemo").click();
-
-function randomId() {
-  return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(2, 10);
-}
-
-exports.randomId = randomId;
-
-function createDemo(c, z) {
-  var smallText = 'Small text demo';
-  var largeText = 'Large text';
-  var buttonText = 'Button';
-  var wrap = document.getElementById('demoWrapper');
-  var item = document.createElement('div');
-  item.className = 'demoItem';
-  var demo = document.createElement('div');
-  demo.className = 'spectrum-Typography demo';
-  var h = document.createElement('h4');
-  h.className = 'spectrum-Heading2 demoHeading';
-  var title = document.createTextNode(largeText);
-  var p = document.createElement('p');
-  p.className = 'spectrum-Body3 demoText';
-  var text = document.createTextNode(smallText);
-  var b = document.createElement('button');
-  b.className = 'spectrum-Button demoButton';
-  var bF = document.createElement('button');
-  bF.className = 'spectrum-Button demoButton';
-  var label = document.createTextNode(buttonText);
-  var label2 = document.createTextNode(buttonText);
-  h.appendChild(title);
-  p.appendChild(text);
-  b.appendChild(label);
-  bF.appendChild(label2);
-  demo.appendChild(h);
-  demo.appendChild(p);
-  demo.appendChild(b);
-  demo.appendChild(bF);
-  var demoIn = document.createElement('div');
-  demoIn.className = 'spectrum-Typography demoInverted';
-  var hIn = document.createElement('h4');
-  hIn.className = 'spectrum-Heading2 demoHeading';
-  var pIn = document.createElement('p');
-  pIn.className = 'spectrum-Body3 demoText';
-  var bIn = document.createElement('button');
-  bIn.className = 'spectrum-Button demoButton';
-  var bFIn = document.createElement('button');
-  bFIn.className = 'spectrum-Button demoButton';
-  var titleIn = document.createTextNode('Large text');
-  var textIn = document.createTextNode(smallText);
-  var labelIn = document.createTextNode(buttonText);
-  var labelIn2 = document.createTextNode(buttonText);
-  hIn.appendChild(titleIn);
-  pIn.appendChild(textIn);
-  bIn.appendChild(labelIn);
-  bFIn.appendChild(labelIn2);
-  demoIn.appendChild(hIn);
-  demoIn.appendChild(pIn);
-  demoIn.appendChild(bIn);
-  demoIn.appendChild(bFIn);
-  item.appendChild(demo);
-  item.appendChild(demoIn);
-  wrap.appendChild(item);
-  demoIn.style.backgroundColor = c;
-  demoIn.style.color = z;
-  demo.style.color = c;
-  p.style.color = c;
-  h.style.color = c;
-  b.style.color = c;
-  bF.style.backgroundColor = c;
-  bF.style.borderColor = c;
-  bF.style.color = z;
-  bFIn.style.color = c;
-  bFIn.style.backgroundColor = z;
-  bFIn.style.borderColor = z;
-  b.style.borderColor = c;
-  pIn.style.color = z;
-  hIn.style.color = z;
-  bIn.style.color = z;
-  bIn.style.borderColor = z;
-  demoWrapper.style.backgroundColor = z;
-}
-
-function colorspaceOptions() {
-  colorspace.options.length = 0;
-  chart3dColorspace.options.length = 0;
-  chart2dColorspace.options.length = 0;
-  var opts = {
-    'CAM02': 'CIECAM02',
-    'LCH': 'Lch',
-    'LAB': 'Lab',
-    'HSL': 'HSL',
-    'HSLuv': 'HSLuv',
-    'HSV': 'HSV',
-    'RGB': 'RGB'
-  };
-  var opts2 = {
-    'CAM02': 'CIECAM02 (recommended)',
-    'LCH': 'Lch',
-    'LAB': 'Lab',
-    'HSL': 'HSL',
-    'HSLuv': 'HSLuv',
-    'HSV': 'HSV',
-    'RGB': 'RGB'
+function createRGBchannelChart(colors) {
+  var id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'RGBchart';
+  var dest = document.getElementById(id);
+  dest.innerHTML = ' ';
+
+  if (id === 'RGBchart') {
+    colors = _toConsumableArray(colors);
+    colors.push('#000000');
+  } // Create chart headers
+
+
+  var RGBheader = document.createElement('h5');
+  RGBheader.className = 'spectrum-Typography spectrum-Heading spectrum-Heading--sizeXXS';
+  RGBheader.innerHTML = "RGB channels";
+  dest.appendChild(RGBheader);
+
+  var fillRange = function fillRange(start, end) {
+    return Array(end + 2 - (start + 2)).fill().map(function (item, index) {
+      return start + index;
+    });
   };
 
-  for (var index in opts) {
-    colorspace.options[colorspace.options.length] = new Option(opts[index], index);
-    chart3dColorspace.options[chart3dColorspace.options.length] = new Option(opts2[index], index);
-    chart2dColorspace.options[chart2dColorspace.options.length] = new Option(opts2[index], index);
-  }
-
-  chart3dColorspace.value = 'CAM02';
-  chart2dColorspace.value = 'CAM02';
-} // Ramp function to create HTML canvas color scale
-
-
-function ramp(color, n) {
-  var container = d3.select('#colorScale');
-  var canvas = container.append("canvas").attr("height", n).attr("width", 1);
-  var context = canvas.node().getContext("2d");
-  canvas.style.width = "40px";
-  canvas.style.imageRendering = "pixelated";
-
-  for (var i = 0; i < n; ++i) {
-    // only do this for actual colors
-    if (color[i] !== undefined) {
-      context.fillStyle = color[i]; // color[i / (n - 1)]
-
-      context.fillRect(0, i, 1, 1);
-    }
-  }
-
-  return canvas;
-}
-
-function checkRatioStepModifiers(e) {
-  if (!e.shiftKey) return;
-  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-  e.preventDefault();
-  var value = Number(e.target.value);
-  var newValue;
-
-  switch (e.key) {
-    case 'ArrowDown':
-      newValue = value - 1;
-      e.target.value = newValue.toFixed(2);
-      e.target.oninput();
-      break;
-
-    case 'ArrowUp':
-      newValue = value + 1;
-      e.target.value = newValue.toFixed(2);
-      e.target.oninput();
-      break;
-
-    default:
-  }
-} // Calculate Color and generate Scales
-
-
-window.colorInput = colorInput;
-
-function colorInput() {
-  document.getElementById('colorScale').innerHTML = '';
-  var spaceOpt = document.getElementById('chart3dColorspace').value;
-  var inputs = document.getElementsByClassName('keyColor-Item');
-  var background = document.getElementById('bgField').value;
-  var mode = document.querySelector('select[name="mode"]').value; // Clamp ratios convert decimal numbers to whole negatives and disallow
-  // inputs less than 1 and greater than -1.
-
-  for (var i = 0; i < ratioFields.length; i++) {
-    val = ratioFields[i].value;
-
-    if (val < 1 && val > -1) {
-      ratioFields[i].value = (10 / (val * 10)).toFixed(2) * -1;
-    } else {}
-  }
-
-  var rfIds = [];
-
-  for (var _i8 = 0; _i8 < ratioFields.length; _i8++) {
-    rfIds.push(ratioFields[_i8].id);
-  }
-
-  ratioInputs = [];
-  var inputColors = []; // For each ratio input field, push the value into the args array for generateContrastColors
-
-  for (var _i9 = 0; _i9 < ratioFields.length; _i9++) {
-    ratioInputs.push(ratioFields[_i9].value);
-  }
-
-  for (var _i10 = 0; _i10 < inputs.length; _i10++) {
-    inputColors.push(inputs[_i10].value);
-  } // Convert input value into a split array of hex values.
-
-
-  var tempArgs = []; // remove any whitespace from inputColors
-
-  tempArgs.push(inputColors);
-  colorArgs = tempArgs.join("").split(',').filter(String);
-  var shift = 1;
-  var clamping = document.getElementById('sequentialClamp').checked; // Generate scale data so we have access to all 3000 swatches to draw the gradient on the left
-
-  var scaleData = Leonardo.createScale({
-    swatches: 3000,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-  var n = window.innerHeight - 282; // let rampData = Leonardo.createScale({swatches: n, colorKeys: colorArgs, colorspace: mode, shift: shift});
-
-  var newColor = new Leonardo.Color({
-    name: 'color',
-    colorKeys: colorArgs,
-    colorspace: mode,
-    ratios: ratioInputs
-  }); // let rampData = newColor.colorScale;
-
-  var rampData = Leonardo.createScale({
-    swatches: n,
-    colorKeys: colorArgs,
-    colorspace: mode,
-    shift: shift
-  });
-  var theme = new Leonardo.Theme({
-    colors: [newColor],
-    backgroundColor: background
-  });
-  newColors = theme.contrastColorValues; // Create values for sliders
-
-  var Values = [];
-  var maxVal = 100;
-
-  for (var _i11 = 0; _i11 < newColors.length; _i11++) {
-    Values.push(maxVal * (d3.hsluv(newColors[_i11]).v / 100)); // wrong direction. Needs inversed.
-    // Values.push(maxVal * (d3.hsluv(newColors[i]).v / 100))
-  } // Values.sort(function(a, b){return a-b});
-  // Values.sort(function(a, b){return a-b});
-
-
-  var values = [];
-  values = values.concat(0, Values, maxVal);
-  values.sort(function (a, b) {
-    return a + b;
-  });
-  var reverseShift = 1 / shift;
-  var sqrtValues = d3.scalePow().exponent(reverseShift).domain([1, maxVal]).range([1, maxVal]);
-  sqrtValues = values.map(function (d) {
-    if (sqrtValues(d) < 0) {
-      return 0;
-    } else {
-      return sqrtValues(d);
-    }
-  });
-
-  for (var _i12 = 0; _i12 < newColors.length; _i12++) {
-    // Calculate value of color and apply to slider position/value
-    var val = d3.hsluv(newColors[_i12]).v;
-    var newVal = sqrtValues[_i12 + 1];
-    val = newVal; // Find corresponding input/slider id
-
-    var slider = document.getElementById(rfIds[_i12] + '-sl');
-    slider.value = val; // apply color to subsequent swatch
-
-    var swatch = document.getElementById(rfIds[_i12] + '-sw');
-    swatch.style.backgroundColor = newColors[_i12];
-  } // Generate Gradient as HTML Canvas element
-
-
-  var filteredColors = rampData;
-  ramp(filteredColors, n);
-  var backgroundR = d3.rgb(background).r;
-  var backgroundG = d3.rgb(background).g;
-  var backgroundB = d3.rgb(background).b;
-  var colorOutputWrapper = document.getElementById('colorOutputs');
-  colorOutputWrapper.innerHTML = '';
-  var wrap = document.getElementById('demoWrapper');
-  wrap.innerHTML = '';
-
-  for (var _i13 = 0; _i13 < newColors.length; _i13++) {
-    var colorOutput = document.createElement('div');
-    var colorOutputVal = newColors[_i13];
-    var colorOutputText = document.createTextNode(d3.rgb(colorOutputVal).hex());
-    var bg = d3.color(background).rgb();
-    var outputRatio = Leonardo.contrast([d3.rgb(newColors[_i13]).r, d3.rgb(newColors[_i13]).g, d3.rgb(newColors[_i13]).b], [bg.r, bg.g, bg.b]);
-    var ratioText = document.createTextNode(outputRatio.toFixed(2));
-    var s1 = document.createElement('span');
-    var s2 = document.createElement('span');
-    colorOutputWrapper.appendChild(colorOutput);
-    colorOutput.className = 'colorOutputBlock';
-    colorOutput.style.backgroundColor = colorOutputVal;
-    colorOutput.setAttribute('data-clipboard-text', colorOutputVal);
-    s1.appendChild(colorOutputText);
-    s1.className = 'colorOutputValue';
-    s2.appendChild(ratioText);
-    colorOutput.appendChild(s1);
-    colorOutput.appendChild(s2);
-
-    if (Leonardo.luminance(d3.rgb(newColors[_i13]).r, d3.rgb(newColors[_i13]).g, d3.rgb(newColors[_i13]).b) < 0.275) {
-      colorOutput.style.color = "#ffffff";
-    } else {
-      colorOutput.style.color = '#000000';
-    }
-
-    createDemo(newColors[_i13], background);
-  }
-
-  var copyColors = document.getElementById('copyAllColors');
-  copyColors.setAttribute('data-clipboard-text', newColors); // update URL parameters
-
-  updateParams(inputColors, background.substr(1), ratioInputs, mode);
-  var data = chartData.createData(scaleData);
-  charts.showCharts('CAM02', data);
-  colorSpaceFeedback('CAM02'); // manually enter default of CAM02
-}
-
-window.onresize = colorInput; // Passing variable parameters to URL
-
-function updateParams(c, b, r, m) {
-  var url = new URL(window.location);
-  var params = new URLSearchParams(url.search.slice(1));
-  var tabColor = document.getElementById("tabColor");
-  params.set('colorKeys', c);
-  params.set('base', b);
-  params.set('ratios', r);
-  params.set('mode', m);
-  var cStrings = c.toString().replace(/[#\/]/g, '"#').replace(/[,\/]/g, '",');
-  cStrings = cStrings + '"';
-  window.history.replaceState({}, '', '?' + params); // update the page's URL.
-
-  var p = document.getElementById('params');
-  p.innerHTML = " ";
-  var call = "new Color({ \n name: 'myColor',\n";
-  var pcol = 'colorKeys: [' + cStrings + '], ';
-  var prat = 'ratios: [' + r + '], ';
-  var pmod = ' colorspace: "' + m + '"});';
-  var text1 = document.createTextNode(call);
-  var text2 = document.createTextNode(pcol);
-  var text4 = document.createTextNode(prat);
-  var text7 = document.createTextNode(pmod);
-  p.appendChild(text1);
-  p.appendChild(text2);
-  p.appendChild(text4);
-  p.appendChild(text7);
-} // Sort swatches in UI
-
-
-function sort() {
-  ratioInputs.sort(function (a, b) {
+  var dataX = fillRange(1, colors.length);
+  var sortedDataX = id === 'RGBchart' ? dataX.sort(function (a, b) {
     return a - b;
-  }); // Update ratio inputs with new values
-
-  for (var i = 0; i < ratioInputs.length; i++) {
-    ratioFields[i].value = ratioInputs[i];
-  }
-}
-
-window.sortRatios = function sortRatios() {
-  sort();
-  colorInput();
-};
-
-function returnRatioCube(lum) {
-  var a = 1.45;
-  var b = 0.7375;
-  var c = 2.5;
-  var x = lum / 100;
-  var exp = x * -1 / a + b;
-  var y = Math.pow(exp, 3) * c;
-  var r = y * 20 + 1;
-
-  if (r > 1) {
-    return r;
-  }
-
-  if (r < 1 && r >= 0) {
-    return 1;
-  }
-}
-
-function interpolateLumArray() {
-  var lums = [];
-
-  for (var i = 0; i < newColors.length; i++) {
-    lums.push(d3.hsluv(newColors[i]).v);
-  }
-
-  var startLum = Math.min.apply(Math, lums);
-  var endLum = Math.max.apply(Math, lums);
-  var interpolator = d3.interpolateNumber(startLum, endLum);
-
-  for (var _i14 = 1; _i14 < lums.length - 1; _i14++) {
-    lums[_i14] = interpolator(_i14 / lums.length);
-  }
-
-  lums.sort(function (a, b) {
+  }) : dataX.sort(function (a, b) {
     return b - a;
   });
-  return lums;
-} // Redistribute contrast swatches
+  var data = [{
+    x: sortedDataX,
+    y: colors.map(function (d) {
+      return (0, _utils.filterNaN)(d3.rgb(d).r);
+    })
+  }, {
+    x: sortedDataX,
+    y: colors.map(function (d) {
+      return (0, _utils.filterNaN)(d3.rgb(d).g);
+    })
+  }, {
+    x: sortedDataX,
+    y: colors.map(function (d) {
+      return (0, _utils.filterNaN)(d3.rgb(d).b);
+    })
+  }];
+  (0, _createChart.createChart)(data, ' ', ' ', "#".concat(id), 0, 255);
+}
+
+module.exports = {
+  createRGBchannelChart: createRGBchannelChart
+};
+},{"./d3":"js/d3.js","./utils":"js/utils.js","./createChart":"js/createChart.js"}],"js/createInterpolationCharts.js":[function(require,module,exports) {
+"use strict";
+
+var d3 = _interopRequireWildcard(require("./d3"));
+
+var _createChart = require("./createChart");
+
+var _utils = require("./utils");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function createInterpolationCharts(colors, mode) {
+  var scaleType = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'theme';
+  var d1id, d2id, d3id;
+
+  if (scaleType === 'theme') {
+    d1id = 'interpolationChart';
+    d2id = 'interpolationChart2';
+    d3id = 'interpolationChart3';
+  } else {
+    d1id = "".concat(scaleType, "InterpolationChart");
+    d2id = "".concat(scaleType, "InterpolationChart2");
+    d3id = "".concat(scaleType, "InterpolationChart3");
+  }
+
+  var dest = document.getElementById(d1id);
+  dest.innerHTML = ' ';
+  var dest2 = document.getElementById(d2id);
+  dest2.innerHTML = ' ';
+  var dest3 = document.getElementById(d3id);
+  dest3.innerHTML = ' '; // Identify mode channels
+
+  var c1, c2, c3, func, yMin, yMax, yMin2, yMax2, c1Label, c2Label, yLabel;
+
+  if (mode === 'RGB') {
+    func = 'hsl';
+    c1 = 'h';
+    c1Label = "Hue (HSL - H)";
+    c2 = 's';
+    c2Label = "Saturation (HSL - S)";
+    c3 = 'l';
+    yMin = 0;
+    yMax = 360;
+    yMin2 = 0;
+    yMax2 = 1;
+  }
+
+  if (mode === 'LAB') {
+    func = 'lab';
+    c1 = 'a';
+    c1Label = "Redness / Greenness (".concat(mode, " - A)");
+    c2 = 'b';
+    c2Label = "Blueness / Yellowness (".concat(mode, " - B)");
+    c3 = 'l';
+  }
+
+  if (mode === 'LCH') {
+    func = 'lch';
+    c1 = 'h';
+    c1Label = "Hue (".concat(mode, " - H)");
+    c2 = 'c';
+    c2Label = "Chroma (".concat(mode, " - C)");
+    c3 = 'l';
+    yMin = 0;
+    yMax = 360;
+  }
+
+  if (mode === 'CAM02') {
+    func = 'jab';
+    c1 = 'a';
+    c1Label = "Redness / Greenness (".concat(mode, " - A)");
+    c2 = 'b';
+    c2Label = "Blueness / Yellowness (".concat(mode, " - B)");
+    c3 = 'J';
+  }
+
+  if (mode === 'CAM02p') {
+    func = 'jch';
+    c1 = 'h';
+    c1Label = "Hue (".concat(mode, " - H)");
+    c2 = 'C';
+    c2Label = "Chroma (".concat(mode, " - C)");
+    c3 = 'J';
+    yMin = 0;
+    yMax = 360;
+  }
+
+  if (mode === 'HSL') {
+    func = 'hsl';
+    c1 = 'h';
+    c1Label = "Hue (".concat(mode, " - H)");
+    c2 = 's';
+    c2Label = "Saturation (".concat(mode, " - S)");
+    c3 = 'l';
+    yMin = 0;
+    yMax = 360;
+    yMin2 = 0;
+    yMax2 = 1;
+  }
+
+  if (mode === 'HSLuv') {
+    func = 'hsluv';
+    c1 = 'l';
+    c1Label = "Hue (".concat(mode, " - H)");
+    c2 = 'u';
+    c2Label = "Saturation (".concat(mode, " - S)");
+    c3 = 'v';
+    yMin = 0;
+    yMax = 360;
+    yMin2 = 0;
+    yMax2 = 100;
+  }
+
+  if (mode === 'HSV') {
+    func = 'hsv';
+    c1 = 'h';
+    c1Label = "Hue (".concat(mode, " - H)");
+    c2 = 's';
+    c2Label = "Saturation (".concat(mode, " - S)");
+    c3 = 'v';
+    yMin = 0;
+    yMax = 360;
+    yMin2 = 0;
+    yMax2 = 1;
+  } // Create chart header
 
 
-window.distributeCube = function distributeCube() {
-  sort();
+  var InterpolationHeader = document.createElement('h5');
+  InterpolationHeader.className = 'spectrum-Heading spectrum-Heading--sizeXXS';
+  InterpolationHeader.innerHTML = "".concat(c1Label);
+  dest.appendChild(InterpolationHeader);
+  var InterpolationHeader2 = document.createElement('h5');
+  InterpolationHeader2.className = 'spectrum-Heading spectrum-Heading--sizeXXS';
+  InterpolationHeader2.innerHTML = "".concat(c2Label);
+  dest2.appendChild(InterpolationHeader2);
+  var InterpolationHeader3 = document.createElement('h5');
+  InterpolationHeader3.className = 'spectrum-Heading spectrum-Heading--sizeXXS';
+  InterpolationHeader3.innerHTML = 'Lightness'; // `${c3Label}`;
+
+  dest3.appendChild(InterpolationHeader3);
+
+  var fillRange = function fillRange(start, end) {
+    return Array(end - start).fill().map(function (item, index) {
+      return start + index;
+    });
+  };
+
+  var dataX = fillRange(1, colors.length); // Reorder data for color scales
+
+  var dataYa = colors.map(function (d) {
+    return (0, _utils.filterNaN)(d3[func](d)[c1]);
+  });
+  var dataYb = colors.map(function (d) {
+    return (0, _utils.filterNaN)(d3[func](d)[c2]);
+  });
+  var dataYc = colors.map(function (d) {
+    return (0, _utils.filterNaN)(d3[func](d)[c3]);
+  });
+
+  if (scaleType !== 'theme') {
+    dataX = dataX.sort(function (a, b) {
+      return a - b;
+    });
+    dataYa = dataYa.sort(function (a, b) {
+      return a - b;
+    });
+    dataYb = dataYb.sort(function (a, b) {
+      return a - b;
+    });
+    dataYc = dataYc.sort(function (a, b) {
+      return a - b;
+    });
+  }
+
+  var visColors = colors[50];
+  var dataA = [{
+    x: dataX,
+    y: dataYa
+  }];
+  var dataB = [{
+    x: dataX,
+    y: dataYb
+  }];
+  var dataC = [{
+    x: dataX,
+    y: dataYc
+  }];
+  var lightnessMax = mode === 'HSL' || mode === 'HSV' ? 1 : 100;
+  (0, _createChart.createChart)(dataA, ' ', ' ', "#".concat(d1id), yMin, yMax, false, visColors, scaleType);
+  (0, _createChart.createChart)(dataB, ' ', ' ', "#".concat(d2id), yMin2, yMax2, false, visColors, scaleType);
+  (0, _createChart.createChart)(dataC, ' ', ' ', "#".concat(d3id), 0, lightnessMax, false, visColors, scaleType);
+}
+
+module.exports = {
+  createInterpolationCharts: createInterpolationCharts
+};
+},{"./d3":"js/d3.js","./createChart":"js/createChart.js","./utils":"js/utils.js"}],"js/ramps.js":[function(require,module,exports) {
+"use strict";
+
+var Leo = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
+
+var d3 = _interopRequireWildcard(require("./d3"));
+
+var _initialTheme = require("./initialTheme");
+
+var _initialColorScales = require("./initialColorScales");
+
+var _createRGBchannelChart = require("./createRGBchannelChart");
+
+var _createInterpolationCharts = require("./createInterpolationCharts");
+
+var _utils = require("./utils");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function themeRamp(colors, dest, angle) {
+  if (!angle) angle = '90';
+  angle = "".concat(angle, "deg");
+  var container = document.getElementById(dest);
+  var gradient = document.createElement('div');
+  gradient.className = 'gradient';
+  gradient.style.backgroundImage = "linear-gradient(".concat(angle, ", ").concat(colors, ")");
+  container.appendChild(gradient);
+}
+
+function themeRampKeyColors(colorKeys, dest, scaleType) {
+  var container = document.getElementById(dest);
+  var domains, sqrtDomains;
+
+  if (scaleType === 'sequential') {
+    domains = _initialColorScales._sequentialScale.domains;
+    var shift = Number(_initialColorScales._sequentialScale.shift);
+    var inverseShift = 1 / shift;
+    var shiftShift = Math.pow(inverseShift, inverseShift);
+    var domainPowScale = (0, _utils.makePowScale)(inverseShift); // let domainPowScale = (x) => {return Math.pow(x, inverseShift)}
+
+    sqrtDomains = domains.map(function (d) {
+      return domainPowScale(d);
+    });
+  } else {
+    domains = colorKeys.map(function (key) {
+      return d3.hsluv(key).v;
+    });
+    sqrtDomains = domains;
+  }
+
+  colorKeys.map(function (key, index) {
+    var lightness = scaleType === 'sequential' ? _initialColorScales._sequentialScale.luminosities[index] : d3.hsluv(key).v;
+    var lightnessPerc = lightness / 100; // Adjust offset based on same percentage of the 
+    // width of the dot, essentially framing the dot
+
+    var dotOffset = scaleType !== 'sequential' ? 36 * lightnessPerc : 36 * domains[index];
+    var left = scaleType === 'sequential' || scaleType === 'diverging' ? domains[index] * 100 : lightness;
+    var leftPosition = "calc(".concat(Math.round(left), "% - ").concat(Math.round(dotOffset), "px)");
+    var dot = document.createElement('div');
+    dot.className = 'themeRampDot';
+    dot.style.backgroundColor = key;
+    dot.style.left = leftPosition;
+    container.appendChild(dot);
+  });
+}
+
+function updateRamps(color, id) {
+  var scaleType = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'theme';
+  var colors, min, max;
+  var angle = '90';
+
+  if (scaleType === 'theme') {
+    colors = color.backgroundColorScale;
+  } else {
+    colors = color.colors;
+    var lums = color.colorKeys.map(function (c) {
+      return d3.hsluv(c).v;
+    });
+    min = Math.min.apply(Math, _toConsumableArray(lums));
+    max = Math.max.apply(Math, _toConsumableArray(lums));
+  }
+
+  var gradientId = id.concat('_gradient');
+  document.getElementById(gradientId).innerHTML = ' ';
+  themeRamp(colors, gradientId, angle);
+  themeRampKeyColors(color.colorKeys, gradientId, scaleType);
+
+  if (scaleType === 'theme') {
+    // Update gradient swatch from panel view
+    var gradientSwatchId = id.concat('_gradientSwatch');
+    document.getElementById(gradientSwatchId).innerHTML = ' ';
+    themeRamp(colors, gradientSwatchId, '45');
+    (0, _createRGBchannelChart.createRGBchannelChart)(colors);
+  } else {
+    (0, _createRGBchannelChart.createRGBchannelChart)(colors, "".concat(id, "RGBchart"));
+  }
+
+  var chartsModeSelect;
+  if (scaleType === 'theme') chartsModeSelect = document.getElementById('chartsMode');else chartsModeSelect = document.getElementById("".concat(id, "_chartsMode"));
+  var chartsMode = chartsModeSelect.value;
+  (0, _createInterpolationCharts.createInterpolationCharts)(colors, chartsMode, scaleType);
+  var panelOutputId = scaleType === 'theme' ? 'panelColorScaleOutput' : "".concat(scaleType, "ColorScaleOutput");
+  var panelOutputContent = document.getElementById(panelOutputId);
+  panelOutputContent.innerHTML = ' ';
+  panelOutputContent.innerHTML = colors;
+}
+
+function createAllColorRamps() {
+  var dest = colorScalesWrapper;
+
+  _initialTheme._theme.colors.map(function (color) {
+    var rampData = color.backgroundColorScale;
+    var colors = rampData;
+    themeRamp(colors, dest); // colors = cvdColors(colors);
+  });
+}
+
+module.exports = {
+  themeRamp: themeRamp,
+  themeRampKeyColors: themeRampKeyColors,
+  createAllColorRamps: createAllColorRamps,
+  updateRamps: updateRamps
+};
+},{"@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","./d3":"js/d3.js","./initialTheme":"js/initialTheme.js","./initialColorScales":"js/initialColorScales.js","./createRGBchannelChart":"js/createRGBchannelChart.js","./createInterpolationCharts":"js/createInterpolationCharts.js","./utils":"js/utils.js"}],"js/createSamples.js":[function(require,module,exports) {
+"use strict";
+
+var _initialColorScales = require("./initialColorScales");
+
+var _createHtmlElement = require("./createHtmlElement");
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function createSamples(samples, scaleType) {
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale;
+  var originalSwatches = colorClass.swatches; // reassign new swatch value
+
+  colorClass.swatches = samples;
+  var samplesWrapper = document.getElementById("".concat(scaleType, "SampleSwatches"));
+  samplesWrapper.innerHTML = ' ';
+  var sampleColors = colorClass.colors;
+
+  for (var i = 0; i < samples; i++) {
+    (0, _createHtmlElement.createHtmlElement)({
+      element: 'div',
+      className: 'sampleSwatch',
+      styles: {
+        backgroundColor: sampleColors[i]
+      },
+      appendTo: "".concat(scaleType, "SampleSwatches")
+    });
+  }
+
+  var panelOutputContent = document.getElementById("".concat(scaleType, "ColorScaleOutput"));
+  panelOutputContent.innerHTML = ' ';
+  var sampleColorsReversed = sampleColors.reverse();
+  panelOutputContent.innerHTML = sampleColorsReversed.toString().replaceAll(',', ', '); // Reset color class to original swatches
+
+  colorClass.swatches = originalSwatches;
+}
+
+module.exports = {
+  createSamples: createSamples
+};
+},{"./initialColorScales":"js/initialColorScales.js","./createHtmlElement":"js/createHtmlElement.js"}],"js/demos/demo_heatmap.js":[function(require,module,exports) {
+"use strict";
+
+var _d = _interopRequireDefault(require("../d3"));
+
+var _initialColorScales = require("../initialColorScales");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function heatmap(scaleType) {
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale; // set the dimensions and margins of the graph
+
+  var margin = {
+    top: 30,
+    right: 30,
+    bottom: 30,
+    left: 30
+  },
+      width = 250 - margin.left - margin.right,
+      height = 250 - margin.top - margin.bottom; // append the svg object to the body of the page
+
+  var svg = _d.default.select("#".concat(scaleType, "Heatmap")).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"); // Labels of row and columns
+
+
+  var myGroups = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  var myVars = ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"]; // Build X scales and axis:
+
+  var x = _d.default.scaleBand().range([0, width]).domain(myGroups).padding(0.01);
+
+  svg.append("g").attr("transform", "translate(0," + height + ")").call(_d.default.axisBottom(x)); // Build X scales and axis:
+
+  var y = _d.default.scaleBand().range([height, 0]).domain(myVars).padding(0.01);
+
+  svg.append("g").call(_d.default.axisLeft(y)); // Build color scale
+  // var myColor = d3.scaleLinear()
+  //   .range(["white", "#69b3a2"])
+  //   .domain([1,100])
+
+  var myColor = colorClass.colorFunction;
+
+  _d.default.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/heatmap_data.csv").then(function (data) {
+    svg.selectAll().data(data, function (d) {
+      return d.group + ':' + d.variable;
+    }).join("rect").attr("x", function (d) {
+      return x(d.group);
+    }).attr("y", function (d) {
+      return y(d.variable);
+    }).attr("width", x.bandwidth()).attr("height", y.bandwidth()).style("fill", function (d) {
+      return myColor(d.value);
+    });
+  });
+}
+
+module.exports = {
+  heatmap: heatmap
+};
+},{"../d3":"js/d3.js","../initialColorScales":"js/initialColorScales.js"}],"js/demos/demo_choropleth.js":[function(require,module,exports) {
+"use strict";
+
+var _d = _interopRequireDefault(require("../d3"));
+
+var _initialColorScales = require("../initialColorScales");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function choropleth(scaleType) {
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale;
+  var originalSwatches = colorClass.swatches;
+  colorClass.swatches = 7; // The svg
+
+  var margin = {
+    top: 30,
+    right: 30,
+    bottom: 30,
+    left: 30
+  },
+      width = 800 - margin.left - margin.right,
+      height = 250 - margin.top - margin.bottom;
+
+  var svg = _d.default.select("#".concat(scaleType, "Choropleth")).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g"); // .attr("transform",
+  //       "translate(" + margin.left + "," + margin.top + ")");
+  // Map and projection
+
+
+  var path = _d.default.geoPath();
+
+  var projection = _d.default.geoMercator().scale(60).center([0, 30]).translate([width / 3.5, height / 1.75]); // Data and color scale
+
+
+  var data = new Map();
+
+  var colorScale = _d.default.scaleThreshold().domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000]).range(colorClass.colors); // const colorScale = colorClass.colorFunction;
+  // Load external data and boot
+
+
+  Promise.all([_d.default.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"), _d.default.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv", function (d) {
+    data.set(d.code, +d.pop);
+  })]).then(function (loadData) {
+    var topo = loadData[0]; // Draw the map
+
+    svg.append("g").selectAll("path").data(topo.features).join("path") // draw each country
+    .attr("d", _d.default.geoPath().projection(projection)) // set the color of each country
+    .attr("fill", function (d) {
+      d.total = data.get(d.id) || 0;
+      return colorScale(d.total);
+    });
+  });
+  colorClass.swatches = originalSwatches;
+}
+
+module.exports = {
+  choropleth: choropleth
+};
+},{"../d3":"js/d3.js","../initialColorScales":"js/initialColorScales.js"}],"../../../node_modules/d3-hexbin/src/hexbin.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+var thirdPi = Math.PI / 3,
+    angles = [0, thirdPi, 2 * thirdPi, 3 * thirdPi, 4 * thirdPi, 5 * thirdPi];
+
+function pointX(d) {
+  return d[0];
+}
+
+function pointY(d) {
+  return d[1];
+}
+
+function _default() {
+  var x0 = 0,
+      y0 = 0,
+      x1 = 1,
+      y1 = 1,
+      x = pointX,
+      y = pointY,
+      r,
+      dx,
+      dy;
+
+  function hexbin(points) {
+    var binsById = {},
+        bins = [],
+        i,
+        n = points.length;
+
+    for (i = 0; i < n; ++i) {
+      if (isNaN(px = +x.call(null, point = points[i], i, points)) || isNaN(py = +y.call(null, point, i, points))) continue;
+      var point,
+          px,
+          py,
+          pj = Math.round(py = py / dy),
+          pi = Math.round(px = px / dx - (pj & 1) / 2),
+          py1 = py - pj;
+
+      if (Math.abs(py1) * 3 > 1) {
+        var px1 = px - pi,
+            pi2 = pi + (px < pi ? -1 : 1) / 2,
+            pj2 = pj + (py < pj ? -1 : 1),
+            px2 = px - pi2,
+            py2 = py - pj2;
+        if (px1 * px1 + py1 * py1 > px2 * px2 + py2 * py2) pi = pi2 + (pj & 1 ? 1 : -1) / 2, pj = pj2;
+      }
+
+      var id = pi + "-" + pj,
+          bin = binsById[id];
+      if (bin) bin.push(point);else {
+        bins.push(bin = binsById[id] = [point]);
+        bin.x = (pi + (pj & 1) / 2) * dx;
+        bin.y = pj * dy;
+      }
+    }
+
+    return bins;
+  }
+
+  function hexagon(radius) {
+    var x0 = 0,
+        y0 = 0;
+    return angles.map(function (angle) {
+      var x1 = Math.sin(angle) * radius,
+          y1 = -Math.cos(angle) * radius,
+          dx = x1 - x0,
+          dy = y1 - y0;
+      x0 = x1, y0 = y1;
+      return [dx, dy];
+    });
+  }
+
+  hexbin.hexagon = function (radius) {
+    return "m" + hexagon(radius == null ? r : +radius).join("l") + "z";
+  };
+
+  hexbin.centers = function () {
+    var centers = [],
+        j = Math.round(y0 / dy),
+        i = Math.round(x0 / dx);
+
+    for (var y = j * dy; y < y1 + r; y += dy, ++j) {
+      for (var x = i * dx + (j & 1) * dx / 2; x < x1 + dx / 2; x += dx) {
+        centers.push([x, y]);
+      }
+    }
+
+    return centers;
+  };
+
+  hexbin.mesh = function () {
+    var fragment = hexagon(r).slice(0, 4).join("l");
+    return hexbin.centers().map(function (p) {
+      return "M" + p + "m" + fragment;
+    }).join("");
+  };
+
+  hexbin.x = function (_) {
+    return arguments.length ? (x = _, hexbin) : x;
+  };
+
+  hexbin.y = function (_) {
+    return arguments.length ? (y = _, hexbin) : y;
+  };
+
+  hexbin.radius = function (_) {
+    return arguments.length ? (r = +_, dx = r * 2 * Math.sin(thirdPi), dy = r * 1.5, hexbin) : r;
+  };
+
+  hexbin.size = function (_) {
+    return arguments.length ? (x0 = y0 = 0, x1 = +_[0], y1 = +_[1], hexbin) : [x1 - x0, y1 - y0];
+  };
+
+  hexbin.extent = function (_) {
+    return arguments.length ? (x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1], hexbin) : [[x0, y0], [x1, y1]];
+  };
+
+  return hexbin.radius(1);
+}
+},{}],"../../../node_modules/d3-hexbin/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "hexbin", {
+  enumerable: true,
+  get: function () {
+    return _hexbin.default;
+  }
+});
+
+var _hexbin = _interopRequireDefault(require("./src/hexbin"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+},{"./src/hexbin":"../../../node_modules/d3-hexbin/src/hexbin.js"}],"js/demos/demo_hexbin.js":[function(require,module,exports) {
+"use strict";
+
+var _d = _interopRequireDefault(require("../d3"));
+
+var d3hexbin = _interopRequireWildcard(require("d3-hexbin"));
+
+var _initialColorScales = require("../initialColorScales");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+Object.assign(_d.default, d3hexbin);
+
+function hexbin(scaleType) {
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale;
+  var margin = {
+    top: 10,
+    right: 30,
+    bottom: 30,
+    left: 40
+  },
+      width = 460 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom; // append the svg object to the body of the page
+
+  var svg = _d.default.select("".concat(scaleType, "Hexbin")).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"); // read data
+
+
+  _d.default.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_for_density2d.csv").then(function (data) {
+    // Add X axis
+    var x = _d.default.scaleLinear().domain([5, 18]).range([0, width]);
+
+    svg.append("g").attr("transform", "translate(0," + height + ")").call(_d.default.axisBottom(x)); // Add Y axis
+
+    var y = _d.default.scaleLinear().domain([5, 20]).range([height, 0]);
+
+    svg.append("g").call(_d.default.axisLeft(y)); // Reformat the data: d3.hexbin() needs a specific format
+
+    var inputForHexbinFun = [];
+    data.forEach(function (d) {
+      inputForHexbinFun.push([x(d.x), y(d.y)]); // Note that we had the transform value of X and Y !
+    }); // Prepare a color palette
+
+    var color = _d.default.scaleLinear().domain([0, 600]) // Number of points in the bin?
+    .range(["transparent", "#69b3a2"]); // Compute the hexbin data
+
+
+    var hexbin = _d.default.hexbin().radius(9) // size of the bin in px
+    .extent([[0, 0], [width, height]]); // Plot the hexbins
+
+
+    svg.append("clipPath").attr("id", "clip").append("rect").attr("width", width).attr("height", height);
+    svg.append("g").attr("clip-path", "url(#clip)").selectAll("path").data(hexbin(inputForHexbinFun)).enter().append("path").attr("d", hexbin.hexagon()).attr("transform", function (d) {
+      return "translate(" + d.x + "," + d.y + ")";
+    }).attr("fill", function (d) {
+      return color(d.length);
+    }).attr("stroke", "black").attr("stroke-width", "0.1");
+  });
+}
+
+module.exports = {
+  hexbin: hexbin
+};
+},{"../d3":"js/d3.js","d3-hexbin":"../../../node_modules/d3-hexbin/index.js","../initialColorScales":"js/initialColorScales.js"}],"js/demos/demo_chord.js":[function(require,module,exports) {
+"use strict";
+
+var _d = _interopRequireDefault(require("../d3"));
+
+var _initialColorScales = require("../initialColorScales");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function chord(scaleType) {
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale;
+  var originalSwatches = colorClass.swatches;
+  colorClass.swatches = 4;
+  var width = 250;
+  var height = 250;
+  var radius = 100;
+  var outerRadius = radius + 10; // create the svg area
+
+  var svg = _d.default.select("#".concat(scaleType, "Chord")).append("svg").attr("width", width).attr("height", height).append("g").attr("transform", "translate(".concat(width / 2, ", ").concat(height / 2, ")")); // create a matrix
+
+
+  var matrix = [[0, 5871, 8916, 2868], [1951, 0, 2060, 6171], [8010, 16145, 0, 8045], [1013, 990, 940, 0]]; // 4 groups, so create a vector of 4 colors
+
+  var colors = colorClass.colors; // give this matrix to d3.chord(): it will calculates all the info we need to draw arc and ribbon
+
+  var res = _d.default.chord().padAngle(0.05).sortSubgroups(_d.default.descending)(matrix); // add the groups on the outer part of the circle
+
+
+  svg.datum(res).append("g").selectAll("g").data(function (d) {
+    return d.groups;
+  }).enter().append("g").append("path").style("fill", function (d, i) {
+    return colors[i];
+  }).style("stroke", "black").attr("d", _d.default.arc().innerRadius(radius).outerRadius(outerRadius)); // Add the links between groups
+
+  svg.datum(res).append("g").selectAll("path").data(function (d) {
+    return d;
+  }).enter().append("path").attr("d", _d.default.ribbon().radius(radius)).style("fill", function (d) {
+    return colors[d.source.index];
+  }) // colors depend on the source group. Change to target otherwise.
+  .style("stroke", "black");
+  colorClass.swatches = originalSwatches;
+}
+
+module.exports = {
+  chord: chord
+};
+},{"../d3":"js/d3.js","../initialColorScales":"js/initialColorScales.js"}],"js/demos/demo_violinJitter.js":[function(require,module,exports) {
+"use strict";
+
+var _d = _interopRequireDefault(require("../d3"));
+
+var _initialColorScales = require("../initialColorScales");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function violinJitter(scaleType) {
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale; // set the dimensions and margins of the graph
+
+  var margin = {
+    top: 10,
+    right: 30,
+    bottom: 30,
+    left: 40
+  },
+      width = 260 - margin.left - margin.right,
+      height = 260 - margin.top - margin.bottom; // append the svg object to the body of the page
+
+  var svg = _d.default.select("#".concat(scaleType, "ViolinJitter")).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"); // Read the data and compute summary statistics for each specie
+
+
+  _d.default.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/iris.csv").then(function (data) {
+    // Build and Show the Y scale
+    var y = _d.default.scaleLinear().domain([3.5, 8]) // Note that here the Y scale is set manually
+    .range([height, 0]);
+
+    svg.append("g").call(_d.default.axisLeft(y)); // Build and Show the X scale. It is a band scale like for a boxplot: each group has an dedicated RANGE on the axis. This range has a length of x.bandwidth
+
+    var x = _d.default.scaleBand().range([0, width]).domain(["setosa", "versicolor", "virginica"]).padding(0.05); // This is important: it is the space between 2 groups. 0 means no padding. 1 is the maximum.
+
+
+    svg.append("g").attr("transform", "translate(0," + height + ")").call(_d.default.axisBottom(x)); // Features of the histogram
+
+    var histogram = _d.default.histogram().domain(y.domain()).thresholds(y.ticks(20)) // Important: how many bins approx are going to be made? It is the 'resolution' of the violin plot
+    .value(function (d) {
+      return d;
+    }); // Compute the binning for each group of the dataset
+
+
+    var sumstat = _d.default.nest() // nest function allows to group the calculation per level of a factor
+    .key(function (d) {
+      return d.Species;
+    }).rollup(function (d) {
+      // For each key..
+      input = d.map(function (g) {
+        return g.Sepal_Length;
+      }); // Keep the variable called Sepal_Length
+
+      bins = histogram(input); // And compute the binning on it.
+
+      return bins;
+    }).entries(data); // What is the biggest number of value in a bin? We need it cause this value will have a width of 100% of the bandwidth.
+
+
+    var maxNum = 0;
+
+    for (i in sumstat) {
+      allBins = sumstat[i].value;
+      lengths = allBins.map(function (a) {
+        return a.length;
+      });
+      longuest = _d.default.max(lengths);
+
+      if (longuest > maxNum) {
+        maxNum = longuest;
+      }
+    } // The maximum width of a violin must be x.bandwidth = the width dedicated to a group
+
+
+    var xNum = _d.default.scaleLinear().range([0, x.bandwidth()]).domain([-maxNum, maxNum]); // Color scale for dots
+
+
+    var myColor = _d.default.scaleSequential().interpolator(_d.default.interpolateInferno).domain([3, 9]); // Add the shape to this svg!
+
+
+    svg.selectAll("myViolin").data(sumstat).enter() // So now we are working group per group
+    .append("g").attr("transform", function (d) {
+      return "translate(" + x(d.key) + " ,0)";
+    }) // Translation on the right to be at the group position
+    .append("path").datum(function (d) {
+      return d.value;
+    }) // So now we are working bin per bin
+    .style("stroke", "none").style("fill", "grey").attr("d", _d.default.area().x0(xNum(0)).x1(function (d) {
+      return xNum(d.length);
+    }).y(function (d) {
+      return y(d.x0);
+    }).curve(_d.default.curveCatmullRom) // This makes the line smoother to give the violin appearance. Try d3.curveStep to see the difference
+    ); // Add individual points with jitter
+
+    var jitterWidth = 40;
+    svg.selectAll("indPoints").data(data).enter().append("circle").attr("cx", function (d) {
+      return x(d.Species) + x.bandwidth() / 2 - Math.random() * jitterWidth;
+    }).attr("cy", function (d) {
+      return y(d.Sepal_Length);
+    }).attr("r", 5).style("fill", function (d) {
+      return myColor(d.Sepal_Length);
+    }).attr("stroke", "white");
+  });
+}
+
+module.exports = {
+  violinJitter: violinJitter
+};
+},{"../d3":"js/d3.js","../initialColorScales":"js/initialColorScales.js"}],"js/demos/demo_scatter.js":[function(require,module,exports) {
+"use strict";
+
+var _d = _interopRequireDefault(require("../d3"));
+
+var _initialColorScales = require("../initialColorScales");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function scatter(scaleType) {
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale; // set the dimensions and margins of the graph
+
+  var margin = {
+    top: 30,
+    right: 30,
+    bottom: 30,
+    left: 60
+  },
+      width = 350 - margin.left - margin.right,
+      height = 250 - margin.top - margin.bottom;
+  var myColor = colorClass.colorFunction; // append the svg object to the body of the page
+
+  var svg = _d.default.select("#".concat(scaleType, "Scatter")).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")"); //Read the data
+
+
+  _d.default.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/2_TwoNum.csv").then(function (data) {
+    // Add X axis
+    var x = _d.default.scaleLinear().domain([0, 4000]).range([0, width]);
+
+    svg.append("g").attr("transform", "translate(0," + height + ")").call(_d.default.axisBottom(x)); // Add Y axis
+
+    var y = _d.default.scaleLinear().domain([0, 500000]).range([height, 0]);
+
+    svg.append("g").call(_d.default.axisLeft(y)); // Add dots
+
+    svg.append('g').selectAll("dot").data(data).enter().append("circle").attr("cx", function (d) {
+      return x(d.GrLivArea);
+    }).attr("cy", function (d) {
+      return y(d.SalePrice);
+    }).attr("r", 1.5).style("fill", function (d) {
+      return myColor(d.SalePrice / 5000);
+    });
+  });
+}
+
+module.exports = {
+  scatter: scatter
+};
+},{"../d3":"js/d3.js","../initialColorScales":"js/initialColorScales.js"}],"js/createDemos.js":[function(require,module,exports) {
+"use strict";
+
+var _demo_heatmap = require("./demos/demo_heatmap");
+
+var _demo_choropleth = require("./demos/demo_choropleth");
+
+var _demo_hexbin = require("./demos/demo_hexbin");
+
+var _demo_chord = require("./demos/demo_chord");
+
+var _demo_violinJitter = require("./demos/demo_violinJitter");
+
+var _demo_scatter = require("./demos/demo_scatter");
+
+/*
+Copyright 2021 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function createDemos(scaleType) {
+  var destHeatmap = document.getElementById("".concat(scaleType, "Heatmap"));
+  var destChoropleth = document.getElementById("".concat(scaleType, "Choropleth"));
+  var destHexbin = document.getElementById("".concat(scaleType, "Hexbin"));
+  var destChord = document.getElementById("".concat(scaleType, "Chord"));
+  var destViolinJitter = document.getElementById("".concat(scaleType, "ViolinJitter"));
+  var destScatter = document.getElementById("".concat(scaleType, "Scatter"));
+  var dests = [destHeatmap, destChoropleth, // destHexbin,
+  destChord, // destViolinJitter,
+  destScatter];
+  (0, _demo_heatmap.heatmap)(scaleType);
+  (0, _demo_chord.chord)(scaleType);
+  (0, _demo_scatter.scatter)(scaleType); // violinJitter(scaleType);
+  // hexbin(scaleType);
+
+  (0, _demo_choropleth.choropleth)(scaleType);
   setTimeout(function () {
-    var lums = interpolateLumArray();
-
-    for (var i = 1; i < lums.length - 1; i++) {
-      ratioFields[i].value = returnRatioCube(lums[i]).toFixed(2);
+    for (var i = 0; i < dests.length; i++) {
+      while (dests[i].childNodes.length > 1) {
+        dests[i].removeChild(dests[i].firstChild);
+      }
     }
   }, 300);
-  setTimeout(function () {
-    colorInput();
-  }, 450);
-}; // Function to distribute swatches based on linear interpolation between HSLuv
-// lightness values.
-
-
-window.distributeLum = function distributeLum() {
-  var lums = interpolateLumArray();
-  var NewContrast = [];
-
-  for (var i = 1; i < newColors.length - 1; i++) {
-    // Re-assign V value as lums[i]
-    var L = d3.hsluv(newColors[i]).l;
-    var U = d3.hsluv(newColors[i]).u;
-    var V = lums[i];
-    var NewRGB = d3.hsluv(L, U, V);
-    var rgbArray = [d3.rgb(NewRGB).r, d3.rgb(NewRGB).g, d3.rgb(NewRGB).b];
-    var baseRgbArray = [d3.rgb(background).r, d3.rgb(background).g, d3.rgb(background).b];
-    NewContrast.push(Leonardo.contrast(rgbArray, baseRgbArray).toFixed(2));
-  } // Concatenate first and last contrast array with new contrast array (middle)
-
-
-  var newRatios = [];
-  newRatios = newRatios.concat(ratioInputs[0], NewContrast, ratioInputs[ratioInputs.length - 1]); // Delete all ratios
-
-  var ratioItems = document.getElementsByClassName('ratio-Item');
-
-  while (ratioItems.length > 0) {
-    ratioItems[0].parentNode.removeChild(ratioItems[0]);
-  }
-
-  var sliders = document.getElementById('colorSlider-wrapper');
-  sliders.innerHTML = ' '; // Add all new
-
-  for (var _i15 = 0; _i15 < newRatios.length; _i15++) {
-    addRatio(newRatios[_i15]);
-  }
-
-  colorInput();
-}; // Create alert feedback for each colorspace
-
-
-function colorSpaceFeedback(spaceOpt) {
-  var alertWrapper = document.getElementById('chart3dAlert');
-  alertWrapper.innerHTML = ' ';
-  var alert = document.createElement('div');
-  alert.className = 'spectrum-Alert';
-
-  if (spaceOpt == 'CAM02') {
-    alert.classList.add('spectrum-Alert--info');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">Recommended color space for color evaluation</div>\n      <div class=\"spectrum-Alert-content\">CIECAM02 is a perceptually uniform model of color. Irregularities seen in this space reflect perceived irregularities in color.\n        <a href=\"https://en.wikipedia.org/wiki/CIECAM02\" target=\"_blank\" class=\"spectrum-Link\">Learn more about CIECAM02</a>\n      </div>";
-  }
-
-  if (spaceOpt == 'LAB' || spaceOpt == 'LCH') {
-    alert.classList.add('spectrum-Alert--info');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">Acceptable color space for color evaluation</div>\n      <div class=\"spectrum-Alert-content\">Lab (Lch in cylindrical form) is a well-known and used color space based on human perception of color.\n        <a href=\"https://en.wikipedia.org/wiki/CIELAB_color_space\" target=\"_blank\" class=\"spectrum-Link\">Learn more about LAB & LCH </a>\n      </div>";
-  }
-
-  if (spaceOpt == 'HSL' || spaceOpt == 'HSV' || spaceOpt == 'HSLuv' || spaceOpt == 'RGB') {
-    alert.classList.add('spectrum-Alert--warning');
-    alert.innerHTML = "\n      <svg class=\"spectrum-Icon spectrum-UIIcon-InfoMedium spectrum-Alert-icon\" focusable=\"false\" aria-hidden=\"true\">\n        <use xlink:href=\"#spectrum-css-icon-InfoMedium\" />\n      </svg>\n      <div class=\"spectrum-Alert-header\">This color space not recommended for evaluating color models</div>\n      <div class=\"spectrum-Alert-content\">Irregularities seen in this color space do not accurately represent perceptual irregularities in the color scale itself.\n        <a href=\"https://en.wikipedia.org/wiki/HSL_and_HSV\" target=\"_blank\" class=\"spectrum-Link\">Learn more about RGB color spaces</a>\n      </div>";
-  }
-
-  alertWrapper.appendChild(alert);
 }
 
-exports.colorSpaceFeedback = colorSpaceFeedback;
-window.colorSpaceFeedback = colorSpaceFeedback;
+module.exports = {
+  createDemos: createDemos
+};
+},{"./demos/demo_heatmap":"js/demos/demo_heatmap.js","./demos/demo_choropleth":"js/demos/demo_choropleth.js","./demos/demo_hexbin":"js/demos/demo_hexbin.js","./demos/demo_chord":"js/demos/demo_chord.js","./demos/demo_violinJitter":"js/demos/demo_violinJitter.js","./demos/demo_scatter":"js/demos/demo_scatter.js"}],"js/scaleKeyColors.js":[function(require,module,exports) {
+"use strict";
 
-function updateCharts(selectObject) {
-  var spaceOpt = selectObject.value;
-  var colorInterpSpace = document.querySelector('select[name="mode"]').value;
-  charts.init3dChart();
-  charts.showCharts(spaceOpt, colorInterpSpace);
-  colorSpaceFeedback(spaceOpt);
+var _utils = require("./utils");
+
+var _ramps = require("./ramps");
+
+var _colorDisc = require("./colorDisc");
+
+var _createSamples = require("./createSamples");
+
+var _createDemos = require("./createDemos");
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+var chroma = require('chroma-js');
+
+var _require = require('./chroma-plus'),
+    extendChroma = _require.extendChroma;
+
+function addScaleKeyColorInput(c) {
+  var thisId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.id;
+  var scaleType = arguments.length > 2 ? arguments[2] : undefined;
+  var index = arguments.length > 3 ? arguments[3] : undefined;
+  var sampleNumber = document.getElementById("".concat(scaleType, "Samples"));
+  var chartsModeSelect = document.getElementById("".concat(scaleType, "_chartsMode"));
+  var currentColor;
+  if (scaleType === 'sequential') currentColor = _sequentialScale;
+  var parent = thisId.replace('_addKeyColor', '');
+  var destId = parent.concat('_keyColors');
+  var dest = document.getElementById(destId);
+  var div = document.createElement('div');
+  var randId = (0, _utils.randomId)();
+  div.className = "keyColor keyColor-".concat(scaleType);
+  div.id = randId + '-item';
+  var sw = document.createElement('input');
+  sw.type = "color";
+  sw.value = c;
+  sw.oninput = (0, _utils.throttle)(function (e) {
+    // Replace current indexed value from color keys with new value from color input field
+    var currentKeys = currentColor.colorKeys;
+    c = e.target.value;
+    currentKeys.splice(index, 1, c);
+    if (scaleType === 'sequential') _sequentialScale.colorKeys = currentKeys;
+    (0, _ramps.updateRamps)(currentColor, parent, scaleType);
+    (0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType);
+    (0, _createSamples.createSamples)(sampleNumber.value, scaleType);
+    (0, _createDemos.createDemos)(scaleType);
+  }, 10);
+  sw.className = 'keyColor-Item';
+  sw.id = randId + '-sw';
+  sw.style.backgroundColor = c;
+  var button = document.createElement('button');
+  button.className = 'spectrum-ActionButton spectrum-ActionButton--sizeM';
+  button.innerHTML = "\n  <svg class=\"spectrum-Icon spectrum-Icon--sizeS\" focusable=\"false\" aria-hidden=\"true\" aria-label=\"Delete\">\n    <use xlink:href=\"#spectrum-icon-18-Delete\" />\n  </svg>";
+  button.addEventListener('click', function (e) {
+    var sampleNumber = document.getElementById("".concat(scaleType, "Samples"));
+    var samples = sampleNumber.value;
+    replaceScaleKeyInputsFromClass(thisId, scaleType, index);
+    (0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType);
+    (0, _createSamples.createSamples)(samples, scaleType);
+  });
+  div.appendChild(sw);
+  div.appendChild(button);
+  dest.appendChild(div);
 }
 
-window.updateCharts = updateCharts; // Temporary
+function replaceScaleKeyInputsFromClass(id, scaleType, index) {
+  var smoothWrapper = document.getElementById("".concat(scaleType, "_smoothWrapper"));
+  var smooth = document.getElementById("".concat(scaleType, "_smooth"));
+  var parentId = id.replace('_addKeyColor', ''); // let inputs = document.getElementsByClassName(`keyColor-${scaleType}`);
 
-window.minPositive = minPositive;
-window.ratioName = ratioName;
-},{"@spectrum-css/vars/dist/spectrum-global.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-medium.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/vars/dist/spectrum-light.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/page/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/typography/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/icon/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/link/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/alert/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/radio/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/dialog/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/actionbutton/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/button/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/fieldgroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/textfield/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/dropdown/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/fieldlabel/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/checkbox/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/buttongroup/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/tooltip/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/slider/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/tabs/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@spectrum-css/illustratedmessage/dist/index-vars.css":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","./scss/colorinputs.scss":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","./scss/charts.scss":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","./scss/style.scss":"../../../node_modules/@spectrum-css/actionbutton/dist/index-vars.css","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","loadicons":"../../../node_modules/loadicons/index.js","clipboard":"../../../node_modules/clipboard/dist/clipboard.js","d3":"../../../node_modules/d3/index.js","d3-cam02":"../../../node_modules/d3-cam02/index.js","d3-hsluv":"../../../node_modules/d3-hsluv/index.js","d3-hsv":"../../../node_modules/d3-hsv/index.js","d3-3d":"../../../node_modules/d3-3d/build/d3-3d.js","./charts.js":"charts.js","./data.js":"data.js"}]},{},["index.js"], null)
-//# sourceMappingURL=/src.e31bb0bc.js.map
+  (0, _utils.removeElementsByClass)("keyColor-".concat(scaleType));
+  var currentColor;
+  if (scaleType === 'sequential') currentColor = _sequentialScale;
+  var colorKeys = currentColor.colorKeys;
+  colorKeys.splice(index, 1); // reassign new array to color class
+
+  currentColor.colorKeys = colorKeys; // If new color keys length is less than three, force
+  // smoothing to false, and update UI toggle, as smooth
+  // option should be removed when only two key colors are
+  // present... colorscale becomes all black.
+
+  if (colorKeys.length < 3) {
+    smooth.checked = false;
+    currentColor.smooth = false;
+  }
+
+  colorKeys.forEach(function (key, i) {
+    addScaleKeyColorInput(key, id, scaleType, i);
+  }); // Update gradient
+
+  (0, _ramps.updateRamps)(currentColor, parentId, scaleType); // updateColorDots();
+
+  if (colorKeys.length >= 3) {
+    smooth.disabled = false;
+    smoothWrapper.classList.remove('is-disabled');
+  } else {
+    smooth.disabled = true;
+    smoothWrapper.classList.add('is-disabled');
+  }
+}
+
+function addScaleKeyColor(scaleType, e) {
+  var smoothWrapper = document.getElementById("".concat(scaleType, "_smoothWrapper"));
+  var smooth = document.getElementById("".concat(scaleType, "_smooth"));
+  var thisId = e.target.id;
+  var parentId = thisId.replace('_addKeyColor', '');
+  var currentColor = scaleType === 'sequential' ? _sequentialScale : null; // TODO: replace with _diverging when available
+
+  var currentKeys = currentColor.colorKeys;
+  var lastIndex = currentKeys.length;
+  if (!lastIndex) lastIndex = 0;
+  var lastColor = lastIndex > 0 ? chroma(currentKeys[lastIndex - 1]).hsluv() : chroma(currentKeys[0]).hsluv();
+  var lastColorLightness = lastColor[2];
+  var fCtintHalf = (100 - lastColorLightness) / 3 + lastColorLightness;
+  var fCshadeHalf = lastColorLightness / 2;
+  var c = lastColorLightness >= 50 ? chroma.hsluv(lastColor[0], lastColor[1], fCshadeHalf) : chroma.hsluv(lastColor[0], lastColor[1], fCtintHalf);
+  c = c.hex(); // console.log(d3.rgb(lastColor).formatHex())
+
+  currentKeys.push(c); // Update color class arguments via the theme class
+
+  currentColor.colorKeys = currentKeys;
+  (0, _utils.removeElementsByClass)("keyColor-".concat(scaleType));
+  currentColor.colorKeys.forEach(function (key, i) {
+    addScaleKeyColorInput(key, thisId, scaleType, i);
+  }); // Update gradient
+
+  (0, _ramps.updateRamps)(currentColor, parentId, scaleType); // updateColorDots();
+
+  if (currentKeys.length >= 3) {
+    smooth.disabled = false;
+    smoothWrapper.classList.remove('is-disabled');
+  } else {
+    smooth.disabled = true;
+    smoothWrapper.classList.add('is-disabled');
+  }
+} // function clearAllColors(e) {
+//   let targetId = e.target.id;
+//   let parentId = targetId.replace('_clearAllColors', '');
+//   let keyColorsId = targetId.replace('_clearAllColors', '_keyColors');
+//   document.getElementById(keyColorsId).innerHTML = ' ';
+//   let color = getColorClassById(parentId);
+//   _theme.updateColor = {color: color.name, colorKeys: ['#cacaca']}
+//   updateRamps();
+//   // themeUpdate();
+// }
+// window.clearAllColors = clearAllColors;
+
+
+module.exports = {
+  addScaleKeyColor: addScaleKeyColor,
+  addScaleKeyColorInput: addScaleKeyColorInput // clearAllColors
+
+};
+},{"./utils":"js/utils.js","./ramps":"js/ramps.js","./colorDisc":"js/colorDisc.js","./createSamples":"js/createSamples.js","./createDemos":"js/createDemos.js","chroma-js":"../../../node_modules/chroma-js/chroma.js","./chroma-plus":"js/chroma-plus.js"}],"../../../node_modules/file-saver/dist/FileSaver.min.js":[function(require,module,exports) {
+var define;
+var global = arguments[3];
+(function(a,b){if("function"==typeof define&&define.amd)define([],b);else if("undefined"!=typeof exports)b();else{b(),a.FileSaver={exports:{}}.exports}})(this,function(){"use strict";function b(a,b){return"undefined"==typeof b?b={autoBom:!1}:"object"!=typeof b&&(console.warn("Deprecated: Expected third argument to be a object"),b={autoBom:!b}),b.autoBom&&/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(a.type)?new Blob(["\uFEFF",a],{type:a.type}):a}function c(a,b,c){var d=new XMLHttpRequest;d.open("GET",a),d.responseType="blob",d.onload=function(){g(d.response,b,c)},d.onerror=function(){console.error("could not download file")},d.send()}function d(a){var b=new XMLHttpRequest;b.open("HEAD",a,!1);try{b.send()}catch(a){}return 200<=b.status&&299>=b.status}function e(a){try{a.dispatchEvent(new MouseEvent("click"))}catch(c){var b=document.createEvent("MouseEvents");b.initMouseEvent("click",!0,!0,window,0,0,0,80,20,!1,!1,!1,!1,0,null),a.dispatchEvent(b)}}var f="object"==typeof window&&window.window===window?window:"object"==typeof self&&self.self===self?self:"object"==typeof global&&global.global===global?global:void 0,a=f.navigator&&/Macintosh/.test(navigator.userAgent)&&/AppleWebKit/.test(navigator.userAgent)&&!/Safari/.test(navigator.userAgent),g=f.saveAs||("object"!=typeof window||window!==f?function(){}:"download"in HTMLAnchorElement.prototype&&!a?function(b,g,h){var i=f.URL||f.webkitURL,j=document.createElement("a");g=g||b.name||"download",j.download=g,j.rel="noopener","string"==typeof b?(j.href=b,j.origin===location.origin?e(j):d(j.href)?c(b,g,h):e(j,j.target="_blank")):(j.href=i.createObjectURL(b),setTimeout(function(){i.revokeObjectURL(j.href)},4E4),setTimeout(function(){e(j)},0))}:"msSaveOrOpenBlob"in navigator?function(f,g,h){if(g=g||f.name||"download","string"!=typeof f)navigator.msSaveOrOpenBlob(b(f,h),g);else if(d(f))c(f,g,h);else{var i=document.createElement("a");i.href=f,i.target="_blank",setTimeout(function(){e(i)})}}:function(b,d,e,g){if(g=g||open("","_blank"),g&&(g.document.title=g.document.body.innerText="downloading..."),"string"==typeof b)return c(b,d,e);var h="application/octet-stream"===b.type,i=/constructor/i.test(f.HTMLElement)||f.safari,j=/CriOS\/[\d]+/.test(navigator.userAgent);if((j||h&&i||a)&&"undefined"!=typeof FileReader){var k=new FileReader;k.onloadend=function(){var a=k.result;a=j?a:a.replace(/^data:[^;]*;/,"data:attachment/file;"),g?g.location.href=a:location=a,g=null},k.readAsDataURL(b)}else{var l=f.URL||f.webkitURL,m=l.createObjectURL(b);g?g.location=m:location.href=m,g=null,setTimeout(function(){l.revokeObjectURL(m)},4E4)}});f.saveAs=g.saveAs=g,"undefined"!=typeof module&&(module.exports=g)});
+
+
+},{}],"js/createSVGgradient.js":[function(require,module,exports) {
+"use strict";
+
+var _fileSaver = require("file-saver");
+
+var _initialTheme = require("./initialTheme");
+
+var _createHtmlElement = require("./createHtmlElement");
+
+function createSVGgradient(colors) {
+  var gradientWidth = 800;
+  var gradientHeight = 80;
+  var svgns = "http://www.w3.org/2000/svg";
+  var svgWrapper = document.createElementNS(svgns, 'svg');
+  svgWrapper.setAttribute("xmlns", svgns);
+  svgWrapper.setAttribute("version", "1.1");
+  svgWrapper.setAttributeNS(null, 'width', gradientWidth + 'px');
+  svgWrapper.setAttributeNS(null, 'height', gradientHeight + 'px');
+  svgWrapper.setAttribute("aria-hidden", "true");
+  svgWrapper.id = 'gradientSvg';
+  var outerElement = document.createElement('div');
+  outerElement.id = '_SVGgradient';
+  outerElement.appendChild(svgWrapper);
+  document.body.appendChild(outerElement);
+  (0, _createHtmlElement.createSvgElement)({
+    element: 'rect',
+    id: 'gradientRect',
+    attributes: {
+      width: gradientWidth,
+      height: gradientHeight,
+      fill: "url(#gradientLinearGrad)",
+      rx: 8
+    },
+    appendTo: 'gradientSvg'
+  });
+  (0, _createHtmlElement.createSvgElement)({
+    element: 'defs',
+    id: 'gradientDefs',
+    appendTo: 'gradientSvg'
+  });
+  (0, _createHtmlElement.createSvgElement)({
+    element: 'linearGradient',
+    id: 'gradientLinearGrad',
+    attributes: {
+      x1: 0,
+      y1: 0,
+      x2: gradientWidth,
+      y2: 0,
+      gradientUnits: "userSpaceOnUse"
+    },
+    appendTo: 'gradientDefs'
+  });
+
+  for (var i = 0; i < colors.length; i++) {
+    var length = colors.length - 1; // only take 10 values from scale
+
+    if (Number.isInteger(i / 10)) {
+      (0, _createHtmlElement.createSvgElement)({
+        element: 'stop',
+        attributes: {
+          offset: i / length,
+          'stop-color': colors[i]
+        },
+        appendTo: 'gradientLinearGrad'
+      });
+    }
+  }
+}
+
+function downloadSVGgradient(colors, mode, gradientName) {
+  createSVGgradient(colors);
+  var svg = document.getElementById('_SVGgradient').innerHTML;
+  var filename = "".concat(gradientName, "-").concat(mode, "-gradient.svg");
+  var blob = new Blob(["".concat(svg)], {
+    type: "image/svg+xml;charset=utf-8"
+  });
+  (0, _fileSaver.saveAs)(blob, filename);
+  document.getElementById('_SVGgradient').remove();
+}
+
+window.downloadSVGgradient = downloadSVGgradient;
+module.exports = {
+  createSVGgradient: createSVGgradient,
+  downloadSVGgradient: downloadSVGgradient
+};
+},{"file-saver":"../../../node_modules/file-saver/dist/FileSaver.min.js","./initialTheme":"js/initialTheme.js","./createHtmlElement":"js/createHtmlElement.js"}],"js/dataVisColorScale.js":[function(require,module,exports) {
+"use strict";
+
+var Leo = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
+
+var d3 = _interopRequireWildcard(require("./d3"));
+
+var _scaleKeyColors = require("./scaleKeyColors");
+
+var _ramps = require("./ramps");
+
+var _initialColorScales = require("./initialColorScales");
+
+var _createInterpolationCharts = require("./createInterpolationCharts");
+
+var _createRGBchannelChart = require("./createRGBchannelChart");
+
+var _createSVGgradient = require("./createSVGgradient");
+
+var _colorDisc = require("./colorDisc");
+
+var _utils = require("./utils");
+
+var _createSamples = require("./createSamples");
+
+var _createDemos = require("./createDemos");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var chroma = require('chroma-js');
+
+function dataVisColorScale(scaleType) {
+  // let colorKeys;
+  // Set up some sensible defaults
+  if (scaleType === 'sequential') {
+    // let defaultColors = ['#FFDD00', '#7AcA02', '#0CA9AC', '#005285', '#2E005C']
+    // let defaultColors = ['#2E005C', '#005285', '#0CA9AC', '#7AcA02', '#FFDD00']
+    // let defaultColors = ['#2E005C', '#FFDD00']
+    var defaultColors = ['#5c3cec', '#9eecff'];
+    _initialColorScales._sequentialScale.colorKeys = defaultColors;
+  }
+
+  if (scaleType === 'diverging') {
+    var defaultStartColors = ['#5c3cec', '#9eecff'];
+    var defaultEndColors = ['#5c3cec', '#9eecff'];
+    var defaultMiddleColor = '#f3f3f3';
+    _divergingScale.startKeys = defaultStartColors;
+    _divergingScale.endKeys = defaultEndColors;
+    _divergingScale.middleKey = defaultMiddleColor;
+  }
+
+  var downloadGradient = document.getElementById("".concat(scaleType, "_downloadGradient"));
+  var chartsModeSelect = document.getElementById("".concat(scaleType, "_chartsMode"));
+  var interpolationMode = document.getElementById("".concat(scaleType, "_mode"));
+  var smoothWrapper = document.getElementById("".concat(scaleType, "_smoothWrapper"));
+  var smooth = document.getElementById("".concat(scaleType, "_smooth"));
+  var shift = document.getElementById("".concat(scaleType, "Shift"));
+  var correctLightness = document.getElementById("".concat(scaleType, "_correctLightness"));
+  var sampleNumber = document.getElementById("".concat(scaleType, "Samples"));
+  var samples = sampleNumber.value;
+  var colorClass = scaleType === 'sequential' ? _initialColorScales._sequentialScale : _divergingScale;
+  var colorKeys = colorClass.colorKeys;
+
+  if (colorKeys.length >= 3) {
+    smooth.disabled = false;
+    smoothWrapper.classList.remove('is-disabled');
+  } else {
+    smooth.disabled = true;
+    smoothWrapper.classList.add('is-disabled');
+  }
+
+  interpolationMode.value = colorClass.colorspace;
+  var gradientId = "".concat(scaleType, "_gradient");
+  var buttonId = "".concat(scaleType, "_addKeyColor");
+
+  for (var i = 0; i < colorKeys.length; i++) {
+    (0, _scaleKeyColors.addScaleKeyColorInput)(colorKeys[i], buttonId, scaleType, i);
+  }
+
+  var colors = colorClass.colors; // TEMPORARY for color wheel
+
+  var mode = 'CAM02';
+  var lightness = 50;
+  var min = Math.min.apply(Math, _toConsumableArray(colorClass.luminosities));
+  var max = Math.max.apply(Math, _toConsumableArray(colorClass.luminosities));
+  (0, _ramps.themeRamp)(colors, gradientId, '90');
+  (0, _ramps.themeRampKeyColors)(colorKeys, gradientId, scaleType);
+  (0, _createRGBchannelChart.createRGBchannelChart)(colors, "".concat(scaleType, "RGBchart"));
+  (0, _createInterpolationCharts.createInterpolationCharts)(colors, 'CAM02', scaleType);
+  (0, _createSamples.createSamples)(samples, scaleType);
+  (0, _createDemos.createDemos)(scaleType);
+  (0, _colorDisc.createColorWheel)(chartsModeSelect.value, 50, scaleType);
+  (0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType);
+  interpolationMode.addEventListener('change', function (e) {
+    var colorspace = e.target.value;
+    colorClass.colorspace = colorspace; // colors = colorClass.colors;
+
+    (0, _ramps.updateRamps)(colorClass, scaleType, scaleType);
+    (0, _createSamples.createSamples)(sampleNumber.value, scaleType);
+    (0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType);
+    (0, _createDemos.createDemos)(scaleType);
+  });
+  smooth.addEventListener('change', function (e) {
+    colorClass.smooth = e.target.checked;
+    colors = colorClass.colors;
+    (0, _ramps.updateRamps)(colorClass, scaleType, scaleType);
+    (0, _createInterpolationCharts.createInterpolationCharts)(colors, chartsModeSelect.value, scaleType);
+    (0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType);
+    (0, _createSamples.createSamples)(sampleNumber.value, scaleType);
+    (0, _createDemos.createDemos)(scaleType);
+  });
+  downloadGradient.addEventListener('click', function (e) {
+    colors = colorClass.colors;
+    (0, _createSVGgradient.downloadSVGgradient)(colors, colorClass.colorspace, scaleType);
+  });
+  chartsModeSelect.addEventListener('change', function (e) {
+    (0, _createInterpolationCharts.createInterpolationCharts)(colors, e.target.value, scaleType);
+    var lightness = e.target.value === 'HSV' ? 100 : e.target.value === 'HSLuv' ? 60 : 50;
+    (0, _colorDisc.updateColorWheel)(e.target.value, lightness, true, null, scaleType);
+  });
+  shift.addEventListener('input', function (e) {
+    colorClass.shift = e.target.value;
+    colors = colorClass.colors;
+    (0, _utils.throttle)((0, _ramps.updateRamps)(colorClass, scaleType, scaleType), 10);
+    (0, _utils.throttle)((0, _createInterpolationCharts.createInterpolationCharts)(colors, chartsModeSelect.value, scaleType), 10);
+    (0, _utils.throttle)((0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType), 10);
+    (0, _utils.throttle)((0, _createSamples.createSamples)(sampleNumber.value, scaleType), 10);
+    (0, _utils.throttle)((0, _createDemos.createDemos)(scaleType), 10);
+  });
+  correctLightness.addEventListener('input', function (e) {
+    colorClass.correctLightness = e.target.checked;
+    colors = colorClass.colors;
+    (0, _ramps.updateRamps)(colorClass, scaleType, scaleType);
+    (0, _createInterpolationCharts.createInterpolationCharts)(colors, chartsModeSelect.value, scaleType);
+    (0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType);
+    (0, _createSamples.createSamples)(sampleNumber.value, scaleType);
+    (0, _createDemos.createDemos)(scaleType);
+  });
+  document.getElementById(buttonId).addEventListener('click', function (e) {
+    (0, _scaleKeyColors.addScaleKeyColor)(scaleType, e);
+    (0, _colorDisc.updateColorDots)(chartsModeSelect.value, scaleType);
+    (0, _createSamples.createSamples)(sampleNumber.value, scaleType);
+    (0, _createDemos.createDemos)(scaleType);
+  });
+  sampleNumber.addEventListener('input', function (e) {
+    (0, _createSamples.createSamples)(e.target.value, scaleType);
+  });
+}
+
+module.exports = {
+  dataVisColorScale: dataVisColorScale
+};
+},{"@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","./d3":"js/d3.js","./scaleKeyColors":"js/scaleKeyColors.js","./ramps":"js/ramps.js","./initialColorScales":"js/initialColorScales.js","./createInterpolationCharts":"js/createInterpolationCharts.js","./createRGBchannelChart":"js/createRGBchannelChart.js","./createSVGgradient":"js/createSVGgradient.js","./colorDisc":"js/colorDisc.js","./utils":"js/utils.js","./createSamples":"js/createSamples.js","./createDemos":"js/createDemos.js","chroma-js":"../../../node_modules/chroma-js/chroma.js"}],"js/tooltip.js":[function(require,module,exports) {
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+function toggleTooltip(targetId) {
+  var tooltip = document.getElementById(targetId);
+
+  if (!tooltip.classList.contains('is-open')) {
+    tooltip.classList.add('is-open');
+  } else {
+    tooltip.classList.remove('is-open');
+  }
+}
+
+window.toggleTooltip = toggleTooltip;
+module.exports = {
+  toggleTooltip: toggleTooltip
+};
+},{}],"scales.js":[function(require,module,exports) {
+"use strict";
+
+require("@spectrum-css/vars/dist/spectrum-global.css");
+
+require("@spectrum-css/vars/dist/spectrum-medium.css");
+
+require("@spectrum-css/vars/dist/spectrum-light.css");
+
+require("@spectrum-css/vars/dist/spectrum-darkest.css");
+
+require("@spectrum-css/page/dist/index-vars.css");
+
+require("@spectrum-css/icon/dist/index-vars.css");
+
+require("@spectrum-css/link/dist/index-vars.css");
+
+require("@spectrum-css/alert/dist/index-vars.css");
+
+require("@spectrum-css/radio/dist/index-vars.css");
+
+require("@spectrum-css/sidenav/dist/index-vars.css");
+
+require("@spectrum-css/dialog/dist/index-vars.css");
+
+require("@spectrum-css/button/dist/index-vars.css");
+
+require("@spectrum-css/badge/dist/index-vars.css");
+
+require("@spectrum-css/actionbutton/dist/index-vars.css");
+
+require("@spectrum-css/actiongroup/dist/index-vars.css");
+
+require("@spectrum-css/divider/dist/index-vars.css");
+
+require("@spectrum-css/fieldgroup/dist/index-vars.css");
+
+require("@spectrum-css/textfield/dist/index-vars.css");
+
+require("@spectrum-css/picker/dist/index-vars.css");
+
+require("@spectrum-css/fieldlabel/dist/index-vars.css");
+
+require("@spectrum-css/checkbox/dist/index-vars.css");
+
+require("@spectrum-css/switch/dist/index-vars.css");
+
+require("@spectrum-css/buttongroup/dist/index-vars.css");
+
+require("@spectrum-css/tooltip/dist/index-vars.css");
+
+require("@spectrum-css/slider/dist/index-vars.css");
+
+require("@spectrum-css/tabs/dist/index-vars.css");
+
+require("@spectrum-css/toast/dist/index-vars.css");
+
+require("@spectrum-css/illustratedmessage/dist/index-vars.css");
+
+require("@spectrum-css/typography/dist/index-vars.css");
+
+require("./scss/style.scss");
+
+require("./scss/charts.scss");
+
+require("./scss/colorinputs.scss");
+
+require("./views/*.scss");
+
+require("@adobe/focus-ring-polyfill");
+
+var Leo = _interopRequireWildcard(require("@adobe/leonardo-contrast-colors"));
+
+var _loadicons = _interopRequireDefault(require("loadicons"));
+
+var _utils = require("./js/utils");
+
+var _tabs = require("./js/tabs");
+
+var _initialColorScales = require("./js/initialColorScales");
+
+var _dataVisColorScale = require("./js/dataVisColorScale");
+
+var _tooltip = _interopRequireDefault(require("./js/tooltip"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+Copyright 2019 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
+(0, _loadicons.default)('./spectrum-css-icons.svg');
+(0, _loadicons.default)('./spectrum-icons.svg'); // Import local Javascript functions
+
+var chroma = require('chroma-js');
+
+var _require = require('./js/chroma-plus'),
+    extendChroma = _require.extendChroma;
+
+extendChroma(chroma);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (event) {
+  if (event.matches) {
+    //dark mode
+    document.querySelector('body').classList.remove('spectrum--light');
+    document.querySelector('body').classList.add('spectrum--darkest');
+  } else {
+    //light mode
+    document.querySelector('body').classList.add('spectrum--light');
+    document.querySelector('body').classList.remove('spectrum--darkest');
+  }
+});
+var mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+if (mq.matches) {
+  //dark mode
+  document.querySelector('body').classList.add('spectrum--darkest');
+} else {
+  //light mode
+  document.querySelector('body').classList.add('spectrum--light');
+}
+
+document.getElementById("tabSequential").click(); // Open default tab of "charts" for each color scale tab
+
+document.getElementById("tabsequentialCharts").click();
+document.getElementById("tabdivergingCharts").click();
+document.getElementById("tabqualitativeCharts").click();
+document.getElementById("welcome").click();
+(0, _dataVisColorScale.dataVisColorScale)('sequential');
+(0, _dataVisColorScale.dataVisColorScale)('diverging');
+},{"@spectrum-css/vars/dist/spectrum-global.css":"views/header.scss","@spectrum-css/vars/dist/spectrum-medium.css":"views/header.scss","@spectrum-css/vars/dist/spectrum-light.css":"views/header.scss","@spectrum-css/vars/dist/spectrum-darkest.css":"views/header.scss","@spectrum-css/page/dist/index-vars.css":"views/header.scss","@spectrum-css/icon/dist/index-vars.css":"views/header.scss","@spectrum-css/link/dist/index-vars.css":"views/header.scss","@spectrum-css/alert/dist/index-vars.css":"views/header.scss","@spectrum-css/radio/dist/index-vars.css":"views/header.scss","@spectrum-css/sidenav/dist/index-vars.css":"views/header.scss","@spectrum-css/dialog/dist/index-vars.css":"views/header.scss","@spectrum-css/button/dist/index-vars.css":"views/header.scss","@spectrum-css/badge/dist/index-vars.css":"views/header.scss","@spectrum-css/actionbutton/dist/index-vars.css":"views/header.scss","@spectrum-css/actiongroup/dist/index-vars.css":"views/header.scss","@spectrum-css/divider/dist/index-vars.css":"views/header.scss","@spectrum-css/fieldgroup/dist/index-vars.css":"views/header.scss","@spectrum-css/textfield/dist/index-vars.css":"views/header.scss","@spectrum-css/picker/dist/index-vars.css":"views/header.scss","@spectrum-css/fieldlabel/dist/index-vars.css":"views/header.scss","@spectrum-css/checkbox/dist/index-vars.css":"views/header.scss","@spectrum-css/switch/dist/index-vars.css":"views/header.scss","@spectrum-css/buttongroup/dist/index-vars.css":"views/header.scss","@spectrum-css/tooltip/dist/index-vars.css":"views/header.scss","@spectrum-css/slider/dist/index-vars.css":"views/header.scss","@spectrum-css/tabs/dist/index-vars.css":"views/header.scss","@spectrum-css/toast/dist/index-vars.css":"views/header.scss","@spectrum-css/illustratedmessage/dist/index-vars.css":"views/header.scss","@spectrum-css/typography/dist/index-vars.css":"views/header.scss","./scss/style.scss":"views/header.scss","./scss/charts.scss":"views/header.scss","./scss/colorinputs.scss":"views/header.scss","./views/*.scss":"views/*.scss","@adobe/focus-ring-polyfill":"../../../node_modules/@adobe/focus-ring-polyfill/index.js","@adobe/leonardo-contrast-colors":"../../../node_modules/@adobe/leonardo-contrast-colors/wrapper.mjs","loadicons":"../../../node_modules/loadicons/index.js","./js/utils":"js/utils.js","./js/tabs":"js/tabs.js","./js/initialColorScales":"js/initialColorScales.js","./js/dataVisColorScale":"js/dataVisColorScale.js","./js/tooltip":"js/tooltip.js","chroma-js":"../../../node_modules/chroma-js/chroma.js","./js/chroma-plus":"js/chroma-plus.js"}]},{},["scales.js"], null)
+//# sourceMappingURL=/scales.bc0b00b7.js.map

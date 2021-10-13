@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html dir="ltr">
+<head>
+  <head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-156021617-1"></script>
+  <script>window.dataLayer = window.dataLayer || [];
+
+function gtag() {
+  dataLayer.push(arguments);
+}
+
+gtag('js', new Date());
+gtag('config', 'UA-156021617-1');</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Leonardo</title>
+  <meta property="og:title" content="Leonardo">
+  <meta name="description" content="Generate colors based on a desired contrast ratio.">
+  <meta property="og:description" content="Generate colors based on a desired contrast ratio.">
+  <meta property="og:image" content="">
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="repository-open-graph-leonardo">
+
+  <meta property="og:site_name" content="Leonardo">
+  <meta name="twitter:image:alt" content="Web interface for generating colors based on contrast ratio.">
+
+  <meta name="twitter:site" content="@Leonardo_Color">
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.4cdc4880.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.df129eab.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.467f1d8b.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.4bc48148.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.e3ea4192.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.a7bdcc8e.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.590927b0.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.da40a8c2.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.7b0657c6.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.ed196cac.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.bd6b9d71.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.5c1e6cfe.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.a0a61c08.png">
+  <link rel="manifest" href="/favicons/manifest.js">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.794a78a9.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="https://use.typekit.net/sik3zpp.css">
+<link rel="stylesheet" href="/scales.bc0b00b7.css"></head>
+</head>
+
+<body class="spectrum spectrum--medium appFrame">
+
+  <header class="spectrum-AppHeader">
+  <div class="spectrum-AppHeader_item">
+    <a href="/" id="logoTitle">
+      <img src="/Leonardo_Logo_sm.32a0c71b.svg" alt="Leonardo logo" id="headerLogo">
+      <h1 class="spectrum-Typography spectrum-Heading spectrum-Heading--sizeXS spectrum-AppHeader-Title">Leonardo</h1>
+    </a>
+
+    <div class="spectrum-Tabs spectrum-Tabs--horizontal spectrum-Tabs--quiet spectrum-Tabs--fluid">
+      <div id="tabHome" class="spectrum-Tabs-item app-Tabs-item" tabindex="0" onclick="openAppTab(event, 'home')">
+        <label class="spectrum-Tabs-itemLabel">
+          <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Edit">
+            <use xlink:href="#spectrum-icon-18-Home"></use>
+          </svg>
+        </label>
+      </div>
+
+      <div id="tabSequential" class="spectrum-Tabs-item app-Tabs-item" tabindex="0" onclick="openAppTab(event, 'sequential')">
+        <label class="spectrum-Tabs-itemLabel">Sequential</label>
+      </div>
+      <div id="tabDiverging" class="spectrum-Tabs-item app-Tabs-item" tabindex="0" onclick="openAppTab(event, 'diverging')">
+        <label class="spectrum-Tabs-itemLabel">Diverging</label>
+      </div>
+      <div id="tabQualitative" class="spectrum-Tabs-item app-Tabs-item" tabindex="0" onclick="openAppTab(event, 'qualitative')">
+        <label class="spectrum-Tabs-itemLabel">Qualitative</label>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="spectrum-Heading spectrum-Heading--XXS" id="themeTitle"></div>
+
+  <div class="spectrum-AppHeader_item">
+    <button class="spectrum-ActionButton spectrum-ActionButton--sizeM copyThemeURL">
+      <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Edit">
+        <use xlink:href="#spectrum-icon-18-Link"></use>
+      </svg>
+      <span class="spectrum-ActionButton-label">Copy URL</span>
+    </button> 
+    <a href="https://www.github.com/adobe/leonardo" id="octo-link"> <img id="octocat" src="/GitHub-Mark-120px-plus.86842841.png" alt="Github octocat"> </a>
+  </div>
+</header>
+
+  <!-- Home Tab -->
+<div id="home" class="AppTab appFrameSideNav">
+  <nav class="sideNav-Wrapper">
+  <ul class="spectrum-SideNav">
+    <li class="spectrum-SideNav-item">
+      <a href="#" class="spectrum-SideNav-itemLink" onclick="openSideNavItem(event, 'homeContent')" id="welcome">Welcome</a>
+    </li>
+    <li class="spectrum-SideNav-item">
+      <a href="#" class="spectrum-SideNav-itemLink" onclick="openSideNavItem(event, 'getstartedContent')">Getting started</a>
+    </li>
+    <li class="spectrum-SideNav-item">
+      <a href="#" class="spectrum-SideNav-itemLink" onclick="openSideNavItem(event, 'learnContent')">Learn</a>
+    </li>
+    <li class="spectrum-SideNav-item">
+      <a href="#" class="spectrum-SideNav-itemLink" onclick="openSideNavItem(event, 'articlesContent')">Articles</a>
+    </li>
+    <li class="spectrum-SideNav-item">
+      <a href="#" class="spectrum-SideNav-itemLink" onclick="openSideNavItem(event, 'contributeContent')">Contribute</a>
+    </li>
+  </ul>
+</nav>
+
+  <main class="home-Wrapper spectrum-Typography">
+    <div class="sideNavContent" id="homeContent">
+  <div style="display: flex;
+  flex-direction: column;
+  align-items: flex-start;">
+    <!-- <h1 class="spectrum-Heading spectrum-Heading--sizeXXL spectrum-Heading--heavy">
+      Create beautiful, accessible colors
+    </h1> -->
+    <h1 class="spectrum-Heading spectrum-Heading--sizeXXL spectrum-Heading--heavy">
+      Color tools for design systems
+    </h1>
+    <!-- <p class="spectrum-Body spectrum-Body--sizeXXL">
+      First of its kind <strong>contrast-ratio based</strong>, adaptive color theme generator
+    </p> -->
+
+    <div class="selectBox--row">
+      <a href="/theme.html" target="_blank" class="selectBox">
+        <img src="/box_theme.637d28d1.png" class="selectBox_image">
+        <h1 class="spectrum-Heading spectrum-Heading--sizeS selectBox_title">
+          Adaptive color theme
+        </h1>
+        <p class="spectrum-Body spectrum-Body--sizeS selectBox_content">
+          Accessible color themes for user interfaces
+        </p>
+      </a>
+      <a href="/scales.html" target="_blank" class="selectBox">
+        <img src="/box_colorScales.4a318a28.png" class="selectBox_image">
+        <h1 class="spectrum-Heading spectrum-Heading--sizeS selectBox_title">
+          Color scales
+        </h1>
+        <p class="spectrum-Body spectrum-Body--sizeS selectBox_content">
+          Colors for data visualization
+        </p>
+      </a>
+      <a href="/tools.html" target="_blank" class="selectBox">
+        <img src="/box_tools.feaab9b1.png" class="selectBox_image">
+        <h1 class="spectrum-Heading spectrum-Heading--sizeS selectBox_title">
+          Color toolbox
+        </h1>
+        <p class="spectrum-Body spectrum-Body--sizeS selectBox_content">
+          Tools for evaluating colors, contrast, and more
+        </p>
+      </a>
+    </div>
+
+    <!-- <div class="spectrum-ButtonGroup" id="homeButtonGroup">
+      <button class="spectrum-Button spectrum-Button--cta spectrum-Button--sizeL" id='homeCTA'>Create new theme</button>
+      <button class="spectrum-Button spectrum-Button--secondary spectrum-Button--sizeL" id='homeCTASecondary'>Start with existing theme</button>  
+    </div>
+
+    <img src="/images/HomepageImage.png" style="width: 100%; max-width: 756px"/> -->
+
+
+    <!-- <section class="spectrum-Body spectrum-Body--sizeL">
+      <p>Leonardo generates colors based on desired contrast ratios. It allows you to create parameters for each color so that you can control the hue and saturation changes for color as it gets lighter or darker. </p>
+
+      <p>Designers and engineers can both collaborate on this tool, as the parameters defined here can be passed into the leonardo npm module to generate colors during a build or dynamically in your product. </p>
+        
+      <p>The latter of those implementations enables innovative methods for your product to achieve dynamic accessibility, providing your customers with a wider array of color and contrast needs in their control.</p>
+  
+    </section> -->
+
+    <hr class="spectrum-Divider spectrum-Divider--sizeM" style="max-width: 756px; margin-top: 76px;">
+
+    <section>
+      <h2 class="spectrum-Heading spectrum-Heading--sizeL spectrum-Heading--heavy">
+        Why use Leonardo?
+      </h2>
+      <h3 class="spectrum-Heading spectrum-Heading--sizeM">
+        Color science driven design
+      </h3>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Leonardo gives designers access to more color spaces than any other tool: <strong>RGB</strong>,
+        <strong>HSL</strong>, <strong>HSV</strong>, <strong>Lab</strong>, <strong>LCh</strong>,
+        <strong>HSLuv</strong>, <strong>CIECAM02 (Jab)</strong>, and <strong>CIECAM02 (JCh)</strong>. 
+      </p>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Interpolating in different color spaces results in unique appearances to the scale (or gradient) that is generated.
+      </p>
+      <img src="/Interpolation@2x.94d1d4c7.png" style="width: 100%; max-width: 560px">
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        The CIECAM02 color space (Jab and JCh) is a more perceptually accurate model of how we see color. 
+        Leonardo gives you the ability to visualize and interpolate in this space to ensure your color 
+        scales are smooth and balanced.
+      </p>
+
+    </section>
+
+    <section>
+      <h3 class="spectrum-Heading spectrum-Heading--sizeM">
+        Adaptive theming
+      </h3>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Leonardo is the first-of-its kind <strong>adaptive theming</strong> tool. Themes created in Leonardo 
+        are dynamic and constraint-based, giving you (or your users) control over <strong>brightness, contrast, 
+        and saturation</strong> of the entire theme. 
+      </p>
+      IMAGE 
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        This makes dark-mode support, multi-theme support, or nuanced theme-wide changes to color far more 
+        manageable than any other tool out there.
+      </p>
+    </section>
+
+    <section>
+      <h3 class="spectrum-Heading spectrum-Heading--sizeM">
+        Contrast-based color generation
+      </h3>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Colors are defined in Leonardo as <strong>color scales</strong> (gradients). Theme color swatches 
+        are determined by meeting the target contrast ratios you define.
+      </p>
+      IMAGE 
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Since colors are generated based on target contrast ratios, you can easily <strong>increase or decrease</strong>
+        the overall contrast of your theme.
+      </p>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        You can also define your swatches by desired luminosity. This enables you to create perceptually 
+        uniform distribution of luminosities for all of your colors.
+      </p>
+    </section>
+
+    <section>
+      <h3 class="spectrum-Heading spectrum-Heading--sizeM">
+        Designer-developer collaborative tool
+      </h3>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Leonardo is built to be used by both designers and developers. As you make adjustments in the 
+        interface, javascript parameters and CSS variables are updated for you to share with engineers. 
+        By sharing the URL to your Leonardo theme, developers can access these outputs directly.
+      </p>
+      IMAGE
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        If you are implementing an <strong>adaptive theme</strong> in your application, the javascript 
+        parameter output gives you all you need to regenerate the theme within your own application.
+      </p>
+      IMAGE
+    </section>
+
+    <section>
+      <h3 class="spectrum-Heading spectrum-Heading--sizeM">
+        Additional color tools in Leonardo
+      </h3>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Aside from creating themes, Leonardo has: 
+      </p>
+      <ul class="spectrum-Body spectrum-Body--sizeM">
+        <li>Contrast checker that can calculate colors with transparency</li>
+        <li>Color converter (with all supported colorspaces)</li>
+        <li>Colorblind palette generator</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 class="spectrum-Heading spectrum-Heading--sizeM">
+        Open source
+      </h3>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Leonardo is the creation of the Adobe Spectrum design systems team, but we found higher value
+        in sharing this with the community. 
+      </p>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        Leonardo's guiding principle has been to enable the creation of <strong>accessible color themes</strong>
+        for design systems. Our team believes that <strong>accessibility is for everyone</strong>, and that 
+        our tool had higher purpose in helping other people and teams create accessile color themes.
+      </p>
+      <p class="spectrum-Body spectrum-Body--sizeM">
+        To do this, we've made Leonardo fully <strong>open-source</strong> for others in the community to 
+        help shape and evolve this tool to fit their needs.
+      </p>
+    </section>
+
+  </div>
+</div>
+    <div class="sideNavContent sideNavContent--splitView" id="getstartedContent">
+  <div class="sideNavContent_main">
+    <h1 class="spectrum-Heading spectrum-Heading--sizeXL spectrum-Heading--heavy">Getting started</h1>
+    <hr class="spectrum-Divider spectrum-Divider--sizeM">
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      Leonardo is a tool for both <strong>designers</strong> and <strong>developers</strong>. 
+    </p>
+    <h2 class="spectrum-Heading spectrum-Heading--sizeL spectrum-Heading--heavy" id="colorSystem">
+      Quickstart
+    </h2>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      Install Leonardo
+    </p>
+    <p class="spectrum-Code spectrum-Code--sizeS">
+      npm i @adobe/leonardo-conrast-colors
+    </p>
+  </div>
+</div>
+    <div class="sideNavContent sideNavContent--splitView" id="learnContent">
+  <div class="sideNavContent_main">
+    <h1 class="spectrum-Heading spectrum-Heading--sizeXL spectrum-Heading--heavy">Learn Leonardo</h1>
+    <hr class="spectrum-Divider spectrum-Divider--sizeM">
+
+    <h2 class="spectrum-Heading spectrum-Heading--sizeL spectrum-Heading--heavy" id="colorSystem">
+      Color
+    </h2>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      The color system tab is for defining your color palette and the color scales for each color.
+    </p>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      Your <strong>color palette</strong> represents each primary color of your system. You can evaluate the 
+      <attr title="Color harmony is the relationship between colors on a color wheel">
+        color harmony
+      </attr>
+      of your palette. The color wheel is available to view in a variety of 
+      <a class="spectrum-Link" href="#">
+        color spaces
+      </a>.
+    </p>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      Your <strong>color scales</strong> are a full value scale for each of your palette colors. This allows you
+      to design color as a fluid continuum of tints and shades. 
+    </p>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      Color scales are defined by three parts: Color keys, interpolation colorspace, and smoothing.
+    </p>
+
+    <h3 class="spectrum-Heading spectrum-Heading--sizeM spectrum-Heading--heavy" id="colorKeys">
+      Color keys
+    </h3>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      Color keys are specific colors that you want the include within the scale. Each color key is automatically sorted 
+      and placed on the gradient by it's luminosity. This is to ensure the scale follows a consistent change in lightness 
+      from dark to light colors.
+    </p>
+
+    <h3 class="spectrum-Heading spectrum-Heading--sizeM spectrum-Heading--heavy" id="interpolationColorspace">
+      Interpolation colorspace
+    </h3>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      This specifies which color space you wish to interpolate between your color keys, black, and white. Color is defined
+      differently within each color space, so the resulting gradient of your color scale will appear differently for each. 
+    </p>
+
+    <h3 class="spectrum-Heading spectrum-Heading--sizeM spectrum-Heading--heavy" id="smoothing">
+      Smoothing
+    </h3>
+    <p class="spectrum-Body spectrum-Body--sizeM">
+      Leonardo offers 
+      <attr>
+        catmull-rom
+      </attr>
+      smoothing for all interpolation color spaces. By default, interpolation is linear. In some cases, this will yield good results.
+      For other cases, smoothing provides an adjustment to the interpolation that makes the transition of colors within your color 
+      scale appear much more balanced and smooth.
+    </p>
+
+
+  </div>
+  <div class="sideNavContent_aside">
+    <ul class="aside_links">
+      <li> 
+        <a class="spectrum-Link spectrum-Link--quiet spectrum-Link--sizeM" href="#colorSystem"> Color </a> 
+        <ul class="aside_links--sublist">
+          <li> 
+            <a class="spectrum-Link spectrum-Link--quiet spectrum-Link--sizeM" href="#colorKeys"> Color keys </a> 
+          </li>
+          <li> 
+            <a class="spectrum-Link spectrum-Link--quiet spectrum-Link--sizeM" href="#interpolationColorspace"> Interpolation color space </a> 
+          </li>
+          <li> 
+            <a class="spectrum-Link spectrum-Link--quiet spectrum-Link--sizeM" href="#smoothing"> Smoothing </a> 
+          </li>    
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+</div>
+    <div class="sideNavContent" id="articlesContent">
+  <h1 class="spectrum-Heading spectrum-Heading--sizeXL spectrum-Heading--heavy">Articles</h1>
+  <hr class="spectrum-Divider spectrum-Divider--sizeM">
+
+</div>
+    <div class="sideNavContent" id="contributeContent">
+  <h1 class="spectrum-Heading spectrum-Heading--sizeXL spectrum-Heading--heavy">Contribute</h1>
+  <hr class="spectrum-Divider spectrum-Divider--sizeM">
+
+</div>
+  </main>
+</div>
+  <!-- <include src="src/views/tab_sequential.html"></include>
+  <include src="src/views/tab_diverging.html"></include>
+  <include src="src/views/tab_qualitative.html"></include> -->
+  <!-- Color Scales Tab (partial / dynamic) -->
+<div id="sequential" class="AppTab appFramePanelLeft">
+  <div class="spectrum-Panel">
+    <div class="spectrum-Panel-ContentWrapper">
+      <div class="spectrum-Panel-Item spectrum-Panel-Item--noPadding">
+         <!-- <div class="spectrum-Panel-Item spectrum-Form--row">
+            <div class="spectrum-Form-item">
+               <label class="spectrum-Fieldlabel spectrum-Fieldlabel--sizeM">Color scale name (optional)</label>
+               <div class="spectrum-Textfield spectrum-Textfield--sizeM"><input type="text" class="spectrum-Textfield-input colorNameInput" id="sequential_colorName" name="sequential_colorName"></div>
+               <div class="spectrum-ButtonGroup"></div>
+            </div>
+         </div> -->
+         <div class="spectrum-Panel-Item">
+            <div class="spectrum-Form spectrum-Form--row themeColor_configs" id="sequential-themeColor_configs">
+               <div class="themeColor_subheading">
+                  <h4 class="spectrum-Heading spectrum-Heading--sizeXXS">Key colors</h4>
+                  <div class="keyColorActions">
+                     <button class="spectrum-ActionButton spectrum-ActionButton--sizeM spectrum-ActionButton--quiet" id="sequential_addKeyColor" title="Add key color">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Add">
+                           <use xlink:href="#spectrum-icon-18-Add"></use>
+                        </svg>
+                     </button>
+                     <button class="spectrum-ActionButton spectrum-ActionButton--sizeM spectrum-ActionButton--quiet" title="Add bulk key colors" id="sequential_addBulk">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Add">
+                           <use xlink:href="#spectrum-icon-18-BoxAdd"></use>
+                        </svg>
+                     </button>
+                  </div>
+               </div>
+               <div class="keyColorsWrapper" id="sequential_keyColors">
+               </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Interpolation</span>
+          <div class="spectrum-Form spectrum-Form--row" id="sequential-themeColor_keyColors">
+               <div class="spectrum-Form-item spectrum-Form-item--row">
+                  <label class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Color space</label>
+                  <select class="spectrum-Picker spectrum-Picker--sizeM pickerMode" id="sequential_mode" name="sequential_mode">
+                     <span class="spectrum-Picker-iconWrapper">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+                           <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+                        </svg>
+                     </span>
+                     <option value="CAM02">Jab</option>
+                     <option value="CAM02p">JCh</option>
+                     <option value="LCH">Lch</option>
+                     <option value="LAB">Lab</option>
+                     <option value="HSL">HSL</option>
+                     <option value="HSLuv">HSLuv</option>
+                     <option value="HSV">HSV</option>
+                     <option value="RGB">RGB</option>
+
+                     <!-- <option value="jab">Jab</option>
+                     <option value="jch">JCh</option>
+                     <option value="lab">Lab</option>
+                     <option value="lch">LCh</option>
+                     <option value="hsl">HSL</option>
+                     <option value="hsv">HSV</option>
+                     <option value="hsluv">HSLuv</option>
+                     <option value="rgb">RGB</option> -->
+                  </select>
+               </div>
+               <div class="spectrum-Form-item">
+                  <div class="spectrum-Switch is-disabled" id="sequential_smoothWrapper">
+                    <input type="checkbox" class="spectrum-Switch-input" id="sequential_smooth" disabled="">
+                    <span class="spectrum-Switch-switch"></span>
+                    <label class="spectrum-Switch-label" for="sequential_smooth">Smooth</label>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+            <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Lightness</span>
+            <div class="spectrum-Form">
+              <div class="spectrum-Form-item">
+                <div id="" class="spectrum-Slider">
+                  <div class="spectrum-Slider-labelContainer">
+                    <label class="spectrum-Slider-label" id="sequentialShiftLabel" for="sequentialShift">Curvature (shift)</label>
+                  </div>
+                  <input class="spectrum-Slider-controls" type="range" min="0.5" max="1" step="0.001" value="1" id="sequentialShift" name="sequentialShift">
+                </div>
+              </div>
+              <div class="spectrum-Form-item">
+                <div class="spectrum-Switch">
+                  <input type="checkbox" class="spectrum-Switch-input" id="sequential_correctLightness" checked="">
+                  <span class="spectrum-Switch-switch"></span>
+                  <label class="spectrum-Switch-label" for="sequential_correctLightness">
+                    Correct lightness
+                  </label>
+                </div>
+              </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Accessibility</span>
+          <div class="spectrum-Form">
+            <div class="spectrum-Form-item spectrum-Form-item--row">
+              <label for="cvdMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left"><abbr title="color vision deficiency">CVD</abbr> simulation</label>
+              <select class="spectrum-Picker spectrum-Picker--sizeM" name="cvdMode" id="cvdMode" oninput="themeUpdate()">
+                <option value="None">None</option>
+                <option value="Deuteranomaly">Deuteranomaly (common)</option>
+                <option value="Deuteranopia">Deuteranopia (common)</option>
+                <option value="Protanomaly">Protanomaly (rare)</option>
+                <option value="Protanopia">Protanopia (rare)</option>
+                <option value="Tritanomaly">Tritanomaly (very rare)</option>
+                <option value="Tritanopia">Tritanopia (very rare)</option>
+                <option value="Achromatomaly">Achromatomaly (very rare)</option>
+                <option value="Achromatopsia">Achromatopsia (very rare)</option>
+              <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium">
+                <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+              </svg>
+            </select>
+          </div>
+  
+          </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <div id="sequentialColorWheelWrapper" class="panel-ColorWheel">
+            
+            <div id="sequentialColorWheel">
+              <div id="sequentialColorWheelPaths" class="polarPathsWrapper"></div>
+            </div>
+        </div>
+         </div>
+      </div>
+      <div class="spectrum-Panel-Item spectrum-ButtonGroup">
+        <button class="spectrum-Button spectrum-Button--sizeM spectrum-Button--cta" title="Download SVG gradient" id="sequential_downloadGradient">Download SVG</button>
+      </div>
+   </div>
+  </div>
+
+  <main class="scaleMainContent-Wrapper">
+    <h2 class="spectrum-Typography spectrum-Heading spectrum-Heading--sizeXS">Color scale</h2>
+    <div class="themeColor_gradient" id="sequential_gradient">
+    </div>
+
+    <div id="" class="spectrum-Content-Tabs spectrum-Content-Tabs--noPadding">
+      <div class="spectrum-Tabs spectrum-Tabs--horizontal spectrum-Tabs--quiet">
+        <!-- <div id="tabsequentialColorWheel" class="spectrum-Tabs-item sequential-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'sequentialColorWheelWrapper', `sequential`)">
+          <label class="spectrum-Tabs-itemLabel">Color wheel</label>
+        </div> -->
+        <div id="tabsequentialCharts" class="spectrum-Tabs-item sequential-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'sequentialChartsWrapper', `sequential`)">
+          <label class="spectrum-Tabs-itemLabel">Charts</label>
+        </div>
+        <div id="tabsequentialCharts" class="spectrum-Tabs-item sequential-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'sequentialRGBChartsWrapper', `sequential`)">
+          <label class="spectrum-Tabs-itemLabel">RGB channels</label>
+        </div>
+        <div id="tabsequentialModel" class="spectrum-Tabs-item sequential-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'sequentialModelWrapper', `sequential`)">
+          <label class="spectrum-Tabs-itemLabel">Model</label>
+        </div>
+        <div id="tabsequentialCharts" class="spectrum-Tabs-item sequential-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'sequentialDemoWrapper', `sequential`)">
+          <label class="spectrum-Tabs-itemLabel">Demo</label>
+        </div>
+        <div id="tabsequentialCharts" class="spectrum-Tabs-item sequential-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'sequentialOutputWrapper', `sequential`)">
+          <label class="spectrum-Tabs-itemLabel">Output</label>
+        </div>
+      </div>
+
+      <div class="spectrum-Form-item spectrum-Form-item--row" style="display: inline-flex">
+        <label for="sequential_chartsMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Charts</label>
+          <select class="spectrum-Picker spectrum-Picker--sizeM chartsMode" name="sequential_chartsMode" id="sequential_chartsMode">
+            <option value="CAM02">Jab</option>
+            <option value="CAM02p">JCh</option>
+            <option value="LAB">Lab</option>
+            <option value="LCH">LCh</option>
+            <option value="HSL">HSL</option>
+            <option value="HSV">HSV</option>
+            <option value="HSLuv">HSLuv</option>
+            <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+              <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+            </svg>
+          </select>
+      </div>
+    </div>
+
+    <!-- <div id="sequentialColorWheelWrapper" class="sequentialTabsWrapper">
+        <div id="colorWheel--controlsWrapper">
+          <div id="sequentialColorWheel"></div>
+
+          <div class="spectrum-Form" id="chartsControls">
+            <div class="spectrum-Form-item">
+              <div id="sequentialColorWheelLightnessWrapper" class="spectrum-Slider">
+                <div class="spectrum-Slider-labelContainer">
+                  <label class="spectrum-Slider-label" id="sequentialColorWheelLightnessLabel" for="sequentialColorWheelLightness">Color wheel lightness</label>
+                </div>
+                <input class="spectrum-Slider-controls" type="range" min="0" max="100" value="50" id="sequentialColorWheelLightness" name="sequentialColorWheelLightness"></input>
+              </div>
+            </div>
+
+            <div class="spectrum-Form-item">
+              <label for="sequentialColorDotsMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Color wheel display</label>
+                <select class="spectrum-Picker spectrum-Picker--sizeM" name="sequentialColorDotsMode" id="sequentialColorDotsMode">
+                  <option value="colorScale">Color scales</option>
+                  <option value="colorKeys">All key colors</option>
+                  <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+                    <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+                  </svg>
+                </select>
+            </div>
+
+          </div>
+        </div>
+    </div> -->
+
+    <div id="sequentialDemoWrapper" class="sequentialTabsWrapper demoVisualizationWrapper">
+      <div class="demoVisualization--row">
+        <div id="sequentialHeatmap" class="demoVisualization"></div>
+        <div id="sequentialScatter" class="demoVisualization"></div>  
+        <div id="sequentialChord" class="demoVisualization"></div>  
+        <!-- <div id="sequentialViolinJitter" class="demoVisualization"></div>   -->
+        <div id="sequentialChoropleth" class="demoVisualization"></div>
+        <!-- <div id="sequentialHexbin" class="demoVisualization"></div>   -->
+      </div>
+
+      
+      <hr class="spectrum-Divider spectrum-Divider--sizeS">
+      <p class="spectrum-Body spectrum-Body--sizeS"> 
+        Visualizations from <a class="spectrum-Link" href="https://www.d3-graph-gallery.com/graph/" target="_blank">d3-graph-gallery</a>
+      </p>
+    </div>
+
+    <div id="sequentialChartsWrapper" class="sequentialTabsWrapper">
+      <div class="chartsWrapper">
+        <div class="chart--labelless" id="sequentialInterpolationChart">
+          chart 1
+        </div>
+        <div class="chart--labelless" id="sequentialInterpolationChart2">
+          chart 2
+        </div>  
+        <div class="chart--labelless" id="sequentialInterpolationChart3">
+          chart 3
+        </div>   
+      </div>
+    </div>
+
+    <div id="sequentialRGBChartsWrapper" class="sequentialTabsWrapper">
+      <div class="chart--labelless" id="sequentialRGBchart">
+        RGB chart
+      </div>
+    </div>
+
+    <div id="sequentialModelWrapper" class="sequentialTabsWrapper">
+      Model will go here
+      <svg class="chart3D"></svg>
+    </div>
+
+    <div id="sequentialOutputWrapper" class="sequentialTabsWrapper">
+      <h2 class="spectrum-Typography spectrum-Heading spectrum-Heading--sizeXS">Sample colors</h2>
+
+      <div class="spectrum-Form spectrum-Form--spacious">
+        <div class="spectrum-Form-item">
+          <div id="" class="spectrum-Textfield">
+            <input class="spectrum-Textfield-input" type="number" min="2" max="100" step="1" value="7" id="sequentialSamples" name="sequentialSamples">
+          </div>
+        </div>
+      </div>
+
+      <div class="sampleSwatches" id="sequentialSampleSwatches">
+        <!-- generated samples here -->
+      </div>
+      <div class="themeOutputParams" id="sequentialColorScaleOutput">
+        <!-- generated values here -->
+      </div>
+    </div>
+
+    </main>
+</div>
+  <!-- Color Scales Tab (partial / dynamic) -->
+<div id="diverging" class="AppTab appFramePanelLeft">
+  <div class="spectrum-Panel">
+    <div class="spectrum-Panel-ContentWrapper">
+      <div class="spectrum-Panel-Item spectrum-Panel-Item--noPadding">
+         <!-- <div class="spectrum-Panel-Item spectrum-Form--row">
+            <div class="spectrum-Form-item">
+               <label class="spectrum-Fieldlabel spectrum-Fieldlabel--sizeM">Color scale name (optional)</label>
+               <div class="spectrum-Textfield spectrum-Textfield--sizeM"><input type="text" class="spectrum-Textfield-input colorNameInput" id="diverging_colorName" name="diverging_colorName"></div>
+               <div class="spectrum-ButtonGroup"></div>
+            </div>
+         </div> -->
+         <div class="spectrum-Panel-Item">
+            <div class="spectrum-Form spectrum-Form--row themeColor_configs" id="diverging-themeColor_configs">
+               <div class="themeColor_subheading">
+                  <h4 class="spectrum-Heading spectrum-Heading--sizeXXS">Key colors</h4>
+                  <div class="keyColorActions">
+                     <button class="spectrum-ActionButton spectrum-ActionButton--sizeM spectrum-ActionButton--quiet" id="diverging_addKeyColor" title="Add key color">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Add">
+                           <use xlink:href="#spectrum-icon-18-Add"></use>
+                        </svg>
+                     </button>
+                     <button class="spectrum-ActionButton spectrum-ActionButton--sizeM spectrum-ActionButton--quiet" title="Add bulk key colors" id="diverging_addBulk">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Add">
+                           <use xlink:href="#spectrum-icon-18-BoxAdd"></use>
+                        </svg>
+                     </button>
+                  </div>
+               </div>
+               <div class="keyColorsWrapper" id="diverging_keyColors">
+               </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Interpolation</span>
+          <div class="spectrum-Form spectrum-Form--row" id="diverging-themeColor_keyColors">
+               <div class="spectrum-Form-item spectrum-Form-item--row">
+                  <label class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Color space</label>
+                  <select class="spectrum-Picker spectrum-Picker--sizeM pickerMode" id="diverging_mode" name="diverging_mode">
+                     <span class="spectrum-Picker-iconWrapper">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+                           <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+                        </svg>
+                     </span>
+                     <option value="CAM02">Jab</option>
+                     <option value="CAM02p">JCh</option>
+                     <option value="LCH">Lch</option>
+                     <option value="LAB">Lab</option>
+                     <option value="HSL">HSL</option>
+                     <option value="HSLuv">HSLuv</option>
+                     <option value="HSV">HSV</option>
+                     <option value="RGB">RGB</option>
+
+                     <!-- <option value="jab">Jab</option>
+                     <option value="jch">JCh</option>
+                     <option value="lab">Lab</option>
+                     <option value="lch">LCh</option>
+                     <option value="hsl">HSL</option>
+                     <option value="hsv">HSV</option>
+                     <option value="hsluv">HSLuv</option>
+                     <option value="rgb">RGB</option> -->
+                  </select>
+               </div>
+               <div class="spectrum-Form-item">
+                  <div class="spectrum-Switch is-disabled" id="diverging_smoothWrapper">
+                    <input type="checkbox" class="spectrum-Switch-input" id="diverging_smooth" disabled="">
+                    <span class="spectrum-Switch-switch"></span>
+                    <label class="spectrum-Switch-label" for="diverging_smooth">Smooth</label>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+            <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Lightness</span>
+            <div class="spectrum-Form">
+              <div class="spectrum-Form-item">
+                <div id="" class="spectrum-Slider">
+                  <div class="spectrum-Slider-labelContainer">
+                    <label class="spectrum-Slider-label" id="divergingShiftLabel" for="divergingShift">Curvature (shift)</label>
+                  </div>
+                  <input class="spectrum-Slider-controls" type="range" min="0.5" max="1" step="0.001" value="1" id="divergingShift" name="divergingShift">
+                </div>
+              </div>
+              <div class="spectrum-Form-item">
+                <div class="spectrum-Switch">
+                  <input type="checkbox" class="spectrum-Switch-input" id="diverging_correctLightness" checked="">
+                  <span class="spectrum-Switch-switch"></span>
+                  <label class="spectrum-Switch-label" for="diverging_correctLightness">
+                    Correct lightness
+                  </label>
+                </div>
+              </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Accessibility</span>
+          <div class="spectrum-Form">
+            <div class="spectrum-Form-item spectrum-Form-item--row">
+              <label for="cvdMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left"><abbr title="color vision deficiency">CVD</abbr> simulation</label>
+              <select class="spectrum-Picker spectrum-Picker--sizeM" name="cvdMode" id="cvdMode" oninput="themeUpdate()">
+                <option value="None">None</option>
+                <option value="Deuteranomaly">Deuteranomaly (common)</option>
+                <option value="Deuteranopia">Deuteranopia (common)</option>
+                <option value="Protanomaly">Protanomaly (rare)</option>
+                <option value="Protanopia">Protanopia (rare)</option>
+                <option value="Tritanomaly">Tritanomaly (very rare)</option>
+                <option value="Tritanopia">Tritanopia (very rare)</option>
+                <option value="Achromatomaly">Achromatomaly (very rare)</option>
+                <option value="Achromatopsia">Achromatopsia (very rare)</option>
+              <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium">
+                <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+              </svg>
+            </select>
+          </div>
+  
+          </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <div id="divergingColorWheelWrapper" class="panel-ColorWheel">
+            
+            <div id="divergingColorWheel">
+              <div id="divergingColorWheelPaths" class="polarPathsWrapper"></div>
+            </div>
+        </div>
+         </div>
+      </div>
+      <div class="spectrum-Panel-Item spectrum-ButtonGroup">
+        <button class="spectrum-Button spectrum-Button--sizeM spectrum-Button--cta" title="Download SVG gradient" id="diverging_downloadGradient">Download SVG</button>
+      </div>
+   </div>
+  </div>
+
+  <main class="scaleMainContent-Wrapper">
+    <h2 class="spectrum-Typography spectrum-Heading spectrum-Heading--sizeXS">Color scale</h2>
+    <div class="themeColor_gradient" id="diverging_gradient">
+    </div>
+
+    <div id="" class="spectrum-Content-Tabs spectrum-Content-Tabs--noPadding">
+      <div class="spectrum-Tabs spectrum-Tabs--horizontal spectrum-Tabs--quiet">
+        <!-- <div id="tabdivergingColorWheel" class="spectrum-Tabs-item diverging-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'divergingColorWheelWrapper', `diverging`)">
+          <label class="spectrum-Tabs-itemLabel">Color wheel</label>
+        </div> -->
+        <div id="tabdivergingCharts" class="spectrum-Tabs-item diverging-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'divergingChartsWrapper', `diverging`)">
+          <label class="spectrum-Tabs-itemLabel">Charts</label>
+        </div>
+        <div id="tabdivergingCharts" class="spectrum-Tabs-item diverging-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'divergingRGBChartsWrapper', `diverging`)">
+          <label class="spectrum-Tabs-itemLabel">RGB channels</label>
+        </div>
+        <div id="tabdivergingModel" class="spectrum-Tabs-item diverging-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'divergingModelWrapper', `diverging`)">
+          <label class="spectrum-Tabs-itemLabel">Model</label>
+        </div>
+        <div id="tabdivergingCharts" class="spectrum-Tabs-item diverging-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'divergingDemoWrapper', `diverging`)">
+          <label class="spectrum-Tabs-itemLabel">Demo</label>
+        </div>
+        <div id="tabdivergingCharts" class="spectrum-Tabs-item diverging-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'divergingOutputWrapper', `diverging`)">
+          <label class="spectrum-Tabs-itemLabel">Output</label>
+        </div>
+      </div>
+
+      <div class="spectrum-Form-item spectrum-Form-item--row" style="display: inline-flex">
+        <label for="diverging_chartsMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Charts</label>
+          <select class="spectrum-Picker spectrum-Picker--sizeM chartsMode" name="diverging_chartsMode" id="diverging_chartsMode">
+            <option value="CAM02">Jab</option>
+            <option value="CAM02p">JCh</option>
+            <option value="LAB">Lab</option>
+            <option value="LCH">LCh</option>
+            <option value="HSL">HSL</option>
+            <option value="HSV">HSV</option>
+            <option value="HSLuv">HSLuv</option>
+            <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+              <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+            </svg>
+          </select>
+      </div>
+    </div>
+
+    <!-- <div id="divergingColorWheelWrapper" class="divergingTabsWrapper">
+        <div id="colorWheel--controlsWrapper">
+          <div id="divergingColorWheel"></div>
+
+          <div class="spectrum-Form" id="chartsControls">
+            <div class="spectrum-Form-item">
+              <div id="divergingColorWheelLightnessWrapper" class="spectrum-Slider">
+                <div class="spectrum-Slider-labelContainer">
+                  <label class="spectrum-Slider-label" id="divergingColorWheelLightnessLabel" for="divergingColorWheelLightness">Color wheel lightness</label>
+                </div>
+                <input class="spectrum-Slider-controls" type="range" min="0" max="100" value="50" id="divergingColorWheelLightness" name="divergingColorWheelLightness"></input>
+              </div>
+            </div>
+
+            <div class="spectrum-Form-item">
+              <label for="divergingColorDotsMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Color wheel display</label>
+                <select class="spectrum-Picker spectrum-Picker--sizeM" name="divergingColorDotsMode" id="divergingColorDotsMode">
+                  <option value="colorScale">Color scales</option>
+                  <option value="colorKeys">All key colors</option>
+                  <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+                    <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+                  </svg>
+                </select>
+            </div>
+
+          </div>
+        </div>
+    </div> -->
+
+    <div id="divergingDemoWrapper" class="divergingTabsWrapper demoVisualizationWrapper">
+      <div class="demoVisualization--row">
+        <div id="divergingHeatmap" class="demoVisualization"></div>
+        <div id="divergingScatter" class="demoVisualization"></div>  
+        <div id="divergingChord" class="demoVisualization"></div>  
+        <!-- <div id="divergingViolinJitter" class="demoVisualization"></div>   -->
+        <div id="divergingChoropleth" class="demoVisualization"></div>
+        <!-- <div id="divergingHexbin" class="demoVisualization"></div>   -->
+      </div>
+
+      
+      <hr class="spectrum-Divider spectrum-Divider--sizeS">
+      <p class="spectrum-Body spectrum-Body--sizeS"> 
+        Visualizations from <a class="spectrum-Link" href="https://www.d3-graph-gallery.com/graph/" target="_blank">d3-graph-gallery</a>
+      </p>
+    </div>
+
+    <div id="divergingChartsWrapper" class="divergingTabsWrapper">
+      <div class="chartsWrapper">
+        <div class="chart--labelless" id="divergingInterpolationChart">
+          chart 1
+        </div>
+        <div class="chart--labelless" id="divergingInterpolationChart2">
+          chart 2
+        </div>  
+        <div class="chart--labelless" id="divergingInterpolationChart3">
+          chart 3
+        </div>   
+      </div>
+    </div>
+
+    <div id="divergingRGBChartsWrapper" class="divergingTabsWrapper">
+      <div class="chart--labelless" id="divergingRGBchart">
+        RGB chart
+      </div>
+    </div>
+
+    <div id="divergingModelWrapper" class="divergingTabsWrapper">
+      Model will go here
+      <svg class="chart3D"></svg>
+    </div>
+
+    <div id="divergingOutputWrapper" class="divergingTabsWrapper">
+      <h2 class="spectrum-Typography spectrum-Heading spectrum-Heading--sizeXS">Sample colors</h2>
+
+      <div class="spectrum-Form spectrum-Form--spacious">
+        <div class="spectrum-Form-item">
+          <div id="" class="spectrum-Textfield">
+            <input class="spectrum-Textfield-input" type="number" min="2" max="100" step="1" value="7" id="divergingSamples" name="divergingSamples">
+          </div>
+        </div>
+      </div>
+
+      <div class="sampleSwatches" id="divergingSampleSwatches">
+        <!-- generated samples here -->
+      </div>
+      <div class="themeOutputParams" id="divergingColorScaleOutput">
+        <!-- generated values here -->
+      </div>
+    </div>
+
+    </main>
+</div>
+  <!-- Color Scales Tab (partial / dynamic) -->
+<div id="qualitative" class="AppTab appFramePanelLeft">
+  <div class="spectrum-Panel">
+    <div class="spectrum-Panel-ContentWrapper">
+      <div class="spectrum-Panel-Item spectrum-Panel-Item--noPadding">
+         <!-- <div class="spectrum-Panel-Item spectrum-Form--row">
+            <div class="spectrum-Form-item">
+               <label class="spectrum-Fieldlabel spectrum-Fieldlabel--sizeM">Color scale name (optional)</label>
+               <div class="spectrum-Textfield spectrum-Textfield--sizeM"><input type="text" class="spectrum-Textfield-input colorNameInput" id="qualitative_colorName" name="qualitative_colorName"></div>
+               <div class="spectrum-ButtonGroup"></div>
+            </div>
+         </div> -->
+         <div class="spectrum-Panel-Item">
+            <div class="spectrum-Form spectrum-Form--row themeColor_configs" id="qualitative-themeColor_configs">
+               <div class="themeColor_subheading">
+                  <h4 class="spectrum-Heading spectrum-Heading--sizeXXS">Key colors</h4>
+                  <div class="keyColorActions">
+                     <button class="spectrum-ActionButton spectrum-ActionButton--sizeM spectrum-ActionButton--quiet" id="qualitative_addKeyColor" title="Add key color">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Add">
+                           <use xlink:href="#spectrum-icon-18-Add"></use>
+                        </svg>
+                     </button>
+                     <button class="spectrum-ActionButton spectrum-ActionButton--sizeM spectrum-ActionButton--quiet" title="Add bulk key colors" id="qualitative_addBulk">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Icon spectrum-Icon--sizeS" focusable="false" aria-hidden="true" aria-label="Add">
+                           <use xlink:href="#spectrum-icon-18-BoxAdd"></use>
+                        </svg>
+                     </button>
+                  </div>
+               </div>
+               <div class="keyColorsWrapper" id="qualitative_keyColors">
+               </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Interpolation</span>
+          <div class="spectrum-Form spectrum-Form--row" id="qualitative-themeColor_keyColors">
+               <div class="spectrum-Form-item spectrum-Form-item--row">
+                  <label class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Color space</label>
+                  <select class="spectrum-Picker spectrum-Picker--sizeM pickerMode" id="qualitative_mode" name="qualitative_mode">
+                     <span class="spectrum-Picker-iconWrapper">
+                        <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+                           <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+                        </svg>
+                     </span>
+                     <option value="CAM02">Jab</option>
+                     <option value="CAM02p">JCh</option>
+                     <option value="LCH">Lch</option>
+                     <option value="LAB">Lab</option>
+                     <option value="HSL">HSL</option>
+                     <option value="HSLuv">HSLuv</option>
+                     <option value="HSV">HSV</option>
+                     <option value="RGB">RGB</option>
+
+                     <!-- <option value="jab">Jab</option>
+                     <option value="jch">JCh</option>
+                     <option value="lab">Lab</option>
+                     <option value="lch">LCh</option>
+                     <option value="hsl">HSL</option>
+                     <option value="hsv">HSV</option>
+                     <option value="hsluv">HSLuv</option>
+                     <option value="rgb">RGB</option> -->
+                  </select>
+               </div>
+               <div class="spectrum-Form-item">
+                  <div class="spectrum-Switch is-disabled" id="qualitative_smoothWrapper">
+                    <input type="checkbox" class="spectrum-Switch-input" id="qualitative_smooth" disabled="">
+                    <span class="spectrum-Switch-switch"></span>
+                    <label class="spectrum-Switch-label" for="qualitative_smooth">Smooth</label>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+            <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Lightness</span>
+            <div class="spectrum-Form">
+              <div class="spectrum-Form-item">
+                <div id="" class="spectrum-Slider">
+                  <div class="spectrum-Slider-labelContainer">
+                    <label class="spectrum-Slider-label" id="qualitativeShiftLabel" for="qualitativeShift">Curvature (shift)</label>
+                  </div>
+                  <input class="spectrum-Slider-controls" type="range" min="0.5" max="1" step="0.001" value="1" id="qualitativeShift" name="qualitativeShift">
+                </div>
+              </div>
+              <div class="spectrum-Form-item">
+                <div class="spectrum-Switch">
+                  <input type="checkbox" class="spectrum-Switch-input" id="qualitative_correctLightness" checked="">
+                  <span class="spectrum-Switch-switch"></span>
+                  <label class="spectrum-Switch-label" for="qualitative_correctLightness">
+                    Correct lightness
+                  </label>
+                </div>
+              </div>
+            </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <span class="spectrum-Heading spectrum-Heading--sizeXXS spectrum-Panel-Item-Title">Accessibility</span>
+          <div class="spectrum-Form">
+            <div class="spectrum-Form-item spectrum-Form-item--row">
+              <label for="cvdMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left"><abbr title="color vision deficiency">CVD</abbr> simulation</label>
+              <select class="spectrum-Picker spectrum-Picker--sizeM" name="cvdMode" id="cvdMode" oninput="themeUpdate()">
+                <option value="None">None</option>
+                <option value="Deuteranomaly">Deuteranomaly (common)</option>
+                <option value="Deuteranopia">Deuteranopia (common)</option>
+                <option value="Protanomaly">Protanomaly (rare)</option>
+                <option value="Protanopia">Protanopia (rare)</option>
+                <option value="Tritanomaly">Tritanomaly (very rare)</option>
+                <option value="Tritanopia">Tritanopia (very rare)</option>
+                <option value="Achromatomaly">Achromatomaly (very rare)</option>
+                <option value="Achromatopsia">Achromatopsia (very rare)</option>
+              <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium">
+                <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+              </svg>
+            </select>
+          </div>
+  
+          </div>
+         </div>
+         <div class="spectrum-Panel-Item">
+          <div id="qualitativeColorWheelWrapper" class="panel-ColorWheel">
+            
+            <div id="qualitativeColorWheel">
+              <div id="qualitativeColorWheelPaths" class="polarPathsWrapper"></div>
+            </div>
+        </div>
+         </div>
+      </div>
+      <div class="spectrum-Panel-Item spectrum-ButtonGroup">
+        <button class="spectrum-Button spectrum-Button--sizeM spectrum-Button--cta" title="Download SVG gradient" id="qualitative_downloadGradient">Download SVG</button>
+      </div>
+   </div>
+  </div>
+
+  <main class="scaleMainContent-Wrapper">
+    <h2 class="spectrum-Typography spectrum-Heading spectrum-Heading--sizeXS">Color scale</h2>
+    <div class="themeColor_gradient" id="qualitative_gradient">
+    </div>
+
+    <div id="" class="spectrum-Content-Tabs spectrum-Content-Tabs--noPadding">
+      <div class="spectrum-Tabs spectrum-Tabs--horizontal spectrum-Tabs--quiet">
+        <!-- <div id="tabqualitativeColorWheel" class="spectrum-Tabs-item qualitative-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'qualitativeColorWheelWrapper', `qualitative`)">
+          <label class="spectrum-Tabs-itemLabel">Color wheel</label>
+        </div> -->
+        <div id="tabqualitativeCharts" class="spectrum-Tabs-item qualitative-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'qualitativeChartsWrapper', `qualitative`)">
+          <label class="spectrum-Tabs-itemLabel">Charts</label>
+        </div>
+        <div id="tabqualitativeCharts" class="spectrum-Tabs-item qualitative-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'qualitativeRGBChartsWrapper', `qualitative`)">
+          <label class="spectrum-Tabs-itemLabel">RGB channels</label>
+        </div>
+        <div id="tabqualitativeModel" class="spectrum-Tabs-item qualitative-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'qualitativeModelWrapper', `qualitative`)">
+          <label class="spectrum-Tabs-itemLabel">Model</label>
+        </div>
+        <div id="tabqualitativeCharts" class="spectrum-Tabs-item qualitative-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'qualitativeDemoWrapper', `qualitative`)">
+          <label class="spectrum-Tabs-itemLabel">Demo</label>
+        </div>
+        <div id="tabqualitativeCharts" class="spectrum-Tabs-item qualitative-Tabs-item" tabindex="0" onclick="openScaleTab(event, 'qualitativeOutputWrapper', `qualitative`)">
+          <label class="spectrum-Tabs-itemLabel">Output</label>
+        </div>
+      </div>
+
+      <div class="spectrum-Form-item spectrum-Form-item--row" style="display: inline-flex">
+        <label for="qualitative_chartsMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Charts</label>
+          <select class="spectrum-Picker spectrum-Picker--sizeM chartsMode" name="qualitative_chartsMode" id="qualitative_chartsMode">
+            <option value="CAM02">Jab</option>
+            <option value="CAM02p">JCh</option>
+            <option value="LAB">Lab</option>
+            <option value="LCH">LCh</option>
+            <option value="HSL">HSL</option>
+            <option value="HSV">HSV</option>
+            <option value="HSLuv">HSLuv</option>
+            <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+              <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+            </svg>
+          </select>
+      </div>
+    </div>
+
+    <!-- <div id="qualitativeColorWheelWrapper" class="qualitativeTabsWrapper">
+        <div id="colorWheel--controlsWrapper">
+          <div id="qualitativeColorWheel"></div>
+
+          <div class="spectrum-Form" id="chartsControls">
+            <div class="spectrum-Form-item">
+              <div id="qualitativeColorWheelLightnessWrapper" class="spectrum-Slider">
+                <div class="spectrum-Slider-labelContainer">
+                  <label class="spectrum-Slider-label" id="qualitativeColorWheelLightnessLabel" for="qualitativeColorWheelLightness">Color wheel lightness</label>
+                </div>
+                <input class="spectrum-Slider-controls" type="range" min="0" max="100" value="50" id="qualitativeColorWheelLightness" name="qualitativeColorWheelLightness"></input>
+              </div>
+            </div>
+
+            <div class="spectrum-Form-item">
+              <label for="qualitativeColorDotsMode" class="spectrum-FieldLabel spectrum-Fieldlabel--sizeM spectrum-FieldLabel--left">Color wheel display</label>
+                <select class="spectrum-Picker spectrum-Picker--sizeM" name="qualitativeColorDotsMode" id="qualitativeColorDotsMode">
+                  <option value="colorScale">Color scales</option>
+                  <option value="colorKeys">All key colors</option>
+                  <svg xmlns:xlink="http://www.w3.org/1999/xlink" class="spectrum-Picker-icon spectrum-UIIcon-ChevronDownMedium spectrum-Picker-icon">
+                    <use xlink:href="#spectrum-css-icon-ChevronDownMedium"></use>
+                  </svg>
+                </select>
+            </div>
+
+          </div>
+        </div>
+    </div> -->
+
+    <div id="qualitativeDemoWrapper" class="qualitativeTabsWrapper demoVisualizationWrapper">
+      <div class="demoVisualization--row">
+        <div id="qualitativeHeatmap" class="demoVisualization"></div>
+        <div id="qualitativeScatter" class="demoVisualization"></div>  
+        <div id="qualitativeChord" class="demoVisualization"></div>  
+        <!-- <div id="qualitativeViolinJitter" class="demoVisualization"></div>   -->
+        <div id="qualitativeChoropleth" class="demoVisualization"></div>
+        <!-- <div id="qualitativeHexbin" class="demoVisualization"></div>   -->
+      </div>
+
+      
+      <hr class="spectrum-Divider spectrum-Divider--sizeS">
+      <p class="spectrum-Body spectrum-Body--sizeS"> 
+        Visualizations from <a class="spectrum-Link" href="https://www.d3-graph-gallery.com/graph/" target="_blank">d3-graph-gallery</a>
+      </p>
+    </div>
+
+    <div id="qualitativeChartsWrapper" class="qualitativeTabsWrapper">
+      <div class="chartsWrapper">
+        <div class="chart--labelless" id="qualitativeInterpolationChart">
+          chart 1
+        </div>
+        <div class="chart--labelless" id="qualitativeInterpolationChart2">
+          chart 2
+        </div>  
+        <div class="chart--labelless" id="qualitativeInterpolationChart3">
+          chart 3
+        </div>   
+      </div>
+    </div>
+
+    <div id="qualitativeRGBChartsWrapper" class="qualitativeTabsWrapper">
+      <div class="chart--labelless" id="qualitativeRGBchart">
+        RGB chart
+      </div>
+    </div>
+
+    <div id="qualitativeModelWrapper" class="qualitativeTabsWrapper">
+      Model will go here
+      <svg class="chart3D"></svg>
+    </div>
+
+    <div id="qualitativeOutputWrapper" class="qualitativeTabsWrapper">
+      <h2 class="spectrum-Typography spectrum-Heading spectrum-Heading--sizeXS">Sample colors</h2>
+
+      <div class="spectrum-Form spectrum-Form--spacious">
+        <div class="spectrum-Form-item">
+          <div id="" class="spectrum-Textfield">
+            <input class="spectrum-Textfield-input" type="number" min="2" max="100" step="1" value="7" id="qualitativeSamples" name="qualitativeSamples">
+          </div>
+        </div>
+      </div>
+
+      <div class="sampleSwatches" id="qualitativeSampleSwatches">
+        <!-- generated samples here -->
+      </div>
+      <div class="themeOutputParams" id="qualitativeColorScaleOutput">
+        <!-- generated values here -->
+      </div>
+    </div>
+
+    </main>
+</div>
+
+<script src="/scales.bc0b00b7.js"></script>
+
+</body></html>
